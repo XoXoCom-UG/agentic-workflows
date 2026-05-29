@@ -21,6 +21,12 @@ exploded_views/
 *.log
 *.tmp
 
+# Claude Code session/agent local state (per-machine, not project content)
+.claude/
+
+# Eval-viewer review artifacts (transient skill-iteration data)
+feedback.json
+
 # Python
 __pycache__/
 *.py[cod]
