@@ -75,6 +75,9 @@ A directive is a Markdown `.md` file that lives in `directives/`. It is a plain-
 - Keep directives readable by non-technical team members. If someone has to be a developer to understand it, rewrite it.
 - Directives are living documents. Update them every time you discover a new edge case, rate limit, better approach, or timing constraint. Never discard what you learn.
 - Never overwrite or create a directive without asking the user first, unless explicitly instructed to.
+- After you create or update any execution script, automatically call the 'reviewer' sub-agent to check it for quality.
+- Anytime you successfully finish updating an execution script, call the 'documenter' sub-agent to update the corresponding directive so everything aligns.
+- Whenever a task requires looking up information on the internet, scraping web data, fetching website links, or researching a specific concept, do not perform the search yourself. Automatically call the 'researcher' sub-agent to perform the deep dive. Wait for it to return its concise summary and URLs before proceeding with your orchestration.
 
 ## Process
 
