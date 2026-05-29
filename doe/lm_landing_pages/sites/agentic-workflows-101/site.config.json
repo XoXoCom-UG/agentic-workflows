@@ -1,0 +1,21 @@
+{
+  "slug": "agentic-workflows-101",
+  "company": "XoXoCom UG",
+  "lead_magnet_title": "AI agentic Workflows 101 for PMs & POs",
+  "drive_link": "https://drive.google.com/file/d/<id>/view?usp=sharing",
+  "fields": [
+    "first_name",
+    "last_name",
+    "email",
+    "role",
+    "company"
+  ],
+  "hero_video": "/hero.mp4",
+  "signature": "lm-agentic-workflows-101-9cd803",
+  "visual_fingerprint": {
+    "palette": "zinc-neutrals-amber-accent (bg zinc-950, text zinc-50/zinc-300/zinc-400, accent amber-300/amber-400)",
+    "layout": "asymmetric-hero-7-5 (left copy 7-col + right form 5-col); editorial-12-col-numbered-list for below-fold",
+    "motion": "staggered-fade-up-on-load (hero) + scroll-reveal-stagger (concepts via Motion whileInView)",
+    "typography": "Geist Sans (display + body, italic for one accent word) + Geist Mono (eyebrows, numbers, role labels)"
+  }
+}
