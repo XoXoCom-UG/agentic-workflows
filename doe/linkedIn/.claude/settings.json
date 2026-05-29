@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python execution/linkedin_browser_repost.py *)",
+      "Bash(python execution/linkedin_check_session.py)",
+      "Bash(python execution/linkedin_save_session.py)",
+      "Bash(cat \"C:\\\\Users\\\\Albert Jr Itoumbou\\\\.claude\\\\settings.json\" 2>/dev/null || echo \"NOT FOUND\")",
+      "Read(//c/Users/Albert Jr Itoumbou/.claude/**)",
+      "Bash(ls \"C:\\\\Users\\\\Albert Jr Itoumbou\\\\.claude\\\\\")",
+      "Read(//c/Users/Albert Jr Itoumbou/**)"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+## secrets
+.env
+
+## Orchestration
+CLAUDE.md
+
+## Folders
+credentials
+.tmp
+docs

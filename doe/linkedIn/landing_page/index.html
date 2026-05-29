@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XoXoCom — Free Resource</title>
+  <style>
+    /* ─── Reset ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ─── Global ─────────────────────────────────────────────── */
+    :root {
+      --bg: #080808;
+      --surface: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.10);
+      --accent: #c8a96e;
+      --text-primary: #f0ece4;
+      --text-muted: rgba(240, 236, 228, 0.55);
+      --radius: 12px;
+      --hero-h: 92vh;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Hero ───────────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      width: 100%;
+      height: var(--hero-h);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    /* Video container — masked so it bleeds into the page bg */
+    .hero__video-wrap {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+
+      /* Inward radial + edge gradient mask:
+         fully opaque centre → transparent at all 4 edges.
+         This lets the page background bleed through naturally. */
+      -webkit-mask-image:
+        radial-gradient(ellipse 75% 75% at 50% 50%,
+          black 25%,
+          transparent 100%);
+      mask-image:
+        radial-gradient(ellipse 75% 75% at 50% 50%,
+          black 25%,
+          transparent 100%);
+    }
+
+    .hero__video-wrap video {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      min-width: 100%;
+      min-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: cover;
+      opacity: 0.72;
+    }
+
+    /* Hero content — centred over the video */
+    .hero__content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 1.5rem;
+      padding: 0 1.5rem;
+      max-width: 640px;
+      width: 100%;
+    }
+
+    .hero__eyebrow {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .hero__headline {
+      font-size: clamp(2rem, 5vw, 3.25rem);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    .hero__sub {
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      max-width: 480px;
+    }
+
+    /* ─── Form card ──────────────────────────────────────────── */
+    .card {
+      position: relative;
+      z-index: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem 2.25rem;
+      width: 100%;
+      max-width: 440px;
+      margin: 0 auto;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    input {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.18s;
+      width: 100%;
+    }
+
+    input::placeholder { color: rgba(240, 236, 228, 0.28); }
+
+    input:focus {
+      border-color: var(--accent);
+      background: rgba(200, 169, 110, 0.06);
+    }
+
+    .btn {
+      margin-top: 1.1rem;
+      width: 100%;
+      padding: 0.8rem 1.5rem;
+      background: var(--accent);
+      color: #0a0a0a;
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.18s, transform 0.12s;
+    }
+
+    .btn:hover { opacity: 0.88; }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .form-note {
+      margin-top: 0.9rem;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .error-msg {
+      display: none;
+      margin-top: 0.75rem;
+      padding: 0.6rem 0.85rem;
+      background: rgba(220, 80, 80, 0.12);
+      border: 1px solid rgba(220, 80, 80, 0.35);
+      border-radius: 7px;
+      font-size: 0.82rem;
+      color: #f08080;
+      text-align: center;
+    }
+
+    /* ─── Success state ──────────────────────────────────────── */
+    .success-state {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      text-align: center;
+      padding: 1rem 0;
+    }
+
+    .success-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(200, 169, 110, 0.15);
+      border: 1.5px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+
+    .success-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .success-sub {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* ─── Footer ─────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 2.5rem 1.5rem;
+      font-size: 0.72rem;
+      color: rgba(240, 236, 228, 0.22);
+      letter-spacing: 0.04em;
+    }
+
+    /* ─── Responsive ─────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .hero { height: auto; min-height: var(--hero-h); padding: 5rem 0 3rem; }
+      .form-row { grid-template-columns: 1fr; }
+      .card { padding: 1.5rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Hero ───────────────────────────────────────────────── -->
+  <section class="hero">
+
+    <!-- Background video with inward mask -->
+    <div class="hero__video-wrap">
+      <video autoplay muted loop playsinline preload="auto">
+        <source src="../lead_magnet_assets/poc_lead_magnet_xoxocom.mp4" type="video/mp4" />
+      </video>
+    </div>
+
+    <!-- Centred content stack -->
+    <div class="hero__content">
+      <p class="hero__eyebrow">Free Resource</p>
+      <h1 class="hero__headline">Get instant access to&nbsp;the&nbsp;guide</h1>
+      <p class="hero__sub">
+        Enter your details below and we'll send the resource straight to your inbox — no&nbsp;fluff, no&nbsp;spam.
+      </p>
+
+      <!-- Lead capture card -->
+      <div class="card">
+        <form id="leadForm" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="firstName">First name</label>
+              <input id="firstName" name="firstName" type="text" placeholder="Jane" required />
+            </div>
+            <div class="form-group">
+              <label for="lastName">Last name</label>
+              <input id="lastName" name="lastName" type="text" placeholder="Smith" required />
+            </div>
+            <div class="form-group full">
+              <label for="email">Email address</label>
+              <input id="email" name="email" type="email" placeholder="jane@example.com" required />
+            </div>
+          </div>
+
+          <div class="error-msg" id="errorMsg"></div>
+
+          <button class="btn" type="submit" id="submitBtn">Send me the resource →</button>
+          <p class="form-note">We respect your privacy. Unsubscribe at any time.</p>
+        </form>
+
+        <div class="success-state" id="successState">
+          <div class="success-icon">✓</div>
+          <p class="success-title">Check your inbox!</p>
+          <p class="success-sub">We've sent the resource to your email address. It should arrive within a few minutes.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>© 2026 XoXoCom. All rights reserved.</footer>
+
+  <script>
+    // ── Config ─────────────────────────────────────────────────
+    // Replace with your Modal endpoint URL after deployment
+    const API_ENDPOINT = 'https://YOUR_MODAL_APP.modal.run/submit';
+
+    // ── Form logic ─────────────────────────────────────────────
+    const form       = document.getElementById('leadForm');
+    const errorMsg   = document.getElementById('errorMsg');
+    const submitBtn  = document.getElementById('submitBtn');
+    const successDiv = document.getElementById('successState');
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.style.display = 'block';
+    }
+
+    function clearError() {
+      errorMsg.style.display = 'none';
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearError();
+
+      const firstName = form.firstName.value.trim();
+      const lastName  = form.lastName.value.trim();
+      const email     = form.email.value.trim();
+
+      if (!firstName || !lastName || !email) {
+        showError('Please fill in all fields.');
+        return;
+      }
+
+      const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRx.test(email)) {
+        showError('Please enter a valid email address.');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending…';
+
+      try {
+        const res = await fetch(API_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ first_name: firstName, last_name: lastName, email }),
+        });
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || `Server error (${res.status})`);
+        }
+
+        form.style.display = 'none';
+        successDiv.style.display = 'flex';
+
+      } catch (err) {
+        showError(err.message || 'Something went wrong. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send me the resource →';
+      }
+    });
+  </script>
+
+</body>
+</html>
