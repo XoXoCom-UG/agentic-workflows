@@ -1,0 +1,19 @@
+{
+  "slug": "matfit_fakedoor_12062026",
+  "company": "MAtfIT",
+  "lead_magnet_title": "MAtfIT Early Access",
+  "drive_link": "https://xoxocom.net",
+  "fields": [
+    "first_name",
+    "email",
+    "company"
+  ],
+  "hero_video": null,
+  "signature": "lm-matfit-fakedoor-3f9c1a",
+  "visual_fingerprint": {
+    "palette": "near-black + chartreuse-lime accent (bg neutral-950 #0a0a0a, text neutral-50/300/400, single accent lime-300/400 ~#bef264/#a3e635, brand-derived)",
+    "layout": "centered wordmark header; reference-style hero (left copy 6-col + right framed product mockup 6-col, CTA scrolls to form); editorial numbered value-prop list; centered card fake-door sign-up section",
+    "motion": "staggered fade-up on load (hero, Motion variants) + scroll-reveal stagger (value props whileInView) + mockup fade/scale-in",
+    "typography": "Geist Sans (uppercase hero display + body) + Geist Mono (eyebrows, benefit chips, signature) + Instrument Serif italic (lime accent words, echoes product UI)"
+  }
+}
