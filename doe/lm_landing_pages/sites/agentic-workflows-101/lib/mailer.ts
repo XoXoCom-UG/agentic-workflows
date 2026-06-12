@@ -32,7 +32,7 @@ export async function sendThankYouEmail(args: ThankYouArgs): Promise<void> {
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 24px; color: #111;">
       <p style="font-size: 16px; margin: 0 0 16px;">${greeting}</p>
       <p style="font-size: 16px; margin: 0 0 24px;">
-        Thanks for grabbing <strong>${escapeHtml(args.leadMagnetTitle)}</strong>. The PM and PO one-pagers are inside the folder below.
+        Thanks for grabbing <strong>${escapeHtml(args.leadMagnetTitle)}</strong>. Your download is ready:
       </p>
       <p style="margin: 0 0 32px;">
         <a href="${args.driveLink}"
@@ -44,7 +44,7 @@ export async function sendThankYouEmail(args: ThankYouArgs): Promise<void> {
         If the button doesn't work, paste this URL into your browser:<br>
         <span style="word-break: break-all;">${args.driveLink}</span>
       </p>
-      <p style="font-size: 14px; color: #555; margin: 24px 0 0;">${escapeHtml(args.companyName)}</p>
+      <p style="font-size: 14px; color: #555; margin: 24px 0 0;">&mdash; ${escapeHtml(args.companyName)}</p>
     </div>
   `.trim();
 
