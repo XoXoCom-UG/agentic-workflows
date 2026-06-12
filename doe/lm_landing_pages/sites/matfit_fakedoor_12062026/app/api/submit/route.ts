@@ -52,6 +52,35 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = getSupabase();
+  const campaignSlug = process.env.CAMPAIGN_SLUG ?? null;
+
+  // De-dupe per campaign: a given email is recorded — and emailed — at most once.
+  // This protects real prospects from repeat confirmation emails on re-submits,
+  // re-tests, or future redeploys, and keeps the demand-test count to unique people.
+  // Best-effort: if the lookup errors, we fall through and treat this as a new signup
+  // so a real lead is never silently dropped.
+  let alreadySignedUp = false;
+  {
+    let lookup = supabase
+      .schema("leads")
+      .from("prospects")
+      .select("email")
+      .eq("email", email)
+      .limit(1);
+    if (campaignSlug) lookup = lookup.eq("campaign_slug", campaignSlug);
+    const { data: existing, error: lookupError } = await lookup;
+    if (lookupError) {
+      console.error("supabase dedupe lookup failed (treating as new)", lookupError);
+    } else {
+      alreadySignedUp = Array.isArray(existing) && existing.length > 0;
+    }
+  }
+
+  // Already on the list → idempotent success: no duplicate row, no second email.
+  if (alreadySignedUp) {
+    return NextResponse.json({ ok: true, redirect_url: "/thank-you" });
+  }
+
   const { error: dbError } = await supabase
     .schema("leads")
     .from("prospects")
@@ -63,7 +92,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Fake-door / early-access campaign: no download. Send a best-effort German
-  // confirmation that the prospect is on the early-access list.
+  // confirmation that the prospect is on the early-access list. First signup only.
   const companyName = process.env.COMPANY_NAME ?? "MAtfIT";
   const gmailUser = process.env.GMAIL_USER;
 

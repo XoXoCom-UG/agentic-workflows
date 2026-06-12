@@ -23,7 +23,7 @@ Document the runtime behavior of a deployed landing page: what happens after a v
 - `execution/add_campaign_slug_column.py` — one-off idempotent migration that adds `campaign_slug text` to `leads.prospects` via direct Postgres (`SUPABASE_DB_URL`). Run once before the first deployment that relies on `campaign_slug` filtering. PostgREST/service key cannot run DDL; only the direct connection can.
 
 **Fake-door / waitlist variant** (per-site overrides, not template changes):
-- `sites/<slug>/app/api/submit/route.ts` — returns `redirect_url: "/thank-you"` with no `?to=` parameter
+- `sites/<slug>/app/api/submit/route.ts` — returns `redirect_url: "/thank-you"` with no `?to=` parameter, and de-dupes by `email` + `campaign_slug` so each address is recorded and emailed at most once
 - `sites/<slug>/lib/mailer.ts` — exports `sendConfirmationEmail`; sends a plain early-access confirmation, no Drive link. Requires only `GMAIL_USER` (not `DRIVE_LINK`).
 - `sites/<slug>/app/thank-you/page.tsx` — static confirmation page; no Drive URL validation, no auto-redirect
 
@@ -51,9 +51,11 @@ Document the runtime behavior of a deployed landing page: what happens after a v
 
 7. **Respond** `200 { ok: true, redirect_url: "/thank-you?to=<urlencoded(DRIVE_LINK)>" }`.
 
-**Fake-door / waitlist variant** — steps 6 and 7 differ:
+**Fake-door / waitlist variant** — steps 5–7 differ:
 
-6. **Send confirmation email** (best-effort, non-blocking) only when `GMAIL_USER` is set. The email confirms the visitor is on the early-access list; it contains no download link and does not use `DRIVE_LINK`. If `sendMail` throws, the error is logged and the response is not blocked.
+5b. **De-dupe before insert + email**: look up `leads.prospects` for an existing row with the same `email` (and `campaign_slug` when set). If one exists, respond `200 { ok: true, redirect_url: "/thank-you" }` immediately — no duplicate row, no second email. This makes re-submissions, re-tests, and redeploys idempotent, so a prospect is recorded and emailed at most once per campaign. If the lookup itself errors, treat the submission as new (insert + email) so a real lead is never silently dropped.
+
+6. **Send confirmation email** (best-effort, non-blocking, first signup only) when `GMAIL_USER` is set. The email confirms the visitor is on the early-access list; it contains no download link and does not use `DRIVE_LINK`. If `sendMail` throws, the error is logged and the response is not blocked.
 
 7. **Respond** `200 { ok: true, redirect_url: "/thank-you" }` — no `?to=` query parameter. The thank-you page is a static confirmation; it does not validate a Drive URL and does not auto-redirect.
 
@@ -86,6 +88,7 @@ Document the runtime behavior of a deployed landing page: what happens after a v
 - **Form posts a column that doesn't exist in `leads.prospects`** (e.g. `phone` when the table doesn't have it): the column is silently dropped by the allowlist filter. The form submission still succeeds. Add the column to `leads.prospects` first, then add it to `LEAD_COLUMNS`.
 - **Drive link is malformed** (standard variant): the thank-you page validates it's an `https://drive.google.com/...` URL before refreshing. If not, it just shows the email-sent message without auto-redirect (visitor still has the email).
 - **Drive link is vestigial** (fake-door variant): `DRIVE_LINK` is set to a real URL (e.g. the company homepage) only to satisfy `sync_env_local.py`'s placeholder check. The submit route and mailer do not use it. This is expected behaviour, not a misconfiguration.
+- **Same email submitted more than once** (fake-door variant): the route de-dupes on `email` + `campaign_slug` before writing or emailing, so repeat submissions return success but create no duplicate row and send no second confirmation email. This protects prospects from being spammed on re-tests, re-submissions, or redeploys, and keeps the demand-test count to unique people. The check is SELECT-then-insert; a race on two simultaneous first-time submits of the same address is possible but harmless at this volume. (The standard lead-magnet template does not yet de-dupe — re-submits there re-insert and re-email.)
 - **Email send fails**: in the standard variant, the visitor still gets to Drive via the thank-you page redirect. In the fake-door variant, the visitor sees the static thank-you page and has no other delivery path, but no action is blocked. Monitor Netlify function logs to catch repeat failures (likely Gmail app-password expired).
 - **Bot submits the form**: there is no bot protection in v1. Deferred. Symptoms: junk rows in `leads.prospects` and bounce emails from Gmail. Add Turnstile to the form when this becomes a problem.
 
