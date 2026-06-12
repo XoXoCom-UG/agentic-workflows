@@ -60,7 +60,7 @@ Iterate on the visual design of an in-progress landing page until the user appro
 - **User asks for a change that would collapse the design onto a fingerprint already used by another site** (e.g. "make it like the acme one"): push back. Suggest an axis where the two pages can still differ (motion, typography) so they don't read as twins.
 - **User asks to remove the `signature` token**: refuse and explain — the token is how they tell different campaigns apart in production. If they insist, save it to `site.config.json` only (no on-page presence) and warn them they're losing visual disambiguation.
 - **Preview doesn't reload**: kill the dev server and re-run `start_preview_server.py`. Don't keep editing into a stale server.
-- **Form submit fails locally with `db` or `invalid_email`**: that's a `.env.local` issue in `sites/<slug>/`, not a design issue. Surface the network response to the user and pause iteration.
+- **Form submit fails locally with `db` or `invalid_email`**: that's a `.env.local` issue in `sites/<slug>/`, not a design issue. Re-run `python execution/sync_env_local.py --slug <slug>` from the repo root to regenerate `.env.local` from the current root `.env` and `site.config.json` (which is the source of `DRIVE_LINK` and other per-campaign vars). Surface the network response to the user and pause iteration.
 - **Hero video stutters or doesn't autoplay**: check that the `<video>` element has `muted playsInline loop`. Browsers block autoplay without `muted`.
 
 ## Error Handling
