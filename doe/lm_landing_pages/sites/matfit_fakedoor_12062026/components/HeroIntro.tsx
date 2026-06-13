@@ -50,7 +50,7 @@ export default function HeroIntro() {
         className="mt-7 text-lg md:text-xl text-neutral-300 max-w-[46ch] leading-[1.55]"
       >
         MAtfIT ist dein KI-Coach für IT-Transformation — fundierte, auf dein
-        Unternehmen zugeschnittene Beratung. Von der Tech-Stack-Analyse bis zur
+        Projekt & Team zugeschnittene Beratung. Von der Tech-Stack-Analyse bis zur
         umsetzbaren Roadmap.{" "}
         <span className="text-neutral-100">Ein Tool statt vieler.</span>
       </motion.p>

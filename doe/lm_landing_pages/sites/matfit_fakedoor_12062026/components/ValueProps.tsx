@@ -55,7 +55,7 @@ export default function ValueProps() {
           </h2>
           <p className="mt-5 text-base md:text-lg text-neutral-400 max-w-[54ch] leading-relaxed">
             MAtfIT begleitet dich Schritt für Schritt durch deine
-            KI-Transformation — fundiert, konkret und auf dein Unternehmen
+            KI-Transformation — fundiert, konkret und auf dein Projekt & Team
             zugeschnitten.
           </p>
         </header>

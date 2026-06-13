@@ -26,7 +26,7 @@ const instrumentSerif = Instrument_Serif({
 export const metadata: Metadata = {
   title: `MAtfIT — Dein KI-Coach für IT-Transformation`,
   description:
-    "MAtfIT ist dein KI-Coach für IT-Transformation: fundierte, auf dein Unternehmen zugeschnittene Beratung — von der Tech-Stack-Analyse bis zur umsetzbaren Roadmap. Sichere dir den Frühzugang.",
+    "MAtfIT ist dein KI-Coach für IT-Transformation: fundierte, auf dein Projekt & Team zugeschnittene Beratung — von der Tech-Stack-Analyse bis zur umsetzbaren Roadmap. Sichere dir den Frühzugang.",
   other: {
     "x-campaign-signature": site.signature,
   },
