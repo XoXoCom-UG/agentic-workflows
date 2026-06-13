@@ -48,3 +48,9 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+# Legal documents
+legal/
+DATENSCHUTZ.md
+IMPRESSUM.md
+
