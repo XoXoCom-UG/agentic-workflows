@@ -24,7 +24,7 @@ Confirm all of these with the user before doing anything else:
 - `execution/deploy_netlify.py` — sets Netlify env vars and deploys
 - `execution/add_campaign_slug_column.py` — one-off, idempotent DB migration that adds the `campaign_slug text` column to `leads.prospects` via a direct Postgres connection. Run this once before the first campaign that needs per-campaign filtering. Uses `SUPABASE_DB_URL` from root `.env`; requires `psycopg2-binary` (included in `requirements.txt`).
 - `design-taste-frontend` skill — generates the per-site design
-- Other directives: `design_landing_page.md` (iteration loop), `deploy_to_netlify.md` (deploy step), `capture_email_redirect.md` (runtime contract reference)
+- Other directives: `design_landing_page.md` (iteration loop), `add_legal_pages.md` (Impressum + Datenschutz — mandatory before deploy), `deploy_to_netlify.md` (deploy step), `capture_email_redirect.md` (runtime contract reference)
 
 Required env in `.env` at repo root: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `LEAD_COLUMNS` (must include `campaign_slug`), `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `NETLIFY_AUTH_TOKEN`, `SUPABASE_DB_URL` (direct Postgres connection string, required only for the migration script).
 
@@ -70,7 +70,9 @@ Required env in `.env` at repo root: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `LE
 
 7. **Iterate** — Hand control to `design_landing_page.md`. Screenshot → critique → edit → reload until the user approves. Never collapse the design back onto a fingerprint already used by another site, and never remove the `signature` token.
 
-8. **Deploy** — On user approval, run `deploy_to_netlify.md`.
+8. **Add legal pages** — Before deploying, follow `add_legal_pages.md` to add the Impressum and Datenschutzerklärung. This is mandatory for any site that collects personal data (including a waitlist email). The legal pages must be reachable from every page via the footer `FooterLinks` component, and the `LeadForm` must show the static consent notice linking to `/datenschutz`. Do not proceed to deploy without completing this step.
+
+9. **Deploy** — On user approval (and after legal pages are in place), run `deploy_to_netlify.md`.
 
 ## Outputs (Deliverables)
 
