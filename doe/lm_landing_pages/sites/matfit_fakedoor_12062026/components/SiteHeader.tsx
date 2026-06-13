@@ -22,7 +22,7 @@ export default function SiteHeader() {
     >
       <div className="mx-auto max-w-7xl px-6 md:px-10 lg:px-12 py-5 flex items-center justify-center">
         <a
-          href="#"
+          href="/"
           aria-label="MAtfIT"
           className="font-mono text-lg font-bold tracking-[0.18em] text-neutral-50"
         >

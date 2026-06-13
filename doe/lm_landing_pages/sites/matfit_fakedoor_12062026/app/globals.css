@@ -51,3 +51,73 @@ body::before {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* Legal pages: style the build-time-rendered Markdown (Impressum, Datenschutz)
+   to the brand theme. No @tailwindcss/typography plugin, so target raw HTML. */
+.legal-prose {
+  color: #d4d4d4; /* neutral-300 */
+  line-height: 1.7;
+  font-size: 0.975rem;
+}
+.legal-prose h1 {
+  color: #fafafa;
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  line-height: 1.05;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.5rem;
+}
+.legal-prose h2 {
+  color: #fafafa;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-top: 2.75rem;
+  margin-bottom: 0.85rem;
+}
+.legal-prose h3 {
+  color: #f5f5f5;
+  font-size: 1.075rem;
+  font-weight: 600;
+  margin-top: 1.85rem;
+  margin-bottom: 0.5rem;
+}
+.legal-prose p {
+  margin-bottom: 1rem;
+}
+.legal-prose a {
+  color: #bef264; /* lime-300 */
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+.legal-prose a:hover {
+  color: #d9f99d; /* lime-200 */
+}
+.legal-prose strong {
+  color: #fafafa;
+  font-weight: 600;
+}
+.legal-prose ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin: 1rem 0;
+}
+.legal-prose ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+  margin: 1rem 0;
+}
+.legal-prose li {
+  margin-bottom: 0.5rem;
+}
+.legal-prose hr {
+  border: 0;
+  border-top: 1px solid #262626; /* neutral-800 */
+  margin: 2.5rem 0;
+}
+.legal-prose code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  color: #e5e5e5;
+}

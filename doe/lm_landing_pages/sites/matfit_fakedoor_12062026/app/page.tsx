@@ -4,6 +4,7 @@ import HeroIntro from "@/components/HeroIntro";
 import HeroMockup from "@/components/HeroMockup";
 import ValueProps from "@/components/ValueProps";
 import LeadForm from "@/components/LeadForm";
+import FooterLinks from "@/components/FooterLinks";
 
 export default function Page() {
   return (
@@ -80,6 +81,7 @@ export default function Page() {
           <div className="text-neutral-500">
             © {new Date().getFullYear()} {site.company} · XoXoCom UG
           </div>
+          <FooterLinks />
           <div
             className="font-mono text-[11px] tracking-[0.16em] text-neutral-700"
             data-signature={site.signature}

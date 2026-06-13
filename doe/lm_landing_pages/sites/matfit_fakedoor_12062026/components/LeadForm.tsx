@@ -128,6 +128,17 @@ export default function LeadForm({ fields, submitLabel }: Props) {
       >
         {status === "submitting" ? "Wird gesendet…" : submitLabel ?? "Auf die Liste setzen"}
       </button>
+
+      <p className="text-[12px] leading-relaxed text-neutral-500">
+        Mit dem Absenden akzeptierst du unsere{" "}
+        <a
+          href="/datenschutz"
+          className="text-lime-300 underline underline-offset-2 hover:text-lime-200"
+        >
+          Datenschutzerklärung
+        </a>
+        .
+      </p>
     </form>
   );
 }

@@ -1,4 +1,5 @@
 import { site } from "@/lib/config";
+import FooterLinks from "@/components/FooterLinks";
 
 export default function ThankYouPage() {
   return (
@@ -22,8 +23,9 @@ export default function ThankYouPage() {
         <p className="text-neutral-400">
           Wir haben dir außerdem eine kurze Bestätigung per E-Mail geschickt.
         </p>
+        <FooterLinks className="justify-center pt-6" />
         <p
-          className="pt-8 font-mono text-[11px] tracking-[0.16em] text-neutral-700"
+          className="pt-4 font-mono text-[11px] tracking-[0.16em] text-neutral-700"
           data-signature={site.signature}
         >
           {site.signature}
