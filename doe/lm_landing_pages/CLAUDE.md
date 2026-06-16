@@ -1,6 +1,8 @@
 # Agent Instructions
 
-> This file is mirrored across CLAUDE.md, AGENTS.md, and GEMINI.md so the same instructions load in any AI environment.
+> The global operating guide for this DOE repo. Keep it general — workflow-specific
+> details belong in `directives/`, not here. Mirror to AGENTS.md / GEMINI.md if you
+> want the same instructions to load in other AI tools.
 
 ## Goal
 
@@ -25,7 +27,7 @@ Operate as a reliable AI orchestrator within the DOE (Directive-Orchestration-Ex
 - Handle API calls, data processing, file operations, database interactions
 - Reliable, testable, fast. Use scripts instead of manual work.
 
-**Why this works:** if you do everything yourself, errors compound. 90% accuracy per step = 59% success over 5 steps. The solution is push complexity into deterministic code. This also saves token costs, as certain tasks are best handled by the scripts e.g. Web scraping, document handling, text pattern matching, spreadsheet automation etc. That way you just focus on decision-making.
+**Why this works:** if you do everything yourself, errors compound. 90% accuracy per step = 59% success over 5 steps. The solution is push complexity into deterministic code. This also saves token costs, as certain tasks are best handled by the scripts e.g. web scraping, document handling, text pattern matching, spreadsheet automation etc. That way you just focus on decision-making.
 
 ## Inputs
 
@@ -38,11 +40,8 @@ Before starting any workflow, confirm with the user:
 
 - `execution/` — All Python scripts (one script per task, named descriptively)
 - `directives/` — All SOP markdown files (one directive per workflow)
-- `.env` — API keys, tokens, and environment variables
+- `.env` — API keys, tokens, and environment variables (never committed)
 - `.tmp/` — Temporary intermediate files (never commit, always regenerable)
-- `credentials.json`, `token.json` — Google OAuth credentials (in `.gitignore`)
-- `execution/webhooks.json` — Webhook slug → directive mapping
-- `execution/modal_webhook.py` — Modal app for cloud execution (modify only when necessary)
 
 ## How to Create a Directive
 
@@ -57,8 +56,8 @@ A directive is a Markdown `.md` file that lives in `directives/`. It is a plain-
 1. **Goal** — One or two sentences. What does this workflow accomplish and why?
 2. **Inputs** — List every parameter the user must supply before the workflow can run (e.g., industry, location, URL, count). Use bold labels.
 3. **Tools / Scripts** — List every `execution/` script this directive calls, with a one-line description of what each does. Include any external dependencies (API tokens, credentials).
-4. **Process** — Numbered, step-by-step instructions. Each step should name the script to call, the expected output, and any decision logic (pass/fail thresholds, branching paths). Use sub-sections for meaningfully different variants of the workflow (e.g., small vs. large scrapes).
-5. **Outputs (Deliverables)** — State exactly what the user receives. Distinguish cloud deliverables (Google Sheet URL, etc.) from temporary intermediates in `.tmp/`. Never list a `.tmp/` file as a deliverable.
+4. **Process** — Numbered, step-by-step instructions. Each step should name the script to call, the expected output, and any decision logic (pass/fail thresholds, branching paths). Use sub-sections for meaningfully different variants of the workflow (e.g., a quick vs. an exhaustive run).
+5. **Outputs (Deliverables)** — State exactly what the user receives. Distinguish cloud deliverables (a hosted URL, a Google Sheet, etc.) from temporary intermediates in `.tmp/`. Never list a `.tmp/` file as a deliverable.
 6. **Edge Cases** — Anticipate likely failures. For each: name the scenario and state the correct response. Format: `**Scenario**: description. -> Action to take.`
 7. **Error Handling** — Note any authentication requirements, rate limits, retry logic, or special conditions the agent should know about.
 
@@ -87,34 +86,13 @@ A directive is a Markdown `.md` file that lives in `directives/`. It is a plain-
 3. **Check for existing scripts** — Look in `execution/` before writing anything new. Only create new scripts if none exist for this task
 4. **Confirm inputs** — Clarify any missing parameters with the user before proceeding
 5. **Execute step by step** — Follow the directive's process exactly. Do not skip steps.
-6. **Deliver output** — Present the final deliverable (usually a Google Sheet URL or cloud link) to the user
-
-### Adding a webhook
-1. Read `directives/add_webhook.md` for complete instructions
-2. Create the directive file in `directives/`
-3. Add entry to `execution/webhooks.json`
-4. Deploy: `modal deploy execution/modal_webhook.py`
-5. Test the endpoint
+6. **Deliver output** — Present the final deliverable (a cloud link/URL) to the user
 
 ## Outputs (Deliverables)
 
-- **Deliverables**: Google Sheets, Google Slides, or other cloud-based outputs that the user can access
-- **Intermediates**: Temporary files needed during processing, stored in `.tmp/` — never presented to the user as final outputs
+- **Deliverables**: Cloud-based outputs the user can access — a hosted site URL, a Google Sheet, or similar.
+- **Intermediates**: Temporary files needed during processing, stored in `.tmp/` — never presented to the user as final outputs.
 - Local files are processing artifacts only. Always confirm the cloud deliverable is complete before notifying the user.
-
-**Key files:**
-- `execution/webhooks.json` - Webhook slug → directive mapping
-- `execution/modal_webhook.py` - Modal app (do not modify unless necessary)
-- `directives/add_webhook.md` - Complete setup guide
-
-**Endpoints:** (filled in after `modal deploy execution/modal_webhook.py`)
-- `https://<modal-user>--claude-orchestrator-list-webhooks.modal.run` - List webhooks
-- `https://<modal-user>--claude-orchestrator-directive.modal.run?slug={slug}` - Execute directive
-- `https://<modal-user>--claude-orchestrator-test-email.modal.run` - Test email
-
-**Available tools for webhooks:** `send_email`, `read_sheet`, `update_sheet`
-
-**All webhook activity streams to Slack in real-time.**
 
 ## Edge Cases
 
