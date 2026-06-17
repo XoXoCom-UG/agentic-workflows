@@ -1,0 +1,17 @@
+{
+  "slug": "xoxocom",
+  "company": "XoXoCom UG",
+  "tagline": "Moderne Arbeitsweisen und A.I. gewinnbringend vereinen",
+  "design_source": "binance",
+  "language": "de",
+  "pages": ["home", "produkte", "leistungen", "ueber-uns", "kontakt"],
+  "has_contact_form": true,
+  "contact_email": "info@xoxocom.net",
+  "signature": "web-xoxocom-fb6b4c",
+  "visual_fingerprint": {
+    "palette": "Binance dark (canvas #0b0e11, ink #eaecef) with Coral #FB6B4C accent",
+    "layout": "sticky dropdown nav, centered hero, editorial sections, card grids",
+    "motion": "subtle fade/lift on scroll",
+    "typography": "Manrope display + body"
+  }
+}
