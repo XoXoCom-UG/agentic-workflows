@@ -52,13 +52,18 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = getSupabase();
+  // Upsert on (campaign_slug, email) with ignoreDuplicates: the shared prospects
+  // table has a UNIQUE index on those columns, so a repeat signup is a no-op at the
+  // row level (keeps the original row + its created_at) instead of erroring or
+  // duplicating. The thank-you email below is best-effort and may re-send the
+  // download link on a repeat, which is harmless.
   const { error: dbError } = await supabase
     .schema("leads")
     .from("prospects")
-    .insert(row)
+    .upsert(row, { onConflict: "campaign_slug,email", ignoreDuplicates: true })
     .select();
   if (dbError) {
-    console.error("supabase insert failed", dbError);
+    console.error("supabase upsert failed", dbError);
     return NextResponse.json({ ok: false, error: "db" }, { status: 500 });
   }
 
