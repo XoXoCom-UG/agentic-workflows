@@ -1,25 +1,27 @@
 import { site } from "@/lib/config";
 import HeroGraph from "@/components/HeroGraph";
 
+// Order = display order: A.I. Transformation (left), Projekteinsätze (middle),
+// Business Coaching (right). Bodies are short teasers — a hook that invites the
+// click; the full copy lives on each Leistung's own page.
 const LEISTUNGEN = [
   {
-    title: "Business Coaching",
-    lede: "Wachstum auf allen Ebenen",
-    body: "Wir coachen Teams und Einzelpersonen, um die Lücke zwischen technologischer Innovation und menschlichem Handeln zu schließen. Ob als strategischer Partner für Ihr Unternehmen oder als persönlicher Mentor für Ihre Karriere – wir befähigen Sie, in der neuen Arbeitswelt nicht nur mitzuhalten, sondern voranzugehen.",
-    href: "/leistungen/business-coaching",
+    title: "A.I. Transformation",
+    lede: "Individuell, disruptiv und messbar überlegen",
+    body: "Wo klassische Agilität an ihre Grenzen stößt, verbinden wir Methodik mit der Power der A.I. – zu einem messbar überlegenen Erfolgsmodell.",
+    href: "/leistungen/ai-transformation",
   },
   {
     title: "Projekteinsätze",
     lede: "Die passenden Puzzleteile für Ihren Projekterfolg",
-    body: "Wir finden nicht nur Experten, sondern die passenden Puzzleteile für Ihren Projekterfolg. Wir unterstützen Sie bei der Besetzung kritischer Schlüsselrollen mit Spezialisten, die methodische Exzellenz und technisches Know-how vereinen:",
-    roles: ["Agile Coach", "Scrum Master", "Product Owner & Manager", "Software Engineer & Architect", "Projekt Manager & Leiter"],
+    body: "Spezialisten für Ihre kritischen Schlüsselrollen – von Agile Coach bis Software Architect, genau dann, wenn Ihr Projekt sie braucht.",
     href: "/leistungen/expert-consulting",
   },
   {
-    title: "A.I. Transformation",
-    lede: "Individuell, disruptiv und messbar überlegen",
-    body: "Wer heute noch nach starren Lehrbüchern arbeitet, hat morgen schon verloren. Wir bieten keine Lösungen von der Stange, sondern einzigartige Konzepte, die dort ansetzen, wo klassische Agilität an ihre Grenzen stößt. Unsere Agile A.I. Transformation verbindet tiefgreifende Methodik mit der Power künstlicher Intelligenz zu einem hybriden Erfolgsmodell.",
-    href: "/leistungen/ai-transformation",
+    title: "Business Coaching",
+    lede: "Wachstum auf allen Ebenen",
+    body: "Wir schließen die Lücke zwischen Innovation und Mensch – als strategischer Partner für Ihr Unternehmen und Mentor für Ihre Karriere.",
+    href: "/leistungen/business-coaching",
   },
 ];
 
@@ -68,15 +70,6 @@ export default function Startseite() {
                 <h3 className="text-xl font-bold text-fg">{l.title}</h3>
                 <p className="mt-1 text-sm font-semibold text-accent">{l.lede}</p>
                 <p className="mt-4 text-sm leading-relaxed text-muted">{l.body}</p>
-                {l.roles && (
-                  <ul className="mt-4 space-y-1.5">
-                    {l.roles.map((r) => (
-                      <li key={r} className="flex items-center gap-2 text-sm text-fg">
-                        <span className="h-1.5 w-1.5 rounded-full bg-accent" /> {r}
-                      </li>
-                    ))}
-                  </ul>
-                )}
                 <span className="mt-6 text-sm font-semibold text-fg transition-colors group-hover:text-accent">Mehr erfahren →</span>
               </a>
             ))}
@@ -108,9 +101,9 @@ export default function Startseite() {
       {/* Section 4 — Über uns teaser */}
       <section className="px-6 md:px-10 lg:px-12 py-20 md:py-28 bg-surface">
         <div className="mx-auto max-w-4xl text-center space-y-6">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-fg">Ein junges Team mit großem Anspruch</h2>
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-fg">Dynamisches Team mit Durchschlagskraft</h2>
           <p className="mx-auto max-w-2xl text-lg text-muted">
-            Wir sind ein junges Team, das sich auf die wirtschaftliche und technische Beratung von A.I.-Implementierung spezialisiert hat.
+            Wir sind ein dynamisches Team, das sich auf die wirtschaftliche und technische Beratung von A.I.-Implementierung spezialisiert hat.
           </p>
           <a href="/ueber-uns" className="inline-flex items-center rounded-[var(--radius-card)] border border-border bg-bg px-6 py-3 font-semibold text-fg transition hover:border-accent/60">
             Lerne uns kennen

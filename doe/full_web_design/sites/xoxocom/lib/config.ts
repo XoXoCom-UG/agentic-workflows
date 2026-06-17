@@ -48,5 +48,5 @@ export const nav: NavItem[] = [
 export const CTA = { label: "Kontaktiere uns", href: "/kontakt" };
 
 export const SOCIALS = [
-  { label: "LinkedIn", href: "https://www.linkedin.com/in/patryk-kwitowski" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/company/xoxocom/" },
 ];
