@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+/*
+  DESIGN TOKENS — the single source of truth for this site's look.
+
+  The `design_website` directive's job is to translate a chosen awesome-design-md
+  DESIGN.md into the values below: swap the hexes, fonts, and radius to that brand's
+  tokens, and the entire multi-page site re-skins. Component markup references these
+  via Tailwind utilities (bg-bg, text-fg, text-muted, bg-surface, border-border,
+  bg-accent, text-accent, text-accent-fg), so structure stays stable across rebrands.
+
+  Default theme below is a neutral light system — replace it, do not build on top of it.
+*/
+@theme {
+  --color-bg: #ffffff;          /* page background */
+  --color-fg: #0a0a0a;          /* primary text / ink */
+  --color-muted: #6b7280;       /* secondary text */
+  --color-surface: #f5f5f5;     /* cards, raised panels */
+  --color-border: #e5e7eb;      /* hairlines, dividers, input borders */
+  --color-accent: #635bff;      /* brand accent — buttons, links, highlights */
+  --color-accent-fg: #ffffff;   /* text/icon color on an accent background */
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: ui-serif, Georgia, "Times New Roman", serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --radius-card: 1rem;          /* card / panel corner radius */
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/*
+  Legal pages: style the build-time-rendered Markdown (Impressum, Datenschutz).
+  No @tailwindcss/typography plugin — target raw HTML and pull from the tokens above
+  so the legal pages always match the active brand theme automatically.
+*/
+.legal-prose {
+  color: var(--color-fg);
+  line-height: 1.7;
+  font-size: 0.975rem;
+}
+.legal-prose h1 {
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  line-height: 1.05;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.5rem;
+}
+.legal-prose h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-top: 2.75rem;
+  margin-bottom: 0.85rem;
+}
+.legal-prose h3 {
+  font-size: 1.075rem;
+  font-weight: 600;
+  margin-top: 1.85rem;
+  margin-bottom: 0.5rem;
+}
+.legal-prose p {
+  margin-bottom: 1rem;
+}
+.legal-prose a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+.legal-prose a:hover {
+  opacity: 0.8;
+}
+.legal-prose strong {
+  font-weight: 600;
+}
+.legal-prose ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin: 1rem 0;
+}
+.legal-prose ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+  margin: 1rem 0;
+}
+.legal-prose li {
+  margin-bottom: 0.5rem;
+}
+.legal-prose hr {
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  margin: 2.5rem 0;
+}
+.legal-prose code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}

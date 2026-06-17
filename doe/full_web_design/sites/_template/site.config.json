@@ -1,0 +1,16 @@
+{
+  "slug": "_template",
+  "company": "Template Company",
+  "tagline": "A short, concrete value proposition goes here.",
+  "design_source": null,
+  "pages": ["home", "about", "services", "contact"],
+  "has_contact_form": true,
+  "contact_email": "hello@example.com",
+  "signature": "web-template-0000",
+  "visual_fingerprint": {
+    "palette": null,
+    "layout": null,
+    "motion": null,
+    "typography": null
+  }
+}

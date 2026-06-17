@@ -1,0 +1,53 @@
+# Secrets
+.env
+.env.*
+credentials/
+credentials.json
+token.json
+*.pem
+*.key
+
+# Per-site Next.js build output and local env
+sites/*/.next/
+sites/*/node_modules/
+sites/*/.env.local
+sites/*/.netlify/
+
+# Temporary / regenerable
+.tmp/
+*.log
+*.tmp
+
+# Claude Code session/agent local state (per-machine, not project content)
+.claude/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# Node (if any execution scripts need it)
+node_modules/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Legal source documents (canonical texts live outside git; copied per-site into content/)
+legal/
+DATENSCHUTZ.md
+IMPRESSUM.md
+
+# Orchestration
+CLAUDE.md
+XOXOCOM_BRIEF.md
