@@ -26,6 +26,7 @@ Confirm all of these with the user before doing anything else:
 - `execution/start_preview_server.py` — runs `next dev` on a free port
 - `execution/deploy_netlify.py` — sets Netlify env vars and deploys
 - `execution/add_campaign_slug_column.py` — one-off, idempotent migration adding `campaign_slug text` to `leads.prospects` (only needed for contact-form sites that filter by site). Uses `SUPABASE_DB_URL`.
+- `execution/record_canvas_animation.py` — records a live `<canvas>` hero animation to `assets/exploded-views/<concept-name>.webm` + `.mp4`. Mandatory whenever a new hero canvas or video graphic is produced; called during the design step before deploy. Requires `browser-harness` daemon and `ffmpeg` on PATH.
 - `awesome-design-md` skill — the design source (74 brand DESIGN.md token specs)
 - Other directives: `design_website.md` (design + iteration loop), `add_legal_pages.md` (legal — mandatory before deploy), `deploy_to_netlify.md` (deploy step), `capture_contact_submission.md` (runtime contract reference)
 

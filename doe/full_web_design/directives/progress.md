@@ -18,13 +18,128 @@ Every entry in the Progress Log must carry a timestamp in the format `YYYY-MM-DD
 
 ## Current Status
 
-The XoXoCom home hero carries a bespoke animated graphic: `sites/xoxocom/components/HeroGraph.tsx` renders a live in-browser canvas of a 3D-perspective node network where the shortest path between two distant nodes lights up in the brand Coral accent on a ~5s loop with a travelling pulse. It reads the site's CSS design tokens at runtime so it re-skins with the theme/background, honours `prefers-reduced-motion`, and is responsive. It is wired into the home hero in `sites/xoxocom/app/page.tsx` as an opacity-80 background layer behind a radial text-protection scrim, and is deployed live to https://xoxocom-ug.netlify.app. A reusable screen-recording of this animation (composited on the brand background, ~5s) now lives at `assets/exploded-views/hero-node-network.webm` (VP9) and `.mp4` (H.264) in a new root-level `assets/exploded-views/` folder for reuse in ads, social, or as a static fallback. The home "MAtfIT" section has had its eyebrow renamed "Unser Produkt" → "Aktuelles" and given restrained Coral life — two slowly "breathing" radial hue orbs (`hueBreathe` keyframes in `sites/xoxocom/app/globals.css`, neutralised under reduced-motion), an accent-tinted card border, a coral rim-glow, and a faint inner accent wash. All deployed live and verified in production.
+Business-coaching hero (`HeroGraphCluster`, clustering-coefficient animation) built and deployed. `execution/record_canvas_animation.py` created, reviewer-approved, and tested. Hero recording is now a mandatory step before every Netlify deploy (documented in `design_website.md` and `deploy_to_netlify.md`). OneDrive external-copy deploy workaround documented in `deploy_to_netlify.md`. The full Leistungen hero set remains complete. Nothing has been committed to git since the last session; branch `doe` has several unstaged files. `hero-centrality-hubs.*` assets were deleted and regenerated at 1900×620 (native live-site height); re-recording at 1900×790 is an open item if dimensional consistency across the exploded-views library is required.
 
-Prospect-table data integrity remains enforced at the database level: `leads.prospects` has a UNIQUE index on `(campaign_slug, email)`, the submit routes upsert with `onConflict: "campaign_slug,email"` / `ignoreDuplicates: true`, and the migration has been run in production (6 duplicate rows removed, index created, verified live). The deploy script masks secret env values when echoing `netlify env:set`. Six directives and eleven execution scripts cover the full pipeline. Outstanding items are the three legal follow-ups inside `add_legal_pages.md` (sub-processors, DPAs, Supabase EU region), the AGB content review (`xoxocom/content/agb.md` is a placeholder draft pending legal sign-off), and swapping the testing Gmail credentials for the owner's credentials before real production use.
+End-of-session enforcement added: `execution/hooks/ensure_progress_logged.py` (Stop hook) and `.claude/settings.json` wired in this session. The hook blocks session end if any tracked file is newer than `progress.md`. `CLAUDE.md` Operating Principle 4 and Key rules strengthened to state this is mandatory and enforced. All three new files are uncommitted on branch `doe`.
+
+Outstanding items: multiple deployed-but-unstaged files on branch `doe` (including the new hook and settings files); `execution/deploy_netlify.py` does not yet automate the OneDrive external-build workaround; `hero-centrality-hubs.*` may need re-recording at 1900×790; three legal follow-ups in `add_legal_pages.md` (name sub-processors for Netlify/Supabase/Google, sign DPAs, confirm Supabase EU region); `sites/xoxocom/content/agb.md` is a placeholder DRAFT pending legal review and sign-off; testing Gmail credentials must be swapped for the owner's credentials before real production use.
 
 ---
 
 ## Progress Log
+
+### 2026-06-17 23:30
+
+**Infrastructure — end-of-session documentation enforcement added (Stop hook + CLAUDE.md hardening). ✅**
+
+1. New script `execution/hooks/ensure_progress_logged.py`:
+   - Pure-stdlib Python. Resolves the repo root from `__file__`. Reads the hook JSON payload from stdin.
+   - If `stop_hook_active` is true in the payload, exits 0 immediately (loop-safe).
+   - Otherwise compares mtimes: if any file under `sites/`, `execution/`, `assets/`, or `directives/` (excluding `directives/progress.md` itself, and pruning `node_modules`/`.next`/`.netlify`/`__pycache__`/`.git`/`.tmp`/the `hooks` directory) is newer than `progress.md`, it prints `{"decision":"block","reason":"..."}` instructing the model to call the documenter sub-agent before ending. Otherwise exits 0.
+   - Runs in approximately 0.3 s.
+
+2. New project file `.claude/settings.json`:
+   - Registers `ensure_progress_logged.py` as a `Stop` hook using the exec form (`"command":"python"`, `"args":["<absolute path>"]`) so the non-ASCII/space-containing OneDrive path never passes through a shell parser. Timeout 30 s.
+
+3. `CLAUDE.md` Operating Principle 4 and Key rules sub-agent trigger list strengthened:
+   - End-of-session progress documentation via the documenter is now stated as mandatory and as enforced by the Stop hook.
+
+**Caveat:** the Stop hook may not activate until the user opens the `/hooks` settings panel once or restarts Claude Code. Settings-file watchers only observe `.claude/` if a settings file existed there at session start; this file was created mid-session.
+
+**Git state:** `execution/hooks/ensure_progress_logged.py`, `.claude/settings.json`, and the `CLAUDE.md` changes are uncommitted on branch `doe` alongside the already-listed business-coaching and hero-animation files. User has not asked to commit.
+
+---
+
+### 2026-06-17 21:00
+
+**XoXoCom — Business Coaching hero built and deployed; `record_canvas_animation.py` created and production-tested; hero recording made mandatory before every deploy; OneDrive deploy workaround documented. ✅**
+
+1. New component `sites/xoxocom/components/HeroGraphCluster.tsx` (sibling of `HeroGraph.tsx`):
+   - Canvas animation visualising the graph-theory **local clustering coefficient**. A focal node lights up; radial spokes draw to its k neighbours; triangles among those neighbours close and fill in Coral; a small arc-gauge sweeps to C = 2·(links among neighbours)/(k·(k−1)). Uses a random-geometric graph so triangles and clustering are always visible. Focal node rotates left-to-right through ~5 high-clustering nodes per cycle.
+   - Same technical pattern as the other two heroes: reads CSS design tokens at runtime, honours `prefers-reduced-motion`, responsive via `ResizeObserver` + `devicePixelRatio`, subtle pointer parallax.
+
+2. Integrated into `sites/xoxocom/app/leistungen/business-coaching/page.tsx`:
+   - Canvas mounted as absolute background layer with the same centre text-protection scrim and accent glow pattern used by the other service pages.
+
+3. New execution script `execution/record_canvas_animation.py` (reviewer-approved, end-to-end tested):
+   - Records any on-page `<canvas>` animation to `assets/exploded-views/<name>.webm` (VP9) + `.mp4` (H.264/yuv420p/faststart, even dims enforced via crop filter).
+   - Drives `browser-harness` via a piped Python snippet. In-browser: CDP `Page.startScreencast` prevents rAF throttling; composites each transparent canvas frame onto the `--color-bg` background token in an offscreen canvas; captures with `MediaRecorder` (VP9); reads webm back base64-chunked; python side writes to disk and calls ffmpeg.
+   - Flags: `--url` (required); `--name`/`--out` (mutually exclusive, required); `--selector` (default `canvas`); `--seconds` (default 12); `--fps` (default 30); `--bitrate` (default 8M); `--bg` (default: reads `--color-bg` token from the live page); `--settle` (default 2.5); `--no-mp4`.
+   - Records at the canvas's native on-page resolution. Reviewer fixes applied: UTF-8 decoding of harness stdout; chunk-scaled subprocess timeout; closes only the tab it opened (no tab leak); polls for `MediaRecorder.onstop` instead of a fixed sleep; substitutes user-supplied tokens last to prevent injection collisions.
+
+4. Hero recording made a mandatory pre-deploy step:
+   - `design_website.md` step 9 (Record hero animation) and `deploy_to_netlify.md` step 2 (first-deploy checklist) already document this rule.
+   - Asset recorded: `assets/exploded-views/hero-cluster-coefficient.webm` + `.mp4`.
+
+5. Deployed to Netlify production and verified live (HTTP 200, animation confirmed): https://xoxocom-ug.netlify.app/leistungen/business-coaching.
+   - Deploy used the external-copy fallback (see below) — not in-place via `deploy_netlify.py`.
+
+6. OneDrive external-build workaround documented in `deploy_to_netlify.md`:
+   - Edge Cases section: describes the three failure symptoms (ENOENT during "Collecting page data", `<Html>` import error on `/500`/`/_error`, `lstat ENOENT` during plugin `onBuild` standalone copy).
+   - Error Handling section: step-by-step external-copy procedure (kill `next dev`; robocopy site to non-OneDrive path excluding `node_modules`/`.next`/`.netlify`; `npm install`; `netlify link --id <siteId>`; `netlify deploy --prod`). Notes that `deploy_netlify.py` does NOT yet automate this.
+
+**Centrality-hubs delete/regenerate incident (cross-session):**
+A parallel session built `HeroGraphHubs` and its `assets/exploded-views/hero-centrality-hubs.*` assets. During cleanup this session deleted those files because at that moment they were broken (0-byte webm; mp4 was a byte-for-byte duplicate of `hero-cluster-coefficient.mp4`). This session regenerated valid ones from the live expert-consulting page using `record_canvas_animation.py` at the canvas's native height of 1900×620. The parallel session had documented 1900×790. Open item: re-record `hero-centrality-hubs.*` at 1900×790 via a bare full-bleed route if exact dimensional consistency across the exploded-views library is required. The live site is unaffected.
+
+**Git state:** nothing committed. On branch `doe`, unstaged: `sites/xoxocom/components/HeroGraphCluster.tsx`, `sites/xoxocom/app/leistungen/business-coaching/page.tsx`, `execution/record_canvas_animation.py`, `assets/exploded-views/hero-cluster-coefficient.webm`, `assets/exploded-views/hero-cluster-coefficient.mp4`, `assets/exploded-views/hero-centrality-hubs.webm` (regenerated), `assets/exploded-views/hero-centrality-hubs.mp4` (regenerated), plus the three directive edits. User has not asked to commit.
+
+---
+
+### 2026-06-17 18:00
+
+**XoXoCom — Expert Consulting hero animation built, recorded, and deployed live. Leistungen hero set now complete. ✅**
+
+1. New component `sites/xoxocom/components/HeroGraphHubs.tsx`:
+   - Canvas animation visualising graph-theory **centrality and hubs**. The highlight alternates on a loop between two modes: a **connector hub** (bridges separate communities; bridge edges pulse in Coral) and a **provincial hub** (links contained inside a single community). Node radius encodes degree centrality — higher-degree nodes are visibly larger.
+   - Same technical pattern as the other two service-page heroes: reads CSS design tokens at runtime, honours `prefers-reduced-motion`, and is responsive via `ResizeObserver` + `devicePixelRatio`.
+
+2. Integrated into `sites/xoxocom/app/leistungen/expert-consulting/page.tsx`:
+   - Canvas mounted as absolute background layer with a text-protection scrim and accent glow, matching the pattern established by the A.I. Transformation and Business Coaching pages.
+
+3. Recorded as an exploded-view asset (bare on `#0B0E11`, 1900×790, 30 fps, ~12 s):
+   - `assets/exploded-views/hero-centrality-hubs.mp4`
+   - `assets/exploded-views/hero-centrality-hubs.webm`
+   - Matches the existing asset pair for the other two heroes.
+
+4. Deployed to Netlify production via `python execution/deploy_netlify.py --slug xoxocom` — build succeeded in place (~1m30s), "Deploy is live!", exit 0. Verified live (HTTP 200): https://xoxocom-ug.netlify.app/leistungen/expert-consulting.
+
+5. The Leistungen hero set is now complete:
+   - shortest-path → A.I. Transformation (`HeroGraph`)
+   - clustering-coefficient → Business Coaching (`HeroGraphCluster`)
+   - centrality & hubs → Expert Consulting (`HeroGraphHubs`)
+
+**Operational note (no follow-up required):** the local `.next` build cache (junction → C:\xoxo-next-cache) was cleared during recording troubleshooting and its required inner `node_modules` junction was restored; the in-place Netlify build/deploy continues to work with this setup.
+
+**Open item carried forward:** `HeroGraphHubs.tsx`, the expert-consulting page edit, and the two new video assets (`hero-centrality-hubs.mp4` / `.webm`) are deployed but not yet committed to git on branch `doe`.
+
+---
+
+### 2026-06-17 09:00
+
+**Session close — documentation pass complete. All baseline gaps resolved. ✅**
+
+Summary of everything accomplished across this session:
+
+1. Initialized `directives/progress.md` as the repo's timestamped progress tracker. Performed a baseline survey: 6 directives, 10 execution scripts (at that point), `sites/_template/` and `sites/xoxocom/` present. Established the reverse-chronological log format and the Open / Unfinished Items checklist.
+
+2. Documented two previously-undocumented execution scripts in `directives/preview_design_systems.md`:
+   - `execution/build_font_lab.py` added as Mode C (Font lab): renders a side-by-side HTML specimen of every `awesome-design-md` system's typeface stack to `.tmp/font_lab/index.html`.
+   - `execution/build_accent_lab.py` added as Mode D (Accent lab): renders accent-color palette swatches for every system to `.tmp/accent_lab/index.html`.
+   - Both scripts added to Inputs, Tools/Scripts, Process, Outputs, and Error Handling sections.
+
+3. Documented the optional AGB page workflow in `directives/add_legal_pages.md`:
+   - New process step covering when to create an AGB page (site sells a paid product or service), what to create (`app/agb/page.tsx`, `content/agb.md`, FooterLinks AGB entry), and the trigger logic.
+   - Noted that the template does not ship an AGB by default — it must be created from scratch.
+   - Noted that `sites/xoxocom/content/agb.md` is a placeholder DRAFT pending legal review and sign-off.
+
+4. Codified progress-log maintenance as Operating Principle 4 in `CLAUDE.md`:
+   - Three trigger conditions (step completed with follow-up needed, work left unfinished, end-of-session wrap-up).
+   - Timestamp format, reverse-chronological ordering, and Current Status / Open Items refresh requirements.
+   - Matching bullet added to the Key rules sub-agent trigger list.
+
+Open items at session close: three legal follow-ups in `add_legal_pages.md` (sub-processors, DPAs, Supabase EU region); `sites/xoxocom/content/agb.md` placeholder DRAFT pending legal sign-off; testing Gmail credentials to be swapped for owner credentials before real production use. All three checked-off documentation gaps are fully resolved.
+
+---
 
 ### 2026-06-17 12:00
 
@@ -169,6 +284,11 @@ Follow-up items noted inside directives that carry into future sessions:
 - [x] AGB page (`app/agb/page.tsx`, `content/agb.md`) not referenced by any directive — resolved 2026-06-16: documented as optional step in `add_legal_pages.md`.
 - [x] Prospect-table de-duplication (unique `(campaign_slug, email)` index + upsert-on-conflict) — resolved 2026-06-16: migration run in production (6 dups removed, index live), submit routes upsert, verified live; documented in `capture_contact_submission.md` and `deploy_to_netlify.md`.
 - [x] Hero exploded-view / hero media — resolved 2026-06-17: built `sites/xoxocom/components/HeroGraph.tsx` (theme-token-driven animated node-network canvas, shortest-path Coral highlight on a ~5s loop), integrated into the home hero in `sites/xoxocom/app/page.tsx`, deployed live to https://xoxocom-ug.netlify.app.
+- [x] Leistungen hero set — resolved 2026-06-17: `HeroGraphCluster` (Business Coaching, clustering-coefficient) and `HeroGraphHubs` (Expert Consulting, centrality & hubs) built, recorded, and deployed; all three service pages now have bespoke animated heroes.
+- [ ] Commit deployed-but-unstaged work to git on branch `doe`: `sites/xoxocom/components/HeroGraphCluster.tsx`, `sites/xoxocom/app/leistungen/business-coaching/page.tsx`, `sites/xoxocom/components/HeroGraphHubs.tsx`, `sites/xoxocom/app/leistungen/expert-consulting/page.tsx`, `execution/record_canvas_animation.py`, `assets/exploded-views/hero-cluster-coefficient.webm`, `assets/exploded-views/hero-cluster-coefficient.mp4`, `assets/exploded-views/hero-centrality-hubs.webm` (regenerated), `assets/exploded-views/hero-centrality-hubs.mp4` (regenerated), directive edits, plus the new infra files: `execution/hooks/ensure_progress_logged.py`, `.claude/settings.json`, `CLAUDE.md` (Stop hook + Operating Principle 4 hardening).
+- [ ] Verify Stop hook is active: user should open the `/hooks` settings panel or restart Claude Code once so the new `.claude/settings.json` is picked up by the settings-file watcher.
+- [ ] `execution/deploy_netlify.py` does not yet automate the OneDrive external-build workaround — currently a manual procedure (documented in `deploy_to_netlify.md` Error Handling). Possible future improvement.
+- [ ] `hero-centrality-hubs.*` assets regenerated at 1900×620 (native live-site canvas height). Re-record at 1900×790 via a bare full-bleed route if exact dimensional consistency across the exploded-views library is wanted.
 - [ ] Swap the testing Gmail credentials for the owner's credentials before real production use.
 - [ ] `add_legal_pages.md` known follow-ups: add sub-processor section to Datenschutz for Netlify, Supabase, and Google; sign DPAs with each; confirm Supabase project is on an EU region. Required before operating at scale.
 - [ ] `sites/xoxocom/content/agb.md` is a placeholder DRAFT. Requires legal review and sign-off before the `/agb` page is suitable for production (AGB legal review).

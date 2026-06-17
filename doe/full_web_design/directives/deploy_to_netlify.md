@@ -30,17 +30,19 @@ vars in place, and return the live URL to the user.
    - `--account-slug` is required when the login owns more than one team, else `sites:create` prompts interactively and hangs. Find it with `netlify api listAccountsForUser` (the `slug` field).
    - `sites:create` auto-links the current directory. If they drift, `netlify link --name <netlify-site-name>`.
 
-2. Run:
+2. Confirm hero recordings are up to date. If the site has any hero canvas or video graphic, `assets/exploded-views/<concept-name>.webm` and `.mp4` must already exist before this step. Recording happens in the design step via `execution/record_canvas_animation.py`; see `design_website.md` for the procedure.
+
+3. Run:
    ```
    python execution/deploy_netlify.py --slug <slug>
    ```
    The script reads `site.config.json`, runs `npm install`, sets the env vars (table below), runs `netlify deploy --prod` from inside the site dir, and prints the deploy URL.
 
-3. Verify by opening the URL: click through every page in the nav, confirm the legal pages load, and — on a contact-form site — submit the form with a real email and confirm the row appears in `leads.prospects` (tagged with `campaign_slug`) and both emails arrive. See `capture_contact_submission.md` for the runtime contract.
+4. Verify by opening the URL: click through every page in the nav, confirm the legal pages load, and — on a contact-form site — submit the form with a real email and confirm the row appears in `leads.prospects` (tagged with `campaign_slug`) and both emails arrive. See `capture_contact_submission.md` for the runtime contract.
 
 ### Subsequent deploys (same slug)
 
-Skip step 1. Re-run `python execution/deploy_netlify.py --slug <slug>`. Env vars are re-set every time so config drift can't accumulate.
+Skip steps 1 and 2. Re-run `python execution/deploy_netlify.py --slug <slug>`. Env vars are re-set every time so config drift can't accumulate.
 
 ## Per-site Netlify env vars
 
@@ -73,9 +75,17 @@ A brochure site with `has_contact_form: false` pushes only `SITE_SLUG` + `COMPAN
 - **`leads.prospects` lacks `campaign_slug`**: deploys succeed but the slug is dropped by the `LEAD_COLUMNS` allowlist. Run `execution/add_campaign_slug_column.py`, or remove it from `LEAD_COLUMNS`.
 - **Submit 500s on a fresh table without the unique index**: the `/api/submit` route upserts with `onConflict: "campaign_slug,email"`, which requires a UNIQUE index on `(campaign_slug, email)`. If it is missing, every submit fails with `error: "db"`. Run `execution/add_prospects_dedup_constraint.py` once (de-dupes existing rows + creates the index). See `capture_contact_submission.md`.
 - **Page 500s on submit**: ~90% of the time a missing env var or a `LEAD_COLUMNS` typo. Check `netlify functions:log submit`.
+- **OneDrive intermittent build failures (repo lives under a synced OneDrive folder)**: `next build` — and therefore `netlify deploy --prod`, which rebuilds via `@netlify/plugin-nextjs` — fails intermittently because OneDrive dehydrates or locks freshly written `.next/server` and `.next/standalone/node_modules` files between write and read. Symptoms vary randomly by run: `Cannot find module for page: /<route>` (ENOENT) during "Collecting page data"; `<Html> should not be imported outside of pages/_document` while prerendering `/500` or `/_error`; `lstat ... ENOENT` during the plugin's `onBuild` copy of `.next/standalone`. Merely pausing OneDrive's watchdog process helps the local build but does not reliably fix the deploy's standalone-copy step. The dependable fix is to build and deploy from a copy outside OneDrive — see the Error Handling section below.
 
 ## Error Handling
 
 - `npm install` failures: check `node -v` (Next.js needs Node 20+).
 - `next build` failures during deploy: usually a TypeScript error introduced by the design step. Reproduce with `npm run build` locally and fix before retrying.
 - Don't auto-retry a failing deploy — each `--prod` deploy consumes a slot and a log entry. Fix the root cause first.
+- **OneDrive external-build workaround**: when the repo is inside a synced OneDrive folder and the build fails with the symptoms described in Edge Cases above, use the following procedure:
+  1. Kill any lingering `next dev` node process before building. A running dev server that shares `.next` with the build can cause the same `/_error` prerender failure.
+  2. Copy `sites/<slug>/` to a path entirely outside OneDrive, e.g. `C:\xoxo-build\<slug>`, excluding `node_modules`, `.next`, and `.netlify` (on Windows: `robocopy sites\<slug> C:\xoxo-build\<slug> /E /XD node_modules .next .netlify`).
+  3. In that copy: run `npm install`; run `netlify link --id <siteId>`; export `NETLIFY_AUTH_TOKEN` from the repo `.env`; run `netlify deploy --prod`.
+  4. Because Netlify env vars were already set by a previous run of `deploy_netlify.py`, the env:set step does not need to be repeated for this workaround deploy.
+  5. After the deploy completes, relaunch OneDrive if you stopped it (`OneDrive.exe /background`).
+  Note: this is currently a manual procedure. The `execution/deploy_netlify.py` script does not yet automate the external-build copy; that is a possible future improvement.
