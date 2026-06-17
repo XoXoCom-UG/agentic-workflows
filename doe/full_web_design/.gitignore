@@ -9,6 +9,7 @@ token.json
 
 # Per-site Next.js build output and local env
 sites/*/.next/
+sites/*/.next-rec/
 sites/*/node_modules/
 sites/*/.env.local
 sites/*/.netlify/
@@ -51,3 +52,4 @@ IMPRESSUM.md
 # Orchestration
 CLAUDE.md
 XOXOCOM_BRIEF.md
+XOXOCOM_BLUEPRINT.md
