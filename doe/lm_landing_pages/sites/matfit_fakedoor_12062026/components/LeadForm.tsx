@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useLang } from "@/lib/i18n";
 
 type Props = {
   fields: string[];
@@ -9,26 +10,6 @@ type Props = {
 
 type Status = "idle" | "submitting" | "error";
 
-const FIELD_LABELS: Record<string, string> = {
-  first_name: "Vorname",
-  last_name: "Nachname",
-  email: "E-Mail",
-  phone: "Telefon",
-  company: "Firma",
-  role: "Rolle",
-  country: "Land",
-};
-
-const FIELD_PLACEHOLDERS: Record<string, string> = {
-  first_name: "Max",
-  email: "max@firma.de",
-  company: "Deine Firma GmbH",
-};
-
-function labelFor(field: string): string {
-  return FIELD_LABELS[field] ?? field.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
 function inputTypeFor(field: string): string {
   if (field === "email") return "email";
   if (field === "phone") return "tel";
@@ -36,8 +17,12 @@ function inputTypeFor(field: string): string {
 }
 
 export default function LeadForm({ fields, submitLabel }: Props) {
+  const { c } = useLang();
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const labelFor = (field: string): string =>
+    c.form.labels[field] ?? field.replace(/_/g, " ").replace(/\b\w/g, (ch) => ch.toUpperCase());
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -68,16 +53,14 @@ export default function LeadForm({ fields, submitLabel }: Props) {
       if (!res.ok || !body?.ok || !body.redirect_url) {
         setStatus("error");
         setErrorMsg(
-          body?.error === "invalid_email"
-            ? "Diese E-Mail sieht nicht richtig aus — bitte prüfe sie."
-            : "Etwas ist schiefgelaufen. Bitte versuche es erneut."
+          body?.error === "invalid_email" ? c.form.errInvalidEmail : c.form.errGeneric
         );
         return;
       }
       window.location.assign(body.redirect_url);
     } catch {
       setStatus("error");
-      setErrorMsg("Netzwerkfehler. Bitte versuche es erneut.");
+      setErrorMsg(c.form.errNetwork);
     }
   }
 
@@ -95,7 +78,7 @@ export default function LeadForm({ fields, submitLabel }: Props) {
             id={field}
             name={field}
             type={inputTypeFor(field)}
-            placeholder={FIELD_PLACEHOLDERS[field] ?? ""}
+            placeholder={c.form.placeholders[field] ?? ""}
             required={field === "email"}
             autoComplete={
               field === "email"
@@ -126,16 +109,16 @@ export default function LeadForm({ fields, submitLabel }: Props) {
         disabled={status === "submitting"}
         className="w-full rounded-lg bg-lime-400 py-3 font-semibold text-neutral-950 transition hover:bg-lime-300 disabled:opacity-50"
       >
-        {status === "submitting" ? "Wird gesendet…" : submitLabel ?? "Auf die Liste setzen"}
+        {status === "submitting" ? c.form.submitting : submitLabel ?? c.form.submitFallback}
       </button>
 
       <p className="text-[12px] leading-relaxed text-neutral-500">
-        Mit dem Absenden akzeptierst du unsere{" "}
+        {c.form.privacyPre}
         <a
           href="/datenschutz"
           className="text-lime-300 underline underline-offset-2 hover:text-lime-200"
         >
-          Datenschutzerklärung
+          {c.form.privacyLink}
         </a>
         .
       </p>

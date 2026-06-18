@@ -1,42 +1,10 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
-
-type Prop = {
-  number: string;
-  title: string;
-  body: string;
-};
-
-const props: Prop[] = [
-  {
-    number: "01",
-    title: "Tech-Stack-Analyse",
-    body: "Analysiere deinen Tech-Stack hinsichtlich aktueller KI-Implementierung — und entdecke, wo der größte Hebel liegt.",
-  },
-  {
-    number: "02",
-    title: "Trend-Abgleich",
-    body: "Abgleich mit aktuellen und zukünftigen Trends im Markt. Bleib deinen Wettbewerbern einen Schritt voraus.",
-  },
-  {
-    number: "03",
-    title: "Umsetzung nach Business Value",
-    body: "Plane deine Umsetzung priorisiert nach echtem Business Value — nicht nach dem lautesten Hype.",
-  },
-  {
-    number: "04",
-    title: "Stories & Teilschritte",
-    body: "Heruntergebrochen auf konkrete Stories und Teilschritte, die dein Team sofort einplanen kann.",
-  },
-  {
-    number: "05",
-    title: "Requirements-Prüfung",
-    body: "Aufwandsschätzung, Manpower, Know-how, Technik und Budget — vorab geprüft, bevor du startest.",
-  },
-];
+import { useLang } from "@/lib/i18n";
 
 export default function ValueProps() {
+  const { c } = useLang();
   const reduce = useReducedMotion();
 
   return (
@@ -47,21 +15,19 @@ export default function ValueProps() {
       <div className="mx-auto max-w-7xl">
         <header className="max-w-3xl mb-16 md:mb-20">
           <p className="font-mono text-[11px] tracking-[0.22em] uppercase text-lime-300/90">
-            Ein Coach. Der gesamte Pfad.
+            {c.valueProps.eyebrow}
           </p>
           <h2 className="mt-5 text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight leading-[1.05] text-neutral-50">
-            Von der Analyse bis zur{" "}
-            <span className="font-serif italic text-lime-300">Umsetzung</span>.
+            {c.valueProps.titlePre}
+            <span className="font-serif italic text-lime-300">{c.valueProps.titleAccent}</span>.
           </h2>
           <p className="mt-5 text-base md:text-lg text-neutral-400 max-w-[54ch] leading-relaxed">
-            MAtfIT begleitet dich Schritt für Schritt durch deine
-            KI-Transformation — fundiert, konkret und auf dein Projekt & Team
-            zugeschnitten.
+            {c.valueProps.sub}
           </p>
         </header>
 
         <ol className="divide-y divide-neutral-800/80">
-          {props.map((p, idx) => (
+          {c.valueProps.items.map((p, idx) => (
             <motion.li
               key={p.number}
               className="group"

@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLang } from "@/lib/i18n";
+import LangToggle from "@/components/LangToggle";
 
 export default function SiteHeader() {
+  const { c } = useLang();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -20,14 +23,16 @@ export default function SiteHeader() {
           : "border-b border-transparent bg-transparent"
       }`}
     >
-      <div className="mx-auto max-w-7xl px-6 md:px-10 lg:px-12 py-5 flex items-center justify-center">
+      <div className="mx-auto max-w-7xl px-6 md:px-10 lg:px-12 py-5 grid grid-cols-[1fr_auto_1fr] items-center">
+        <div aria-hidden="true" />
         <a
           href="/"
-          aria-label="MAtfIT"
-          className="font-mono text-lg font-bold tracking-[0.18em] text-neutral-50"
+          aria-label={c.header.homeAria}
+          className="justify-self-center font-mono text-lg font-bold tracking-[0.18em] text-neutral-50"
         >
           MAt<span className="text-lime-300">fIT</span>
         </a>
+        <LangToggle className="justify-self-end" />
       </div>
     </header>
   );

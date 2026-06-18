@@ -12,6 +12,7 @@ sites/*/.next/
 sites/*/node_modules/
 sites/*/.env.local
 sites/*/.netlify/
+sites/*/tsconfig.tsbuildinfo
 
 # Hero video assets — kept out of git history (sync separately)
 exploded_views/

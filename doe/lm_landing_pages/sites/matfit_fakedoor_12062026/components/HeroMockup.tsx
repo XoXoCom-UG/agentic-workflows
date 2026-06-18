@@ -1,8 +1,10 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
+import { useLang } from "@/lib/i18n";
 
 export default function HeroMockup() {
+  const { c } = useLang();
   const reduce = useReducedMotion();
 
   return (
@@ -25,13 +27,13 @@ export default function HeroMockup() {
           <span className="h-3 w-3 rounded-full bg-neutral-700" />
           <span className="h-3 w-3 rounded-full bg-lime-400/70" />
           <span className="ml-3 font-mono text-[11px] tracking-wide text-neutral-500">
-            matfit.app
+            {c.heroMockup.browserLabel}
           </span>
         </div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/product-mockup.png"
-          alt="MAtfIT Produkt-Oberfläche: stelle jede Frage zu SaaS, KI und DACH-Strategie"
+          alt={c.heroMockup.alt}
           className="block w-full"
           width={1105}
           height={588}
