@@ -1,0 +1,5 @@
+iter	timestamp	hypothesis	score	prev_best	decision	commit
+1	2026-06-18 21:03:50	baseline (current site, pre-optimization)	30.95	0.0	reverted	264e865
+2	2026-06-18 21:05:11	Add sitemap.ts + robots.ts + SITE_URL config (site.config.json site_url, lib/config.ts)	54.95	0.0	kept	264e865
+3	2026-06-18 21:07:53	metadataBase + default OG/Twitter + title template + JSON-LD Organization + branded opengraph-image + per-page buildMetadata (canonical, OG, tuned titles/descriptions); thank-you noindex	94.0	54.95	kept	264e865
+4	2026-06-18 21:12:16	Fix crashing OG image (Satori multi-child: single interpolated tagline string) so og:image renders on every route	100.0	94.0	kept	264e865
