@@ -1,0 +1,5 @@
+iter	timestamp	hypothesis	score	prev_best	decision	commit
+1	2026-06-18 19:02:10	baseline (current site, pre-optimization)	32.57	0.0	kept	b2aefc2
+2	2026-06-18 19:06:53	Add sitemap.ts + robots.ts, metadataBase, full OG+Twitter defaults, JSON-LD Organization, branded OG image, per-page canonical+tuned metadata	88.64	32.57	kept	b2aefc2
+3	2026-06-18 19:09:29	Explicit og:image on every route via buildMetadata; fix scorer sitemap-lists-all '/' guard bug	100.0	88.64	kept	b2aefc2
+4	2026-06-18 19:13:46	Fix crashing OG image (Satori multi-child) + harden scorer to verify og:image actually renders (prior 100 was a false pass)	100.0	100.0	kept	b2aefc2

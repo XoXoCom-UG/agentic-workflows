@@ -1,4 +1,6 @@
-autoresearch/
+# Karpathy's AutoResearch clone lives at the repo root — ignore it, but anchor the rule
+# so it does NOT also swallow our own harness at doe/full_web_design/execution/autoresearch/.
+/autoresearch/
 
 # Local Netlify folder
 .netlify

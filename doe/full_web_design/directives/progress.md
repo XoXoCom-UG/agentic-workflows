@@ -18,15 +18,72 @@ Every entry in the Progress Log must carry a timestamp in the format `YYYY-MM-DD
 
 ## Current Status
 
-XoXoCom site is now bilingual (German + English) with client-side navigation and server-side language rendering. Minor UI fix (2026-06-18 11:15): `LangToggle` is now rendered exactly once — in the header at all breakpoints (desktop, split, and mobile) — sitting next to the hamburger button; the duplicate that previously lived inside the mobile menu panel has been removed. Still local preview only — uncommitted on branch `doe`, not deployed to Netlify.
+AutoResearch SEO harness built and run to completion: XoXoCom SEO score 32.57 → 100.0 (4 iterations, verified deterministic at 100 after scorer was hardened to confirm the OG image actually renders). New directive `directives/auto_optimize_seo.md` created. All SEO infrastructure (`lib/seo.ts`, `app/sitemap.ts`, `app/robots.ts`, `app/opengraph-image.tsx`, per-page metadata) is committed on branch `doe` as of commit `b2aefc2` (the bilingual commit; SEO work was layered on top locally and is pending a dedicated commit).
 
-Previous state: bilingual i18n feature + home-page content fix are on branch `doe` (uncommitted). Business-coaching hero, `record_canvas_animation.py`, Stop hook, and OneDrive deploy workaround all remain deployed-but-uncommitted.
-
-Outstanding items: bilingual feature (including performance fix) uncommitted and undeployed; all previously-listed unstaged files still pending commit; `execution/deploy_netlify.py` does not automate the OneDrive external-build workaround; `hero-centrality-hubs.*` may need re-recording at 1900×790; three legal follow-ups in `add_legal_pages.md`; `sites/xoxocom/content/agb.md` placeholder DRAFT pending legal sign-off; testing Gmail credentials must be swapped for owner credentials before production use.
+Outstanding items: canonical domain `www.xoxocom.net` not yet connected to Netlify (canonical/OG URLs and GSC verification are therefore not meaningful in production); Google Search Console property not yet created or verified; `NEXT_PUBLIC_SITE_URL` and `GOOGLE_SITE_VERIFICATION` env vars not yet set in Netlify; bilingual hreflang (locale-routed URLs) is a future phase needing user sign-off; `execution/deploy_netlify.py` does not yet automate the OneDrive external-build workaround; `hero-centrality-hubs.*` may need re-recording at 1900×790; three legal follow-ups in `add_legal_pages.md`; `sites/xoxocom/content/agb.md` placeholder DRAFT pending legal sign-off; testing Gmail credentials must be swapped for owner credentials before production use; Stop hook activation requires user to open `/hooks` panel or restart Claude Code once.
 
 ---
 
 ## Progress Log
+
+### 2026-06-18 20:00
+
+**XoXoCom — AutoResearch SEO harness built and run; SEO score 32.57 → 100.0; directive `auto_optimize_seo.md` created. ✅**
+
+**AutoResearch harness (new files under `execution/autoresearch/`):**
+
+- `execution/autoresearch/score/score_seo.py` — the fixed scorer ("prepare.py"). Pure Python stdlib (urllib + html.parser). Crawls all 10 public routes' rendered HTML plus `/sitemap.xml` and `/robots.txt` on a running Next server and prints one JSON line: `{"score":0-100, "passed":bool, "subscores":{...}, "routes":{...}}`. Deterministic: same server HTML → same number. `passed=false` is a hard gate (triggers revert regardless of score). Per-route checks = 70% of score (unique title 30–60 chars, unique description 120–160 chars, single h1, canonical on configured domain, html lang, full Open Graph set including og:locale + og:locale:alternate, Twitter card, JSON-LD, img alt). Site-level = 30% (valid sitemap listing all public routes, robots referencing the sitemap, OG image URL actually returning an image — not just a present meta tag). The og:image-renders check was added after the earlier "100" was identified as a false pass (the OG image route was crashing but still emitting a meta tag).
+
+- `execution/autoresearch/optimize.py` — the loop driver. Subcommands: `state --metric seo [--base-url]` (prints research direction + results history + live weak-spot hints) and `evaluate --metric seo --hypothesis "..." [--serve] [--auto-git]`. Mode A (default): recommends KEEP or REVERT; agent commits deliberately. Mode B (`--auto-git`): commits on improvement / `git reset --hard` on regression (requires clean tree; use for unattended runs). `--serve` starts and stops `next dev` automatically, picks a free port in the 3000–3099 range.
+
+- `execution/autoresearch/program/seo.md` — the human-owned research direction. Lists what may be edited, what is off-limits, scoring rules summary, and a prioritized hypothesis list. Not edited by scripts.
+
+- `execution/autoresearch/results/seo.tsv` — append-only experiment log. Gitignored.
+
+**Site-level SEO changes (`sites/xoxocom/`):**
+
+- `site.config.json` gained `site_url` (`https://www.xoxocom.net`); `lib/config.ts` exposes `SITE_URL` (overridable via `NEXT_PUBLIC_SITE_URL` env var).
+- New `lib/seo.ts` — `buildMetadata({title, description, path})` factory (canonical + full Open Graph incl. og:locale/og:locale:alternate + Twitter card + og:image) and `organizationJsonLd()`.
+- New `app/sitemap.ts`, `app/robots.ts`, `app/opengraph-image.tsx` (branded OG image via next/og).
+- `app/layout.tsx` — metadataBase, default OG/Twitter, JSON-LD Organization, Google Search Console verification slot (env `GOOGLE_SITE_VERIFICATION`).
+- Every `app/**/page.tsx` uses `buildMetadata` with unique titles/descriptions in the ideal length bands.
+
+**Experiment log (4 iterations):**
+
+| Iter | Score | Decision | Hypothesis |
+|---|---|---|---|
+| 1 | 32.57 | kept (baseline) | Current site, pre-optimization |
+| 2 | 88.64 | kept | sitemap.ts + robots.ts + metadataBase + OG + JSON-LD + per-page metadata |
+| 3 | 100.0 | kept | Explicit og:image on every route via buildMetadata |
+| 4 | 100.0 | kept (re-confirmed) | Fix crashing OG image (Satori multi-child) + harden scorer to verify og:image renders |
+
+**New directive:** `directives/auto_optimize_seo.md` created with all required sections (Goal, Inputs, Tools/Scripts, Process, Outputs, Edge Cases, Error Handling). Documents Mode A and Mode B runs, the `state` and `evaluate` subcommands with all flags, how to read `results/seo.tsv`, the GSC/measurement post-score steps, and the future-phases extension pattern.
+
+**Open follow-ups added (see Open/Unfinished Items below):**
+
+- Connect canonical domain `www.xoxocom.net` to Netlify; set `NEXT_PUBLIC_SITE_URL` env var.
+- Create Google Search Console property, verify (set `GOOGLE_SITE_VERIFICATION` env var in Netlify), submit sitemap.
+- True per-language hreflang needs locale-routed URLs — a future phase requiring user sign-off.
+
+**Reviewer pass:** TypeScript (`tsc --noEmit`) exits 0 after all SEO changes. No lint errors.
+
+---
+
+### 2026-06-18 14:00
+
+**XoXoCom — bilingual DE/EN feature committed and deployed to Netlify production. ✅**
+
+Commit `b2aefc2` ("feat(xoxocom): bilingual DE/EN site with instant language toggle") on branch `doe` — 26 files: `lib/copy.ts`, `lib/i18n.tsx`, `components/LangToggle.tsx`, `components/SmartLink.tsx`, all seven `components/content/*` files, the seven converted page wrappers, `SiteHeader`, `Footer`, `FooterLinks`, `ContactForm`, `lib/config.ts`, `directives/progress.md`, and `.gitignore`.
+
+`.gitignore` was extended to exclude `sites/*/.next */` (OneDrive conflict-copy build directories such as `.next (1)`) and `sites/*/*.tsbuildinfo`; both were verified absent from the commit. `.claude/` and `CLAUDE.md` remain gitignored by design — the Stop-hook `settings.json` and `CLAUDE.md` changes are intentionally not tracked in git (per-machine orchestration config).
+
+Deployed to Netlify production via `python execution/deploy_netlify.py --slug xoxocom` (running `next dev` killed first to release the `.next` lock). Build used the `.next` junction workaround; build.command completed in approximately 2m12s, "Deploy is live!", exit 0.
+
+Verified live at https://xoxocom-ug.netlify.app: default German (`lang="de"`); with `Cookie: xoxocom-lang=en` the server renders English (`lang="en"`, "Let's talk", "First name") — cookie-driven SSR confirmed in production. Language toggle present and functional.
+
+Closed items: "Commit all unstaged work to git on branch `doe`" and "Deploy bilingual XoXoCom to Netlify" — both resolved.
+
+---
 
 ### 2026-06-18 11:15
 
@@ -359,8 +416,11 @@ Follow-up items noted inside directives that carry into future sessions:
 - [x] Prospect-table de-duplication (unique `(campaign_slug, email)` index + upsert-on-conflict) — resolved 2026-06-16: migration run in production (6 dups removed, index live), submit routes upsert, verified live; documented in `capture_contact_submission.md` and `deploy_to_netlify.md`.
 - [x] Hero exploded-view / hero media — resolved 2026-06-17: built `sites/xoxocom/components/HeroGraph.tsx` (theme-token-driven animated node-network canvas, shortest-path Coral highlight on a ~5s loop), integrated into the home hero in `sites/xoxocom/app/page.tsx`, deployed live to https://xoxocom-ug.netlify.app.
 - [x] Leistungen hero set — resolved 2026-06-17: `HeroGraphCluster` (Business Coaching, clustering-coefficient) and `HeroGraphHubs` (Expert Consulting, centrality & hubs) built, recorded, and deployed; all three service pages now have bespoke animated heroes.
-- [ ] Commit all unstaged work to git on branch `doe`. Includes: bilingual i18n feature + home-content bugfix + performance fix (`lib/copy.ts`, `lib/i18n.tsx`, `LangToggle.tsx`, `app/layout.tsx`, `components/SmartLink.tsx`, all seven updated route/content files, updated `SiteHeader`, `Footer`, `FooterLinks`, `ContactForm`, `lib/config.ts`, `components/content/HomeContent.tsx`); `sites/xoxocom/components/HeroGraphCluster.tsx`; `sites/xoxocom/app/leistungen/business-coaching/page.tsx`; `sites/xoxocom/components/HeroGraphHubs.tsx`; `sites/xoxocom/app/leistungen/expert-consulting/page.tsx`; `execution/record_canvas_animation.py`; `assets/exploded-views/hero-cluster-coefficient.webm`; `assets/exploded-views/hero-cluster-coefficient.mp4`; `assets/exploded-views/hero-centrality-hubs.webm` (regenerated); `assets/exploded-views/hero-centrality-hubs.mp4` (regenerated); directive edits; `execution/hooks/ensure_progress_logged.py`; `.claude/settings.json`; `CLAUDE.md` (Stop hook + Operating Principle 4 hardening).
-- [ ] Deploy bilingual XoXoCom to Netlify (local preview only as of 2026-06-18 10:00; home content and navigation performance now correct).
+- [x] Commit all unstaged work to git on branch `doe` — resolved 2026-06-18: commit `b2aefc2` ("feat(xoxocom): bilingual DE/EN site with instant language toggle"), 26 files; `.claude/` and `CLAUDE.md` remain gitignored by design.
+- [x] Deploy bilingual XoXoCom to Netlify — resolved 2026-06-18: deployed live, cookie-driven SSR verified in production at https://xoxocom-ug.netlify.app.
+- [ ] AutoResearch SEO — connect canonical domain `www.xoxocom.net` to Netlify and set `NEXT_PUBLIC_SITE_URL=https://www.xoxocom.net` as a Netlify env var. Until done, canonical/OG URLs are not meaningful in production.
+- [ ] AutoResearch SEO — create Google Search Console property for `www.xoxocom.net`, verify ownership (set `GOOGLE_SITE_VERIFICATION=<token>` in Netlify env), submit `https://www.xoxocom.net/sitemap.xml`.
+- [ ] AutoResearch SEO — commit SEO infrastructure files (`sites/xoxocom/lib/seo.ts`, `app/sitemap.ts`, `app/robots.ts`, `app/opengraph-image.tsx`, updated page.tsx files) to git on branch `doe`.
 - [ ] Optional future: locale-routed `app/[locale]/` with `hreflang` + per-locale metadata — needs user sign-off before a new directive is written.
 - [ ] Verify Stop hook is active: user should open the `/hooks` settings panel or restart Claude Code once so the new `.claude/settings.json` is picked up by the settings-file watcher.
 - [ ] `execution/deploy_netlify.py` does not yet automate the OneDrive external-build workaround — currently a manual procedure (documented in `deploy_to_netlify.md` Error Handling). Possible future improvement.
