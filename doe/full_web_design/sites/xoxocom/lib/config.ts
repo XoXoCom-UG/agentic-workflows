@@ -22,30 +22,8 @@ export type SiteConfig = {
 
 export const site: SiteConfig = config as SiteConfig;
 
-export type NavChild = { label: string; href: string; external?: boolean; desc?: string };
-export type NavItem = { label: string; href?: string; children?: NavChild[] };
-
-/** Primary navigation (German). "Leistungen" is a dropdown only (no own page). */
-export const nav: NavItem[] = [
-  {
-    label: "Produkte",
-    href: "/produkte",
-    children: [
-      { label: "MAtfIT", href: "https://matfit.ai", external: true, desc: "A.I. Transformation Coach für Dev-Teams" },
-    ],
-  },
-  {
-    label: "Leistungen",
-    children: [
-      { label: "A.I. Transformation", href: "/leistungen/ai-transformation", desc: "Agile A.I. Transformation für Unternehmen" },
-      { label: "Expert Consulting", href: "/leistungen/expert-consulting", desc: "Spezialisten für kritische Schlüsselrollen" },
-      { label: "Business Coaching", href: "/leistungen/business-coaching", desc: "Wachstum für Teams und Einzelpersonen" },
-    ],
-  },
-  { label: "Über uns", href: "/ueber-uns" },
-];
-
-export const CTA = { label: "Kontaktiere uns", href: "/kontakt" };
+// Navigation, CTA, and all user-facing copy now live in `lib/copy.ts` (bilingual)
+// and are consumed via the language context in `lib/i18n.tsx`.
 
 export const SOCIALS = [
   { label: "LinkedIn", href: "https://www.linkedin.com/company/xoxocom/" },

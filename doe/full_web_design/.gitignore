@@ -10,9 +10,11 @@ token.json
 # Per-site Next.js build output and local env
 sites/*/.next/
 sites/*/.next-rec/
+sites/*/.next */
 sites/*/node_modules/
 sites/*/.env.local
 sites/*/.netlify/
+sites/*/*.tsbuildinfo
 
 # Temporary / regenerable
 .tmp/

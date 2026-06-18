@@ -18,15 +18,89 @@ Every entry in the Progress Log must carry a timestamp in the format `YYYY-MM-DD
 
 ## Current Status
 
-Business-coaching hero (`HeroGraphCluster`, clustering-coefficient animation) built and deployed. `execution/record_canvas_animation.py` created, reviewer-approved, and tested. Hero recording is now a mandatory step before every Netlify deploy (documented in `design_website.md` and `deploy_to_netlify.md`). OneDrive external-copy deploy workaround documented in `deploy_to_netlify.md`. The full Leistungen hero set remains complete. Nothing has been committed to git since the last session; branch `doe` has several unstaged files. `hero-centrality-hubs.*` assets were deleted and regenerated at 1900×620 (native live-site height); re-recording at 1900×790 is an open item if dimensional consistency across the exploded-views library is required.
+XoXoCom site is now bilingual (German + English) with client-side navigation and server-side language rendering. Minor UI fix (2026-06-18 11:15): `LangToggle` is now rendered exactly once — in the header at all breakpoints (desktop, split, and mobile) — sitting next to the hamburger button; the duplicate that previously lived inside the mobile menu panel has been removed. Still local preview only — uncommitted on branch `doe`, not deployed to Netlify.
 
-End-of-session enforcement added: `execution/hooks/ensure_progress_logged.py` (Stop hook) and `.claude/settings.json` wired in this session. The hook blocks session end if any tracked file is newer than `progress.md`. `CLAUDE.md` Operating Principle 4 and Key rules strengthened to state this is mandatory and enforced. All three new files are uncommitted on branch `doe`.
+Previous state: bilingual i18n feature + home-page content fix are on branch `doe` (uncommitted). Business-coaching hero, `record_canvas_animation.py`, Stop hook, and OneDrive deploy workaround all remain deployed-but-uncommitted.
 
-Outstanding items: multiple deployed-but-unstaged files on branch `doe` (including the new hook and settings files); `execution/deploy_netlify.py` does not yet automate the OneDrive external-build workaround; `hero-centrality-hubs.*` may need re-recording at 1900×790; three legal follow-ups in `add_legal_pages.md` (name sub-processors for Netlify/Supabase/Google, sign DPAs, confirm Supabase EU region); `sites/xoxocom/content/agb.md` is a placeholder DRAFT pending legal review and sign-off; testing Gmail credentials must be swapped for the owner's credentials before real production use.
+Outstanding items: bilingual feature (including performance fix) uncommitted and undeployed; all previously-listed unstaged files still pending commit; `execution/deploy_netlify.py` does not automate the OneDrive external-build workaround; `hero-centrality-hubs.*` may need re-recording at 1900×790; three legal follow-ups in `add_legal_pages.md`; `sites/xoxocom/content/agb.md` placeholder DRAFT pending legal sign-off; testing Gmail credentials must be swapped for owner credentials before production use.
 
 ---
 
 ## Progress Log
+
+### 2026-06-18 11:15
+
+**XoXoCom — `LangToggle` deduplicated: now visible in header at all breakpoints; removed from mobile menu panel. 🟡 (local preview only; uncommitted, not deployed)**
+
+Removed the `hidden md:inline-flex` class from the `LangToggle` in `SiteHeader.tsx` so the DE|EN toggle appears in the header on desktop, split-screen, and mobile (390 px verified). Removed the `LangToggle` entry that was previously duplicated inside the `#mobile-menu` hamburger panel. The toggle now appears exactly once at all widths. Open items unchanged.
+
+---
+
+### 2026-06-18 10:00
+
+**XoXoCom — bilingual performance bugfix: client-side navigation + cookie-driven SSR. 🟡 (local preview only; not committed or deployed)**
+
+Root cause: every internal link was a plain `<a href>`, forcing a full-page hard reload on each navigation. Each reload rebooted React and reset `LanguageProvider` to its German default, painted German, then re-read the `localStorage` preference and re-rendered to English (the visible flash); in dev the reload also recompiled the route (the 2–3s lag).
+
+Two-part fix:
+
+1. **New `sites/xoxocom/components/SmartLink.tsx`** — renders a Next.js `<Link>` for internal routes (paths starting with `/`) and a plain `<a>` for external URLs, hash anchors (`#…`), and `mailto:` links. All props pass through. Converted all internal links across `SiteHeader`, `FooterLinks`, `ContactForm`, and all seven content components (`HomeContent`, `BusinessCoachingContent`, `AiTransformationContent`, `ExpertConsultingContent`, `ProdukteContent`, `UeberUnsContent`, `KontaktContent`) to use `SmartLink`. Hash and external links intentionally remain plain `<a>`. Result: internal navigation is now client-side; the in-memory `LanguageProvider` state survives the route change — no reload, no re-translate, no flash.
+
+2. **Cookie-based language preference + server-side rendering** — Language preference moved from `localStorage` to a cookie (`xoxocom-lang`). `app/layout.tsx` is now an async server component: reads the cookie via `next/headers` `cookies()`, sets `<html lang>` accordingly, and passes `initialLang` to `LanguageProvider`. The provider initializes its state from `initialLang` (no post-mount read); on change it writes the cookie. Result: even a hard refresh renders the saved language on the server with zero flash.
+
+   **Lesson recorded — shared constants between server and client modules:** the `LANG_COOKIE` constant was initially defined in `lib/i18n.tsx`, which carries `"use client"`. Importing a plain constant from a client module into a server component yields a client-reference stub (a function), not the string value — so `cookies().get(LANG_COOKIE)` silently returned `undefined` and SSR stayed German. Fix: shared server-readable constants must be defined in a non-client module. `LANG_COOKIE` was moved to `lib/copy.ts` (no `"use client"` directive); both the server layout and the client provider import it from there.
+
+**Verified:** `npx tsc --noEmit` exits 0; `curl` with no cookie returns `lang="de"` + German "Vorname"/"Nachricht absenden"; `curl -H "Cookie: xoxocom-lang=en"` returns `lang="en"` + English "First name"/"Send message"; browser test confirms clicking a nav link performs client-side navigation (~0.8s, no full reload, window marker survived, language stayed English, destination rendered English immediately). Note: reading `cookies()` opts the affected routes into dynamic rendering — acceptable for this site and Netlify's Next.js runtime.
+
+**Git state:** fix is on branch `doe` (uncommitted), incorporated into the bilingual feature. Not deployed to Netlify.
+
+---
+
+### 2026-06-18 01:30
+
+**XoXoCom — home-page content restored after accidental clobber during bilingual i18n refactor. 🟡 (local preview only; not committed or deployed)**
+
+During the bilingual conversion, `components/content/HomeContent.tsx` and `lib/copy.ts` were written with the "Unsere Leistungen / Services" section rebuilt from an older in-memory copy rather than from the actual committed file. This clobbered customizations present in `app/page.tsx` at commit 6fe8c0b ("home content refinements").
+
+Recovered via `git show HEAD:doe/full_web_design/sites/xoxocom/app/page.tsx` and restored into `lib/copy.ts` (both `de` and `en` trees) and `HomeContent.tsx`:
+
+1. **Card order corrected** — A.I. Transformation (left) → Projekteinsätze (middle) → Business Coaching (right). The earlier refactor had reshuffled these.
+2. **Card bodies restored to short teasers** — German text is the user's exact wording from commit 6fe8c0b; English entries are new matching teasers. The accidental draft had replaced them with full-copy paragraphs.
+3. **Per-card roles `<ul>` list removed** — The `roles` data field was dropped from the home Leistungen entries in `lib/copy.ts`; the `<ul>`/`<li>` rendering block was deleted from `HomeContent.tsx`. The home section is now teaser-only, matching the original page design.
+4. **Home "About" teaser restored** — Title is "Dynamisches Team mit Durchschlagskraft"; body opens "Wir sind ein dynamisches Team …". The earlier refactor had reverted to "junges Team mit großem Anspruch" / "junges Team".
+
+**Verified:** `npx tsc --noEmit` exits 0; home HTTP 200; SSR HTML confirms correct card order, all three teasers present, no `<ul>`/`<li>` in the services section, correct About text. Browser-harness screenshots were unavailable this turn (Chrome remote-debugging permission lapsed); verification was via DOM/HTML inspection.
+
+**Lesson recorded:** when refactoring an existing page whose content may have been hand-customized, read the full current file AND run `git show HEAD:<path>` to check for committed-vs-working drift before overwriting. Never rebuild content from an in-memory copy.
+
+**Git state:** fix is incorporated into the uncommitted bilingual feature on branch `doe`. Not deployed.
+
+---
+
+### 2026-06-17 23:59
+
+**XoXoCom — site made bilingual (DE/EN) with instant client-context toggle. Local preview only; not deployed or committed. 🟡**
+
+1. New `sites/xoxocom/lib/copy.ts` — bilingual content dictionary. `de` is the source of truth; `en` is typed `typeof de`, which forces the English tree to mirror the German one at compile time (missing or renamed key = TypeScript error). Holds all user-facing copy: nav items, CTAs, header aria-labels, footer, contact form, and all seven pages (home, business-coaching, ai-transformation, expert-consulting, produkte, ueber-uns, kontakt).
+
+2. New `sites/xoxocom/lib/i18n.tsx` — `LanguageProvider` React context and `useLang()` hook. Default language is German (matches SSR `<html lang="de">` to avoid hydration mismatch). A saved preference in `localStorage` key `xoxocom-lang` is applied after mount. Switching is instant (no reload, no route change) and sets `document.documentElement.lang`. Exposes `{ lang, setLang, toggle, c }` where `c = COPY[lang]`.
+
+3. New `sites/xoxocom/components/LangToggle.tsx` — segmented "DE | EN" switch. Rendered in the header desktop bar and in the mobile menu.
+
+4. Architecture decision: no locale-based routing (no `/en` or `/de` URL segments, no Next.js middleware). This is a deliberate lightweight client-context approach suited to a small marketing site. Consequence: per-page `<title>` / description metadata (exported from each server page component) remains in German by default. Legal pages (Impressum / AGB / Datenschutz) intentionally stay German for legal validity; only the footer legal-nav aria-label localizes.
+
+5. Refactor pattern applied across all seven routes: each `app/.../page.tsx` is now a thin server wrapper that keeps the `metadata` export and renders a matching client content component under `sites/xoxocom/components/content/` (HomeContent, BusinessCoachingContent, AiTransformationContent, ExpertConsultingContent, ProdukteContent, UeberUnsContent, KontaktContent). Content components consume `useLang()`. `app/layout.tsx` wraps everything in `<LanguageProvider>`. `SiteHeader`, `Footer` (promoted to client component), `FooterLinks` (gained an `ariaLabel` prop), and `ContactForm` all read copy from the context. Nav items, CTA text, `NavItem`, and `NavChild` config were removed from `lib/config.ts` and moved into `lib/copy.ts`; `config.ts` still exports `site` and `SOCIALS`.
+
+6. Verified: `npx tsc --noEmit` passes (exit 0); `next dev` compiles all seven routes (HTTP 200 confirmed); browser smoke test confirmed clicking EN flips nav labels (Produkte → Products, Leistungen → Services, Über uns → About), headline, CTAs, and contact form; sets `<html lang="en">`; choice persists across in-app navigation and page reload via localStorage. Reset to DE after testing.
+
+**Follow-up items added:**
+- Commit the bilingual feature to git on branch `doe` once user is satisfied with the local preview.
+- Deploy to Netlify after committing.
+- Optional future: migrate to locale-routed `app/[locale]/` with `hreflang` and per-locale metadata if true multilingual SEO is later required. Would need user sign-off before a new directive is written.
+
+**Git state:** uncommitted on branch `doe` (alongside all previously-listed unstaged files). Not deployed to Netlify.
+
+---
 
 ### 2026-06-17 23:30
 
@@ -285,7 +359,9 @@ Follow-up items noted inside directives that carry into future sessions:
 - [x] Prospect-table de-duplication (unique `(campaign_slug, email)` index + upsert-on-conflict) — resolved 2026-06-16: migration run in production (6 dups removed, index live), submit routes upsert, verified live; documented in `capture_contact_submission.md` and `deploy_to_netlify.md`.
 - [x] Hero exploded-view / hero media — resolved 2026-06-17: built `sites/xoxocom/components/HeroGraph.tsx` (theme-token-driven animated node-network canvas, shortest-path Coral highlight on a ~5s loop), integrated into the home hero in `sites/xoxocom/app/page.tsx`, deployed live to https://xoxocom-ug.netlify.app.
 - [x] Leistungen hero set — resolved 2026-06-17: `HeroGraphCluster` (Business Coaching, clustering-coefficient) and `HeroGraphHubs` (Expert Consulting, centrality & hubs) built, recorded, and deployed; all three service pages now have bespoke animated heroes.
-- [ ] Commit deployed-but-unstaged work to git on branch `doe`: `sites/xoxocom/components/HeroGraphCluster.tsx`, `sites/xoxocom/app/leistungen/business-coaching/page.tsx`, `sites/xoxocom/components/HeroGraphHubs.tsx`, `sites/xoxocom/app/leistungen/expert-consulting/page.tsx`, `execution/record_canvas_animation.py`, `assets/exploded-views/hero-cluster-coefficient.webm`, `assets/exploded-views/hero-cluster-coefficient.mp4`, `assets/exploded-views/hero-centrality-hubs.webm` (regenerated), `assets/exploded-views/hero-centrality-hubs.mp4` (regenerated), directive edits, plus the new infra files: `execution/hooks/ensure_progress_logged.py`, `.claude/settings.json`, `CLAUDE.md` (Stop hook + Operating Principle 4 hardening).
+- [ ] Commit all unstaged work to git on branch `doe`. Includes: bilingual i18n feature + home-content bugfix + performance fix (`lib/copy.ts`, `lib/i18n.tsx`, `LangToggle.tsx`, `app/layout.tsx`, `components/SmartLink.tsx`, all seven updated route/content files, updated `SiteHeader`, `Footer`, `FooterLinks`, `ContactForm`, `lib/config.ts`, `components/content/HomeContent.tsx`); `sites/xoxocom/components/HeroGraphCluster.tsx`; `sites/xoxocom/app/leistungen/business-coaching/page.tsx`; `sites/xoxocom/components/HeroGraphHubs.tsx`; `sites/xoxocom/app/leistungen/expert-consulting/page.tsx`; `execution/record_canvas_animation.py`; `assets/exploded-views/hero-cluster-coefficient.webm`; `assets/exploded-views/hero-cluster-coefficient.mp4`; `assets/exploded-views/hero-centrality-hubs.webm` (regenerated); `assets/exploded-views/hero-centrality-hubs.mp4` (regenerated); directive edits; `execution/hooks/ensure_progress_logged.py`; `.claude/settings.json`; `CLAUDE.md` (Stop hook + Operating Principle 4 hardening).
+- [ ] Deploy bilingual XoXoCom to Netlify (local preview only as of 2026-06-18 10:00; home content and navigation performance now correct).
+- [ ] Optional future: locale-routed `app/[locale]/` with `hreflang` + per-locale metadata — needs user sign-off before a new directive is written.
 - [ ] Verify Stop hook is active: user should open the `/hooks` settings panel or restart Claude Code once so the new `.claude/settings.json` is picked up by the settings-file watcher.
 - [ ] `execution/deploy_netlify.py` does not yet automate the OneDrive external-build workaround — currently a manual procedure (documented in `deploy_to_netlify.md` Error Handling). Possible future improvement.
 - [ ] `hero-centrality-hubs.*` assets regenerated at 1900×620 (native live-site canvas height). Re-record at 1900×790 via a bare full-bleed route if exact dimensional consistency across the exploded-views library is wanted.

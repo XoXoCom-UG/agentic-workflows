@@ -1,16 +1,20 @@
+"use client";
+
 import { site, SOCIALS } from "@/lib/config";
+import { useLang } from "@/lib/i18n";
 import FooterLinks from "@/components/FooterLinks";
 
 /** Site-wide footer (rendered once in app/layout.tsx). Copyright (left),
  *  socials (middle), legal links (right) — per the brief. */
 export default function Footer() {
+  const { c } = useLang();
   const year = new Date().getFullYear();
   return (
     <footer className="mt-auto border-t border-border bg-surface">
       <div className="mx-auto max-w-7xl px-6 md:px-10 lg:px-12 py-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
         {/* Left: copyright */}
         <p className="text-sm text-muted order-2 md:order-1">
-          © {year} {site.company}. Alle Rechte vorbehalten.
+          © {year} {site.company}. {c.footer.rights}
         </p>
 
         {/* Middle: socials */}
@@ -37,7 +41,7 @@ export default function Footer() {
 
         {/* Right: legal */}
         <div className="order-3 flex flex-col gap-2 md:items-end">
-          <FooterLinks className="md:justify-end" />
+          <FooterLinks className="md:justify-end" ariaLabel={c.footer.legalAria} />
           <span className="text-xs text-muted/60" data-signature={site.signature}>
             {site.signature}
           </span>

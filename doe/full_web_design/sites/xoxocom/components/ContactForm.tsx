@@ -1,22 +1,29 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useLang } from "@/lib/i18n";
+import type { Copy } from "@/lib/copy";
+import SmartLink from "@/components/SmartLink";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
-// Field order per the brief: Vorname, Nachname, E-Mail, Firma, Nachricht.
-const FIELDS: { name: string; label: string; type: string; required?: boolean; textarea?: boolean; autocomplete?: string }[] = [
-  { name: "first_name", label: "Vorname", type: "text", autocomplete: "given-name" },
-  { name: "last_name", label: "Nachname", type: "text", autocomplete: "family-name" },
-  { name: "email", label: "E-Mail", type: "email", required: true, autocomplete: "email" },
-  { name: "company", label: "Firma", type: "text", autocomplete: "organization" },
-  { name: "message", label: "Deine Nachricht", type: "text", textarea: true },
+// Field order per the brief: first name, last name, email, company, message.
+// Labels come from the bilingual copy tree (keyed by `labelKey`) at render time.
+type FieldMeta = { name: string; labelKey: keyof Copy["contact"]; type: string; required?: boolean; textarea?: boolean; autocomplete?: string };
+const FIELDS: FieldMeta[] = [
+  { name: "first_name", labelKey: "firstName", type: "text", autocomplete: "given-name" },
+  { name: "last_name", labelKey: "lastName", type: "text", autocomplete: "family-name" },
+  { name: "email", labelKey: "email", type: "email", required: true, autocomplete: "email" },
+  { name: "company", labelKey: "company", type: "text", autocomplete: "organization" },
+  { name: "message", labelKey: "message", type: "text", textarea: true },
 ];
 
 const FIELD_CLASS =
   "w-full px-3.5 py-2.5 rounded-[var(--radius-card)] border border-border bg-bg text-fg placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent";
 
 export default function ContactForm() {
+  const { c } = useLang();
+  const t = c.contact;
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -47,26 +54,22 @@ export default function ContactForm() {
       const body = (await res.json().catch(() => null)) as { ok: boolean; error?: string } | null;
       if (!res.ok || !body?.ok) {
         setStatus("error");
-        setErrorMsg(
-          body?.error === "invalid_email"
-            ? "Diese E-Mail-Adresse sieht nicht korrekt aus — bitte prüfe sie."
-            : "Etwas ist schiefgelaufen. Bitte versuche es erneut."
-        );
+        setErrorMsg(body?.error === "invalid_email" ? t.errInvalidEmail : t.errGeneric);
         return;
       }
       setStatus("success");
       form.reset();
     } catch {
       setStatus("error");
-      setErrorMsg("Netzwerkfehler. Bitte versuche es erneut.");
+      setErrorMsg(t.errNetwork);
     }
   }
 
   if (status === "success") {
     return (
       <div role="status" className="rounded-[var(--radius-card)] border border-border bg-surface p-6 text-center space-y-2">
-        <p className="text-lg font-semibold text-fg">Danke — deine Nachricht ist angekommen.</p>
-        <p className="text-sm text-muted">Wir melden uns innerhalb eines Werktags bei dir.</p>
+        <p className="text-lg font-semibold text-fg">{t.successTitle}</p>
+        <p className="text-sm text-muted">{t.successBody}</p>
       </div>
     );
   }
@@ -77,7 +80,7 @@ export default function ContactForm() {
         {FIELDS.filter((f) => !f.textarea).map((f) => (
           <div key={f.name} className={f.name === "email" || f.name === "company" ? "sm:col-span-2 space-y-1.5" : "space-y-1.5"}>
             <label htmlFor={f.name} className="block text-sm font-medium text-fg">
-              {f.label}
+              {t[f.labelKey]}
               {f.required && <span className="text-accent"> *</span>}
             </label>
             <input id={f.name} name={f.name} type={f.type} required={f.required} autoComplete={f.autocomplete} className={FIELD_CLASS} />
@@ -87,7 +90,7 @@ export default function ContactForm() {
 
       {FIELDS.filter((f) => f.textarea).map((f) => (
         <div key={f.name} className="space-y-1.5">
-          <label htmlFor={f.name} className="block text-sm font-medium text-fg">{f.label}</label>
+          <label htmlFor={f.name} className="block text-sm font-medium text-fg">{t[f.labelKey]}</label>
           <textarea id={f.name} name={f.name} rows={5} className={FIELD_CLASS} />
         </div>
       ))}
@@ -99,12 +102,12 @@ export default function ContactForm() {
         disabled={status === "submitting"}
         className="w-full py-3 rounded-[var(--radius-card)] bg-accent font-semibold text-accent-fg transition hover:opacity-90 disabled:opacity-50"
       >
-        {status === "submitting" ? "Wird gesendet…" : "Nachricht senden"}
+        {status === "submitting" ? t.submitting : t.submit}
       </button>
 
       <p className="text-xs text-muted">
-        Mit dem Absenden akzeptierst du unsere{" "}
-        <a href="/datenschutz" className="underline hover:text-fg">Datenschutzerklärung</a>.
+        {t.privacyPre}
+        <SmartLink href="/datenschutz" className="underline hover:text-fg">{t.privacyLink}</SmartLink>.
       </p>
     </form>
   );
