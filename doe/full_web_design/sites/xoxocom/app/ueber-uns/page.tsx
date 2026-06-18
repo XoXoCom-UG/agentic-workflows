@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
-import { site } from "@/lib/config";
+import { buildMetadata } from "@/lib/seo";
 import UeberUnsContent from "@/components/content/UeberUnsContent";
 
-export const metadata: Metadata = {
-  title: `Über uns — ${site.company}`,
-  description: "XoXoCom UG ist ein junges Team, das sich auf die wirtschaftliche und technische Beratung von A.I.-Implementierung spezialisiert hat.",
-};
+export const metadata: Metadata = buildMetadata({
+  title: "Über uns — Das Team hinter XoXoCom UG",
+  description:
+    "XoXoCom UG ist ein junges Team für die wirtschaftliche und technische Beratung von A.I.-Implementierung — agile Methodik vereint mit künstlicher Intelligenz.",
+  path: "/ueber-uns",
+});
 
 export default function UeberUnsPage() {
   return <UeberUnsContent />;
