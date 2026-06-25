@@ -85,12 +85,6 @@ export default function LandingContent() {
             © {new Date().getFullYear()} {site.company} · XoXoCom UG
           </div>
           <FooterLinks />
-          <div
-            className="font-mono text-[11px] tracking-[0.16em] text-neutral-700"
-            data-signature={site.signature}
-          >
-            {site.signature}
-          </div>
         </div>
       </footer>
     </main>

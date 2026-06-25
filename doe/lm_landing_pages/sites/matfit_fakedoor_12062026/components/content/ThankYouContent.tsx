@@ -1,6 +1,5 @@
 "use client";
 
-import { site } from "@/lib/config";
 import { useLang } from "@/lib/i18n";
 import FooterLinks from "@/components/FooterLinks";
 
@@ -24,12 +23,6 @@ export default function ThankYouContent() {
         <p className="text-neutral-300 leading-relaxed">{c.thankYou.body}</p>
         <p className="text-neutral-400">{c.thankYou.emailNote}</p>
         <FooterLinks className="justify-center pt-6" />
-        <p
-          className="pt-4 font-mono text-[11px] tracking-[0.16em] text-neutral-700"
-          data-signature={site.signature}
-        >
-          {site.signature}
-        </p>
       </div>
     </main>
   );
