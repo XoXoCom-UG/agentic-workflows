@@ -70,7 +70,7 @@ export default function LeadForm({ fields, submitLabel }: Props) {
         <div key={field} className="space-y-1.5">
           <label
             htmlFor={field}
-            className="block text-sm font-medium text-neutral-200"
+            className="block text-sm font-medium text-neutral-700"
           >
             {labelFor(field)}
           </label>
@@ -93,13 +93,13 @@ export default function LeadForm({ fields, submitLabel }: Props) {
                 ? "organization"
                 : "off"
             }
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3.5 py-2.5 text-neutral-100 placeholder:text-neutral-600 focus:border-lime-400 focus:outline-none focus:ring-2 focus:ring-lime-400/40"
+            className="w-full rounded-lg border border-neutral-300 bg-white px-3.5 py-2.5 text-neutral-900 placeholder:text-neutral-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-600/25"
           />
         </div>
       ))}
 
       {errorMsg ? (
-        <p role="alert" className="text-sm text-red-400">
+        <p role="alert" className="text-sm text-red-600">
           {errorMsg}
         </p>
       ) : null}
@@ -107,7 +107,7 @@ export default function LeadForm({ fields, submitLabel }: Props) {
       <button
         type="submit"
         disabled={status === "submitting"}
-        className="w-full rounded-lg bg-lime-400 py-3 font-semibold text-neutral-950 transition hover:bg-lime-300 disabled:opacity-50"
+        className="w-full rounded-lg bg-gradient-to-b from-green-500 to-green-600 py-3 font-semibold text-white shadow-[0_12px_30px_-12px_rgba(34,197,94,0.55)] transition hover:from-green-400 hover:to-green-500 disabled:opacity-50"
       >
         {status === "submitting" ? c.form.submitting : submitLabel ?? c.form.submitFallback}
       </button>
@@ -116,7 +116,7 @@ export default function LeadForm({ fields, submitLabel }: Props) {
         {c.form.privacyPre}
         <a
           href="/datenschutz"
-          className="text-lime-300 underline underline-offset-2 hover:text-lime-200"
+          className="text-green-700 underline underline-offset-2 hover:text-green-600"
         >
           {c.form.privacyLink}
         </a>

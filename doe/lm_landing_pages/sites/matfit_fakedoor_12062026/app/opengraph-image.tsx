@@ -3,16 +3,16 @@ import { site } from "@/lib/config";
 
 // Site-wide default Open Graph / Twitter image. A root-level opengraph-image is inherited
 // by every route, so all pages get an og:image without per-page work. Generated at build
-// time with next/og (built in — no external service, no cost). On-brand: lime on near-black.
+// time with next/og (built in — no external service, no cost). On-brand: green on white.
 
 export const alt = `${site.company} — ${site.tagline}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const BG = "#0a0a0a";
-const FG = "#fafafa";
-const MUTED = "#a3a3a3";
-const ACCENT = "#bef264";
+const BG = "#ffffff";
+const FG = "#171717";
+const MUTED = "#737373";
+const ACCENT = "#16a34a";
 
 export default function OpengraphImage() {
   return new ImageResponse(
@@ -47,12 +47,12 @@ export default function OpengraphImage() {
             maxWidth: "950px",
           }}
         >
-          Starte deine KI-Transformation
+          Plane wie mit Top-Beratern. Nur schneller. Nur günstiger.
         </div>
         {/* Single interpolated string (not expression + text) so this multi-child-free
             div doesn't trip Satori's "explicit display:flex" requirement. */}
         <div style={{ marginTop: "44px", fontSize: "30px", color: ACCENT, maxWidth: "900px" }}>
-          {`${site.tagline} — von der Tech-Stack-Analyse bis zur umsetzbaren Roadmap.`}
+          {`${site.tagline} — Business-Transformation-Know-how bis zur umsetzbaren Roadmap.`}
         </div>
       </div>
     ),

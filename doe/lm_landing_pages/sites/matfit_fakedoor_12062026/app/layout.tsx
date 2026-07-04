@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import { site, SITE_URL } from "@/lib/config";
 import { LanguageProvider } from "@/lib/i18n";
 import {
@@ -22,17 +22,9 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-serif",
-  subsets: ["latin"],
-  weight: "400",
-  style: ["normal", "italic"],
-  display: "swap",
-});
-
 const DEFAULT_TITLE = `${site.company} — ${site.tagline}`;
 const DEFAULT_DESCRIPTION =
-  "MAtfIT ist dein KI-Coach für die IT-Transformation: fundierte Beratung von der Tech-Stack-Analyse bis zur umsetzbaren Roadmap. Sichere dir den Frühzugang.";
+  "Plane wie mit Top-Beratern — nur schneller und günstiger. MAtfIT ist dein KI-Strategie-Consultant: von der Tech-Stack-Analyse bis zur umsetzbaren Roadmap.";
 
 // metadataBase resolves every relative canonical/og:url/og:image to an absolute URL.
 // The default openGraph/twitter blocks below act as the site-wide fallback; each page
@@ -77,9 +69,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="de"
-      className={`dark ${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable}`}
+      className={`${geistSans.variable} ${geistMono.variable}`}
     >
-      <body className="antialiased bg-neutral-950 text-neutral-100 selection:bg-lime-300/30 selection:text-lime-100">
+      <body className="antialiased bg-white text-neutral-900 selection:bg-green-600/15 selection:text-green-900">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}

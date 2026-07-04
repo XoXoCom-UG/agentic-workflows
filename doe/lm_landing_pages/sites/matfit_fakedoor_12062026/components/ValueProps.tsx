@@ -14,19 +14,19 @@ export default function ValueProps() {
     >
       <div className="mx-auto max-w-7xl">
         <header className="max-w-3xl mb-16 md:mb-20">
-          <p className="font-mono text-[11px] tracking-[0.22em] uppercase text-lime-300/90">
+          <p className="text-[11px] font-semibold tracking-[0.22em] uppercase text-green-600">
             {c.valueProps.eyebrow}
           </p>
-          <h2 className="mt-5 text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight leading-[1.05] text-neutral-50">
+          <h2 className="mt-5 text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.05] text-neutral-900">
             {c.valueProps.titlePre}
-            <span className="font-serif italic text-lime-300">{c.valueProps.titleAccent}</span>.
+            <span className="text-green-600">{c.valueProps.titleAccent}</span>.
           </h2>
-          <p className="mt-5 text-base md:text-lg text-neutral-400 max-w-[54ch] leading-relaxed">
+          <p className="mt-5 text-base md:text-lg text-neutral-500 max-w-[54ch] leading-relaxed">
             {c.valueProps.sub}
           </p>
         </header>
 
-        <ol className="divide-y divide-neutral-800/80">
+        <ol className="divide-y divide-neutral-200">
           {c.valueProps.items.map((p, idx) => (
             <motion.li
               key={p.number}
@@ -41,14 +41,14 @@ export default function ValueProps() {
                 ease: [0.16, 1, 0.3, 1],
               }}
             >
-              <div className="grid grid-cols-1 md:grid-cols-12 items-baseline gap-y-2 gap-x-8 -mx-4 md:-mx-6 px-4 md:px-6 py-6 md:py-8 rounded-2xl transition-colors duration-300 group-hover:bg-neutral-900/50 group-hover:shadow-[0_18px_50px_-24px_rgba(163,230,53,0.35)]">
-                <div className="md:col-span-1 font-mono text-sm text-lime-300/90 tabular-nums">
+              <div className="grid grid-cols-1 md:grid-cols-12 items-baseline gap-y-2 gap-x-8 -mx-4 md:-mx-6 px-4 md:px-6 py-6 md:py-8 rounded-2xl transition-colors duration-300 group-hover:bg-neutral-50 group-hover:shadow-[0_18px_50px_-24px_rgba(34,197,94,0.3)]">
+                <div className="md:col-span-1 text-sm font-semibold text-green-600 tabular-nums">
                   {p.number}
                 </div>
-                <h3 className="md:col-span-4 text-xl md:text-2xl font-medium tracking-tight text-neutral-50">
+                <h3 className="md:col-span-4 text-xl md:text-2xl font-medium tracking-tight text-neutral-900">
                   {p.title}
                 </h3>
-                <p className="md:col-span-7 text-[15px] md:text-base text-neutral-400 leading-snug transition-colors duration-300 group-hover:text-neutral-300">
+                <p className="md:col-span-7 text-[15px] md:text-base text-neutral-500 leading-snug transition-colors duration-300 group-hover:text-neutral-700">
                   {p.body}
                 </p>
               </div>

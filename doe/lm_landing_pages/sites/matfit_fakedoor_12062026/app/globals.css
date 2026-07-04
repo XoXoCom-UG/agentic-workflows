@@ -1,17 +1,12 @@
 @import "tailwindcss";
 
-/* Drive `dark:` variants from the `.dark` class on <html> (set in layout.tsx),
-   not from the OS preference. Required in Tailwind v4 — the default is media-query. */
-@custom-variant dark (&:where(.dark, .dark *));
-
-/* Dark page theme is locked at the html element (see app/layout.tsx).
-   Single accent: lime-300/400 (brand chartreuse, ~#bef264/#a3e635). Neutrals: neutral.
-   Serif (Instrument Serif) is used only for the italic accent word, echoing the product UI. */
+/* Light page theme, matching the current matfit.ai product UI:
+   white surfaces, neutral grays, single saturated green accent
+   (green-500/600, ~#22c55e/#16a34a). Sans-only typography (Geist). */
 
 @theme {
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: var(--font-mono), ui-monospace, "SF Mono", Menlo, monospace;
-  --font-serif: var(--font-serif), ui-serif, Georgia, "Times New Roman", serif;
 }
 
 html {
@@ -19,8 +14,8 @@ html {
 }
 
 html, body {
-  background: #0a0a0a;
-  color: #fafafa;
+  background: #ffffff;
+  color: #171717;
 }
 
 body {
@@ -28,18 +23,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-}
-
-/* Subtle grain over the whole page; pointer-events-none so it never blocks interaction. */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 70;
-  opacity: 0.03;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -55,12 +38,12 @@ body::before {
 /* Legal pages: style the build-time-rendered Markdown (Impressum, Datenschutz)
    to the brand theme. No @tailwindcss/typography plugin, so target raw HTML. */
 .legal-prose {
-  color: #d4d4d4; /* neutral-300 */
+  color: #404040; /* neutral-700 */
   line-height: 1.7;
   font-size: 0.975rem;
 }
 .legal-prose h1 {
-  color: #fafafa;
+  color: #171717;
   font-size: clamp(2rem, 5vw, 2.75rem);
   line-height: 1.05;
   font-weight: 600;
@@ -68,7 +51,7 @@ body::before {
   margin-bottom: 1.5rem;
 }
 .legal-prose h2 {
-  color: #fafafa;
+  color: #171717;
   font-size: 1.4rem;
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -76,7 +59,7 @@ body::before {
   margin-bottom: 0.85rem;
 }
 .legal-prose h3 {
-  color: #f5f5f5;
+  color: #262626;
   font-size: 1.075rem;
   font-weight: 600;
   margin-top: 1.85rem;
@@ -86,16 +69,16 @@ body::before {
   margin-bottom: 1rem;
 }
 .legal-prose a {
-  color: #bef264; /* lime-300 */
+  color: #16a34a; /* green-600 */
   text-decoration: underline;
   text-underline-offset: 2px;
   overflow-wrap: anywhere;
 }
 .legal-prose a:hover {
-  color: #d9f99d; /* lime-200 */
+  color: #15803d; /* green-700 */
 }
 .legal-prose strong {
-  color: #fafafa;
+  color: #171717;
   font-weight: 600;
 }
 .legal-prose ul {
@@ -113,11 +96,11 @@ body::before {
 }
 .legal-prose hr {
   border: 0;
-  border-top: 1px solid #262626; /* neutral-800 */
+  border-top: 1px solid #e5e5e5; /* neutral-200 */
   margin: 2.5rem 0;
 }
 .legal-prose code {
   font-family: var(--font-mono);
   font-size: 0.9em;
-  color: #e5e5e5;
+  color: #262626;
 }

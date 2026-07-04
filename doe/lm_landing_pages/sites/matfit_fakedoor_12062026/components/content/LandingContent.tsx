@@ -13,20 +13,20 @@ export default function LandingContent() {
   const { c } = useLang();
 
   return (
-    <main className="min-h-[100dvh] flex flex-col bg-neutral-950 text-neutral-100">
+    <main className="min-h-[100dvh] flex flex-col bg-white text-neutral-900">
       {/* HEADER (sticky, translucent on scroll) =========================== */}
       <SiteHeader />
 
       {/* HERO ============================================================== */}
       <section className="relative isolate overflow-hidden flex items-center">
-        {/* Background: top-left lime radial glow + faint grid */}
+        {/* Background: top-left green radial glow + faint grid */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(70%_55%_at_15%_0%,rgba(163,230,53,0.12),transparent_60%)]"
+          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(70%_55%_at_15%_0%,rgba(34,197,94,0.10),transparent_60%)]"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -z-10 opacity-[0.04] [background-image:linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] [background-size:64px_64px]"
+          className="pointer-events-none absolute inset-0 -z-10 opacity-[0.03] [background-image:linear-gradient(to_right,#171717_1px,transparent_1px),linear-gradient(to_bottom,#171717_1px,transparent_1px)] [background-size:64px_64px]"
         />
 
         <div className="relative z-10 mx-auto w-full max-w-7xl px-6 md:px-10 lg:px-12 pt-16 md:pt-24 pb-20 md:pb-28">
@@ -39,7 +39,7 @@ export default function LandingContent() {
         {/* Bottom-edge fade into the next section */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-24 z-[2] bg-gradient-to-b from-transparent to-neutral-950"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-24 z-[2] bg-gradient-to-b from-transparent to-white"
         />
       </section>
 
@@ -53,23 +53,23 @@ export default function LandingContent() {
       >
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_60%_at_50%_30%,rgba(163,230,53,0.10),transparent_65%)]"
+          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_60%_at_50%_30%,rgba(34,197,94,0.08),transparent_65%)]"
         />
         <div className="mx-auto max-w-xl">
           <div className="text-center mb-8">
-            <p className="font-mono text-[11px] tracking-[0.22em] uppercase text-lime-300/90">
+            <p className="text-[11px] font-semibold tracking-[0.22em] uppercase text-green-600">
               {c.signup.eyebrow}
             </p>
-            <h2 className="mt-4 text-3xl md:text-4xl font-semibold tracking-tight text-neutral-50">
+            <h2 className="mt-4 text-3xl md:text-4xl font-bold tracking-tight text-neutral-900">
               {c.signup.titlePre}
-              <span className="font-serif italic text-lime-300">{c.signup.titleAccent}</span>.
+              <span className="text-green-600">{c.signup.titleAccent}</span>.
             </h2>
-            <p className="mt-4 text-base text-neutral-400 leading-relaxed">
+            <p className="mt-4 text-base text-neutral-500 leading-relaxed">
               {c.signup.sub}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-neutral-800/80 bg-neutral-900/60 p-6 md:p-8 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.8)] backdrop-blur-sm">
+          <div className="rounded-2xl border border-neutral-200 bg-white p-6 md:p-8 shadow-[0_30px_80px_-40px_rgba(23,23,23,0.3)]">
             <LeadForm fields={site.fields} submitLabel={c.signup.submitLabel} />
             <p className="mt-4 text-[12px] leading-relaxed text-neutral-500">
               {c.signup.fineprint}
@@ -79,7 +79,7 @@ export default function LandingContent() {
       </section>
 
       {/* FOOTER =========================================================== */}
-      <footer className="border-t border-neutral-900 px-6 md:px-10 lg:px-12 py-10 mt-auto">
+      <footer className="border-t border-neutral-200 px-6 md:px-10 lg:px-12 py-10 mt-auto">
         <div className="mx-auto max-w-7xl flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-sm">
           <div className="text-neutral-500">
             © {new Date().getFullYear()} {site.company} · XoXoCom UG

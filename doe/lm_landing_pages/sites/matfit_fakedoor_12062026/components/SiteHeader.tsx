@@ -19,7 +19,7 @@ export default function SiteHeader() {
     <header
       className={`sticky top-0 z-50 transition-colors duration-300 ${
         scrolled
-          ? "border-b border-neutral-800/70 bg-neutral-950/70 backdrop-blur-md"
+          ? "border-b border-neutral-200/80 bg-white/80 backdrop-blur-md"
           : "border-b border-transparent bg-transparent"
       }`}
     >
@@ -28,9 +28,9 @@ export default function SiteHeader() {
         <a
           href="/"
           aria-label={c.header.homeAria}
-          className="justify-self-center font-mono text-lg font-bold tracking-[0.18em] text-neutral-50"
+          className="justify-self-center text-lg font-bold tracking-tight text-neutral-900"
         >
-          MAt<span className="text-lime-300">fIT</span>
+          matfit<span className="text-green-600">.ai</span>
         </a>
         <LangToggle className="justify-self-end" />
       </div>

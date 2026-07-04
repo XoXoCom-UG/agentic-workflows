@@ -24,31 +24,31 @@ const de = {
   },
 
   hero: {
-    eyebrow: "Dein KI-Coach für die IT-Transformation",
-    titleLine1: "Starte deine",
-    titleAccent: "KI-Transformation",
+    eyebrow: "Dein KI-Strategie-Consultant",
+    titleLine1: "Plane wie mit Top-Beratern.",
+    titleAccent: "Nur schneller. Nur günstiger.",
     subPre:
-      "MAtfIT ist dein KI-Coach für IT-Transformation — fundierte, auf dein Projekt & Team zugeschnittene Beratung. Von der Tech-Stack-Analyse bis zur umsetzbaren Roadmap. ",
-    subStrong: "Ein Tool statt vieler.",
+      "MAtfIT ist dein KI-Strategie-Consultant: Business-Transformation-Know-how, das sonst nur teure Beratungen liefern — von der Tech-Stack-Analyse bis zur Roadmap, die dein Team sofort umsetzen kann. ",
+    subStrong: "Ohne Berater-Budget. Ohne Wartezeit.",
     cta: "Jetzt Frühzugang sichern",
     ctaNote: "Sichere dir deinen Platz auf der Early-Access-Liste.",
     chips: [
-      { label: "Ein Tool", sub: "statt vieler" },
+      { label: "24/7", sub: "verfügbar" },
+      { label: "Bruchteil", sub: "der Beratungskosten" },
       { label: "DACH", sub: "Markt-Fokus" },
-      { label: "Roadmaps", sub: "KI-gestützt" },
     ] as Chip[],
   },
 
   heroMockup: {
     browserLabel: "matfit.app",
-    alt: "MAtfIT Produkt-Oberfläche: stelle jede Frage zu SaaS, KI und DACH-Strategie",
+    alt: "MAtfIT Produkt-Oberfläche: dein KI-Strategie-Consultant für Tech-Stack, KI und Business-Transformation",
   },
 
   valueProps: {
-    eyebrow: "Ein Coach. Der gesamte Pfad.",
+    eyebrow: "Ein Consultant. Der gesamte Pfad.",
     titlePre: "Von der Analyse bis zur ",
     titleAccent: "Umsetzung",
-    sub: "MAtfIT begleitet dich Schritt für Schritt durch deine KI-Transformation — fundiert, konkret und auf dein Projekt & Team zugeschnitten.",
+    sub: "MAtfIT begleitet dich Schritt für Schritt durch deine Business-Transformation — fundiert wie eine Top-Beratung, verfügbar wie ein Tool. Zugeschnitten auf dein Projekt & Team.",
     items: [
       {
         number: "01",
@@ -82,7 +82,7 @@ const de = {
     eyebrow: "Early Access",
     titlePre: "Sichere dir den ",
     titleAccent: "Frühzugang",
-    sub: "Trag dich ein — wir melden uns, sobald MAtfIT startet. Du gehörst zu den Ersten, die ihre KI-Transformation mit MAtfIT angehen.",
+    sub: "Trag dich ein — wir melden uns, sobald MAtfIT startet. Du gehörst zu den Ersten, die aus „Wir brauchen KI“ einen konkreten Plan machen.",
     submitLabel: "Auf die Liste setzen",
     fineprint: "Kein Spam. Nur eine Nachricht zum Launch. Abmeldung jederzeit möglich.",
   },
@@ -134,31 +134,31 @@ const en: typeof de = {
   },
 
   hero: {
-    eyebrow: "Your AI coach for IT transformation",
-    titleLine1: "Start your",
-    titleAccent: "AI transformation",
+    eyebrow: "Your AI strategy consultant",
+    titleLine1: "Plan like top consultants.",
+    titleAccent: "Just faster. Just cheaper.",
     subPre:
-      "MAtfIT is your AI coach for IT transformation — well-founded advice tailored to your project & team. From tech-stack analysis to an actionable roadmap. ",
-    subStrong: "One tool instead of many.",
+      "MAtfIT is your AI strategy consultant: the business-transformation know-how usually reserved for expensive consultancies — from tech-stack analysis to a roadmap your team can execute right away. ",
+    subStrong: "No consulting budget. No waiting.",
     cta: "Get early access now",
     ctaNote: "Secure your spot on the early-access list.",
     chips: [
-      { label: "One tool", sub: "instead of many" },
+      { label: "24/7", sub: "available" },
+      { label: "Fraction", sub: "of consulting fees" },
       { label: "DACH", sub: "market focus" },
-      { label: "Roadmaps", sub: "AI-powered" },
     ] as Chip[],
   },
 
   heroMockup: {
     browserLabel: "matfit.app",
-    alt: "MAtfIT product interface: ask any question about SaaS, AI and DACH strategy",
+    alt: "MAtfIT product interface: your AI strategy consultant for tech stack, AI and business transformation",
   },
 
   valueProps: {
-    eyebrow: "One coach. The entire path.",
+    eyebrow: "One consultant. The entire path.",
     titlePre: "From analysis to ",
     titleAccent: "execution",
-    sub: "MAtfIT guides you step by step through your AI transformation — well-founded, concrete and tailored to your project & team.",
+    sub: "MAtfIT guides you step by step through your business transformation — as rigorous as a top consultancy, as available as a tool. Tailored to your project & team.",
     items: [
       {
         number: "01",
@@ -192,7 +192,7 @@ const en: typeof de = {
     eyebrow: "Early Access",
     titlePre: "Secure your ",
     titleAccent: "early access",
-    sub: "Sign up — we'll reach out as soon as MAtfIT launches. You'll be among the first to tackle your AI transformation with MAtfIT.",
+    sub: "Sign up — we'll reach out as soon as MAtfIT launches. You'll be among the first to turn “we need AI” into a concrete plan.",
     submitLabel: "Add me to the list",
     fineprint: "No spam. Just one message at launch. Unsubscribe anytime.",
   },

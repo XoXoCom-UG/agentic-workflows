@@ -27,48 +27,48 @@ export default function HeroIntro() {
     >
       <motion.p
         variants={item}
-        className="font-mono text-[11px] sm:text-xs tracking-[0.22em] uppercase text-lime-300/90"
+        className="text-[11px] sm:text-xs font-semibold tracking-[0.22em] uppercase text-green-600"
       >
         {c.hero.eyebrow}
       </motion.p>
 
       <motion.h1
         variants={item}
-        className="mt-6 text-[2.75rem] sm:text-5xl lg:text-6xl font-semibold uppercase leading-[0.98] tracking-[-0.02em] text-neutral-50 text-balance"
+        className="mt-6 text-[2.75rem] sm:text-5xl lg:text-6xl font-bold leading-[1.02] tracking-[-0.02em] text-neutral-900 text-balance"
       >
         {c.hero.titleLine1}
         <br />
-        <span className="text-lime-300">{c.hero.titleAccent}</span>
+        <span className="text-green-600">{c.hero.titleAccent}</span>
       </motion.h1>
 
       <motion.p
         variants={item}
-        className="mt-7 text-lg md:text-xl text-neutral-300 max-w-[46ch] leading-[1.55]"
+        className="mt-7 text-lg md:text-xl text-neutral-500 max-w-[46ch] leading-[1.55]"
       >
         {c.hero.subPre}
-        <span className="text-neutral-100">{c.hero.subStrong}</span>
+        <span className="font-medium text-neutral-900">{c.hero.subStrong}</span>
       </motion.p>
 
       <motion.div variants={item} className="mt-9 flex flex-col items-start gap-3">
         <a
           href="#form"
-          className="inline-flex items-center justify-center rounded-xl bg-lime-400 px-8 py-4 text-base font-semibold tracking-wide text-neutral-950 shadow-[0_20px_50px_-15px_rgba(163,230,53,0.55)] transition hover:bg-lime-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-300"
+          className="inline-flex items-center justify-center rounded-xl bg-gradient-to-b from-green-500 to-green-600 px-8 py-4 text-base font-semibold tracking-wide text-white shadow-[0_20px_50px_-15px_rgba(34,197,94,0.55)] transition hover:from-green-400 hover:to-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
         >
           {c.hero.cta}
         </a>
-        <p className="text-sm text-neutral-400">{c.hero.ctaNote}</p>
+        <p className="text-sm text-neutral-500">{c.hero.ctaNote}</p>
       </motion.div>
 
       <motion.dl
         variants={item}
-        className="mt-12 flex flex-wrap gap-x-10 gap-y-6 border-t border-neutral-800/80 pt-8"
+        className="mt-12 flex flex-wrap gap-x-10 gap-y-6 border-t border-neutral-200 pt-8"
       >
         {c.hero.chips.map((chip) => (
           <div key={chip.label} className="flex flex-col">
-            <dt className="text-2xl md:text-3xl font-semibold tracking-tight text-neutral-50">
+            <dt className="text-2xl md:text-3xl font-semibold tracking-tight text-neutral-900">
               {chip.label}
             </dt>
-            <dd className="mt-1 font-mono text-[11px] uppercase tracking-[0.16em] text-neutral-500">
+            <dd className="mt-1 text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-500">
               {chip.sub}
             </dd>
           </div>

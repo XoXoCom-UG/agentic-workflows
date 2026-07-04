@@ -8,7 +8,7 @@ import LegalShell from "@/components/LegalShell";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Datenschutzerklärung — MAtfIT, dein KI-Coach",
+  title: "Datenschutzerklärung — MAtfIT, dein KI-Strategie-Consultant",
   description:
     "Datenschutzerklärung der XoXoCom UG (haftungsbeschränkt) für MAtfIT: welche Daten wir erheben, wie wir sie verwenden und welche Rechte du als Nutzer hast.",
   path: "/datenschutz",

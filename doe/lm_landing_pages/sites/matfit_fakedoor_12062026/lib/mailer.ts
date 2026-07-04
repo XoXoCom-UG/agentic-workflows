@@ -37,8 +37,8 @@ export async function sendConfirmationEmail(args: ConfirmationArgs): Promise<voi
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 24px; color: #111;">
       <p style="font-size: 16px; margin: 0 0 16px;">${greeting}</p>
       <p style="font-size: 16px; margin: 0 0 16px;">
-        danke für dein Interesse an <strong>MAtfIT</strong> — deinem KI-Coach für
-        IT-Transformation.
+        danke für dein Interesse an <strong>MAtfIT</strong> — deinem
+        KI-Strategie-Consultant für die Business-Transformation.
       </p>
       <p style="font-size: 16px; margin: 0 0 24px;">
         Du stehst jetzt auf der <strong>Early-Access-Liste</strong>. Wir melden
