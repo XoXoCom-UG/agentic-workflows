@@ -150,6 +150,8 @@ Repeat Steps 1–4 until `score = 100.0` and `passed = true`. The prioritized hy
 
 ### Step 6 — Post-score production steps (one-time, manual)
 
+> **Status for matfit.ai (completed 2026-07-05):** GSC URL-prefix property `https://matfit.ai` created and ownership verified via HTML-tag method (`GOOGLE_SITE_VERIFICATION` set as a Netlify env var on site `f641bb12-70dd-4a9b-93c7-5e065fafc672`, all contexts — persists across deploys). Sitemap submitted in GSC: Status "Erfolgreich", 3 pages discovered. Homepage was already indexed by Google; a recrawl was requested after the rebrand deploy. Steps 1–3, 5 and 6 below are therefore DONE for matfit.ai; only re-do them for a new site/domain.
+
 Once the score reaches 100 locally, complete the following before the score is meaningful in production:
 
 1. **Verify the canonical domain is connected.** `matfit.ai` is already live on Netlify. Confirm `NEXT_PUBLIC_SITE_URL=https://matfit.ai` is set as a Netlify environment variable (or that `site.config.json` has `"site_url": "https://matfit.ai"`). This ensures canonical links and OG URLs resolve correctly for crawlers.
@@ -184,6 +186,12 @@ Temporary intermediates (`.next/`, `node_modules/`) are never deliverables.
 **`passed=false` despite the site appearing functional.** Check which route failed by inspecting the `routes` key in the scorer's JSON output, or run `state --base-url ...` for a human-readable breakdown. `/sitemap.xml` returning 404 (not yet created) and `/robots.txt` missing are the two most common hard-gate failures on a fresh site.
 
 **`--auto-git` staged unintended files.** Mode B stages `sites`, `execution`, and `directives`. If OneDrive sync or another background process wrote to those directories during the 60–120 second score run, those files may be swept into the commit. Prefer Mode A during active development.
+
+**GSC shows "Konnte nicht abgerufen werden" right after submitting the sitemap.** Normal for a freshly verified property — Google's first real fetch lags the submission. Observed 2026-07-05: status flipped to "Erfolgreich" (3 pages) within minutes. Do not resubmit; just refresh the Sitemaps page later.
+
+**A copy rebrand (or any external edit session) regresses the score.** Title/description copy changes made outside this workflow routinely push descriptions out of the 120–160 band (observed 2026-07-05: a rebrand left home and impressum descriptions at exactly 161 chars → score 98.1). After any content update lands, re-run `state --base-url ...` and trim/expand descriptions back into band. Note that once a score of 100 has been kept, `evaluate` compares against `prev_best=100` forever — after an external change lowers the baseline, a fix that restores 100 prints `REVERT — score did not improve` even though it is correct to keep. The decision column is advisory in that situation; record a "post-<event> baseline" row and a fix row for the audit trail and keep by Mode A judgment.
+
+**Another agent session is actively editing the site.** Do not score, fix, or deploy while files are still being written — your edits can be overwritten mid-flight (observed: a description trim was superseded minutes later by the editing session's own rewrite). Watch the site directory (excluding `node_modules/`, `.next/`, `.netlify/`, `tsconfig.tsbuildinfo`) and wait until no file has changed for at least 5 minutes before scoring.
 
 **Sitemap `lastModified` changes between runs.** `sitemap.ts` uses `new Date()`, so the timestamp in `/sitemap.xml` changes on every server start. The scorer's sitemap check only reads `<loc>` values — it never reads `<lastmod>` — so this does not affect determinism.
 
