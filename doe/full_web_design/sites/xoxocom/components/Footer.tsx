@@ -42,9 +42,6 @@ export default function Footer() {
         {/* Right: legal */}
         <div className="order-3 flex flex-col gap-2 md:items-end">
           <FooterLinks className="md:justify-end" ariaLabel={c.footer.legalAria} />
-          <span className="text-xs text-muted/60" data-signature={site.signature}>
-            {site.signature}
-          </span>
         </div>
       </div>
     </footer>

@@ -53,9 +53,6 @@ export const metadata: Metadata = {
   verification: process.env.GOOGLE_SITE_VERIFICATION
     ? { google: process.env.GOOGLE_SITE_VERIFICATION }
     : undefined,
-  other: {
-    "x-site-signature": site.signature,
-  },
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
