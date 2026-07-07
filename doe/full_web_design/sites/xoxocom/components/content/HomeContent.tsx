@@ -1,8 +1,12 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useLang } from "@/lib/i18n";
-import HeroGraph from "@/components/HeroGraph";
 import SmartLink from "@/components/SmartLink";
+
+// Decorative canvas animation — loaded after hydration so its chunk stays out of
+// the first-load bundle; ssr:false is safe (absolute overlay, no layout impact).
+const HeroGraph = dynamic(() => import("@/components/HeroGraph"), { ssr: false });
 
 export default function HomeContent() {
   const { c } = useLang();

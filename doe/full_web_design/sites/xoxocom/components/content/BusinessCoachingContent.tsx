@@ -1,7 +1,11 @@
 "use client";
 
 import { useLang } from "@/lib/i18n";
-import HeroGraphCluster from "@/components/HeroGraphCluster";
+import dynamic from "next/dynamic";
+
+// Decorative canvas animation — loaded after hydration so its chunk stays out of
+// the first-load bundle; ssr:false is safe (absolute overlay, no layout impact).
+const HeroGraphCluster = dynamic(() => import("@/components/HeroGraphCluster"), { ssr: false });
 import SmartLink from "@/components/SmartLink";
 
 export default function BusinessCoachingContent() {
