@@ -1,0 +1,2 @@
+iter	timestamp	hypothesis	score	prev_best	decision	commit
+1	2026-07-07 17:43:22	baseline (frozen byte budgets, prod build via serve_prod.py)	86.13	0.0	kept	718b515
