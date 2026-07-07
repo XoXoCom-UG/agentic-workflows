@@ -18,13 +18,185 @@ Every entry in the Progress Log must carry a timestamp in the format `YYYY-MM-DD
 
 ## Current Status
 
-AutoResearch SEO harness built and run to completion: XoXoCom SEO score 32.57 → 100.0 (4 iterations, verified deterministic at 100 after scorer was hardened to confirm the OG image actually renders). New directive `directives/auto_optimize_seo.md` created. All SEO infrastructure (`lib/seo.ts`, `app/sitemap.ts`, `app/robots.ts`, `app/opengraph-image.tsx`, per-page metadata) is committed on branch `doe` as of commit `b2aefc2` (the bilingual commit; SEO work was layered on top locally and is pending a dedicated commit).
+Production domain `www.xoxocom.net` is live and fully connected to the Netlify site `xoxocom-ug` (site id 5ec12ba7-2b39-4c85-8aa4-d3c8db971b2a). TLS cert covers both apex and www (expires 2026-09-27). https://www.xoxocom.net returns 200; https://xoxocom.net redirects 301 to www. SEO infrastructure is deployed and verified: /robots.txt, /sitemap.xml, /opengraph-image all return 200; homepage canonical, OG tags, and JSON-LD Organization are present in production HTML. `site.config.json` `site_url` is the single source of truth for all canonical/OG/JSON-LD URLs. Google Search Console verification is now server-side complete: `GOOGLE_SITE_VERIFICATION` is set as a production Netlify env var and the `google-site-verification` meta tag is confirmed live in the homepage `<head>`. The visible site `signature` (`web-xoxocom-fb6b4c`) has been removed from the footer and from the head meta tag; the change is committed on branch `doe` (commit `61c5aea`) but NOT yet deployed to Netlify — deploy is pending user go-ahead. The homepage "About us" copy has been reworded in both languages (`lib/copy.ts`) and verified locally; this change is uncommitted and also pending the same deploy go-ahead. AutoResearch Experiment #2 (Speed) is now underway: a deterministic byte-budget harness (`serve_prod.py` + `score/score_speed.py`) was built and verified, and the first optimization run raised the score from a frozen baseline of 86.13 to 87.43 via a full server-side i18n refactor (bilingual copy no longer ships in client JS). All five iterations are committed on branch `doe`. The optimized site is NOT yet deployed — a live PSI/Lighthouse "before" bookend must be captured first (see Open Items), since deploying now would destroy that baseline measurement.
 
-Outstanding items: canonical domain `www.xoxocom.net` not yet connected to Netlify (canonical/OG URLs and GSC verification are therefore not meaningful in production); Google Search Console property not yet created or verified; `NEXT_PUBLIC_SITE_URL` and `GOOGLE_SITE_VERIFICATION` env vars not yet set in Netlify; bilingual hreflang (locale-routed URLs) is a future phase needing user sign-off; `execution/deploy_netlify.py` does not yet automate the OneDrive external-build workaround; `hero-centrality-hubs.*` may need re-recording at 1900×790; three legal follow-ups in `add_legal_pages.md`; `sites/xoxocom/content/agb.md` placeholder DRAFT pending legal sign-off; testing Gmail credentials must be swapped for owner credentials before production use; Stop hook activation requires user to open `/hooks` panel or restart Claude Code once.
+Outstanding items: XoXoCom signature-removal commit `61c5aea` AND the reworded home "About us" copy both need a commit + deploy decision from the user; the AutoResearch speed experiment needs a PSI/Lighthouse baseline bookend captured against the live site before deploying the optimized build; GSC verification and Bing Webmaster Tools setup are now CONFIRMED DONE (verified via the Bing GSC-import succeeding); the only remaining GSC-side action is optional "Request Indexing" for the homepage + priority pages; the `deploy_to_netlify.md` DNS-ordering reconciliation is RESOLVED (directive updated); MAtfIT `LegalShell.tsx` campaign signature still visible in legal-pages footer; bilingual hreflang is a future phase needing user sign-off; `execution/deploy_netlify.py` does not yet automate the OneDrive external-build workaround; `hero-centrality-hubs.*` may need re-recording at 1900×790; three legal follow-ups in `add_legal_pages.md`; `sites/xoxocom/content/agb.md` placeholder DRAFT pending legal sign-off; testing Gmail credentials must be swapped for owner credentials before production use; Stop hook activation requires user to open `/hooks` panel or restart Claude Code once.
 
 ---
 
 ## Progress Log
+
+### 2026-07-07 18:15
+
+**AutoResearch Experiment #2 (Speed) — byte-budget harness built and verified; first optimization run complete, score 86.13 → 87.43. Live PSI/Lighthouse bookend and deploy still pending. 🟡**
+
+New files under `execution/autoresearch/`:
+
+- `serve_prod.py` — builds and serves the XoXoCom **production** bundle from outside OneDrive (mirrors the site to `C:\xoxo-build\xoxocom-speed`, hash-cached `npm ci`, `next build`, `next start` on a free port in 3100–3199; `up`/`down`/`status` subcommands). This automates the manual robocopy/external-build workaround already documented in `deploy_to_netlify.md`'s Error Handling section — for scoring purposes only; `deploy_netlify.py` itself is unchanged. Reviewer sub-agent findings applied: orphan-port sweep on `down` when the state file is lost, a PID-identity check before `taskkill` (guards against a recycled PID), a protocol-relative-URL fix, and UTF-8 decoding of subprocess output.
+- `score/score_speed.py` — the deterministic byte-budget scorer. Crawls the same 10 public routes as `score_seo.py` against a running prod server, gzip-compresses every referenced same-origin asset locally, and grades against frozen KB budgets (per-route JS 110/260, CSS 12/40, HTML 25/90; shared JS 95/220; critical font 45/130; script count 10/25). Re-runs `score_seo.py` as a hard gate so a speed change can never silently regress the SEO-100 score from experiment #1. Verified byte-identical across repeat runs, hard-rejects a `next dev` server, and the SEO gate was negative-tested by deleting `robots.ts` (correctly returned `passed=false`).
+- `program/speed.md` — the human-owned research direction and prioritized hypothesis list for this metric.
+
+New directive `directives/auto_optimize_speed.md` (commit `c4fa2ea`) documents the full Mode A/B loop, the `serve_prod.py` port range (3100–3199, kept separate from `optimize.py`'s 3000–3099 dev range so a speed run never collides with a SEO/dev loop), and why Lighthouse/PSI is used only as a before/after bookend rather than the loop's keep/revert signal (Lighthouse's ±2–5 point run-to-run variance would corrupt the gate; the byte-budget scorer is deterministic).
+
+**Five iterations logged in `results/speed.tsv`, all committed on branch `doe`:**
+
+| Iter | Score | Decision | Commit | Hypothesis |
+|---|---|---|---|---|
+| 1 | 86.13 | kept (baseline) | `718b515` | Frozen baseline, prod build via `serve_prod.py` |
+| 2 | 86.17 | kept | `c43bf87` | Lazy-load the 3 canvas heroes via `next/dynamic` (`ssr:false`) |
+| 3 | 86.54 | kept | `c4fa2ea` | Server-side i18n for `/ueber-uns` only (`getCopy` cookie helper; provider `router.refresh()` on toggle) |
+| 4 | 86.52 | **reverted** | `511e4b0` | Server-side i18n for `/produkte` alone — proved per-page conversion can't cross the shared-bundle valley |
+| 5 | 87.43 | kept | `511e4b0` | Full server-side i18n: `COPY` leaves the client bundle entirely |
+
+The winning refactor (iteration 5) moves the bilingual `COPY` tree off the client JS bundle for good: content components now read language server-side via a new `lib/server-copy.ts` `getCopy()` helper; `SiteHeader`, `LangToggle`, and `ContactForm` receive translated strings as props instead of calling `useLang()` directly; `LanguageProvider` was slimmed down to language state plus `router.refresh()` on toggle; a new `components/LazyHero.tsx` wraps the lazy-mounted hero canvases from iteration 2. Per-route first-load JS dropped from 149–158 KB gz to 145–146 KB gz. Verified manually in the browser: DE↔EN toggle works across header, nav, contact form, and footer; lazy heroes render; form labels localize correctly.
+
+**Calibration finding** (recorded in `program/speed.md`): the Manrope variable font makes weight-list reduction a byte no-op — `next/font` serves the same unicode-range slice regardless of the declared `weight` list, and the scorer only counts preloaded/`.p.` "critical" fonts, not every slice referenced in CSS. Do not retry that lever.
+
+**Hygiene commit `943a165`:** removed the unused `motion` dependency from `package.json`. Score unchanged at 87.43 — it was already tree-shaken out of the bundle, so the removal is byte-invisible but reduces `node_modules` surface.
+
+**Not yet deployed.** The optimized site (87.43) is committed but sits behind an ordering constraint: a live PSI/Lighthouse "before" bookend against https://www.xoxocom.net has not been captured yet (the keyless PageSpeed Insights API quota was exhausted this session, and local Lighthouse could not drive Chrome). Deploying now would overwrite the "before" state the bookend needs to measure against — so the bookend must be captured first, then the deploy, then an "after" bookend.
+
+**Open items added** (see Open/Unfinished Items below): capture the PSI/Lighthouse baseline bookend before deploying; deploy via `deploy_to_netlify.md` and capture the after-bookend; decide whether to commit the currently-untracked `execution/autoresearch/EXPLAINER.md` and extend it with a plain-language speed section once before/after numbers exist; optional runtime-only hygiene (pause hero canvas `requestAnimationFrame` via `IntersectionObserver` when scrolled offscreen — byte-invisible, not scored). Note for future sessions: the byte score has likely plateaued near 87.4 — the remaining ~145 KB gz first-load JS is dominated by the React 19/Next 15 framework baseline, and no further server-only dependency leakage was found.
+
+**Git state:** all code and results changes from this session are committed on branch `doe` (`718b515`, `c43bf87`, `c4fa2ea`, `511e4b0`, `943a165`). `execution/autoresearch/EXPLAINER.md` remains untracked pending a decision on whether to commit it.
+
+---
+
+### 2026-07-07 00:00
+
+**XoXoCom — home "About us" copy reworded to a more confident/professional framing (DE + EN); verified in local preview, not committed or deployed. 🟡**
+
+`sites/xoxocom/lib/copy.ts` — `home.aboutTitle` / `home.aboutBody` updated in both language trees, replacing the earlier "dynamic team" wording:
+
+- DE: `aboutTitle` → "A.I.-Implementierung, mit Bedacht umgesetzt"; `aboutBody` → "Strategie, Architektur, Umsetzung: Wir begleiten den ganzen Weg vom Business Case bis zur Produktion."
+- EN: `aboutTitle` → "A.I. implementation, done deliberately"; `aboutBody` → "Strategy, architecture, delivery: we cover the full path from business case to production."
+
+Since `en` is typed as `typeof de`, both trees stay structurally in sync automatically. No other file changed — the home page and `HomeContent.tsx` already render `aboutTitle`/`aboutBody` from `useLang().c.home`, so no component edit was needed.
+
+Verified on the local `next dev` preview (localhost:3000) via browser screenshots in both German and English.
+
+**Git state:** uncommitted on branch `doe`, alongside the still-uncommitted signature-removal commit `61c5aea` context. **Open item added:** deploy this copy change (together with `61c5aea`) to Netlify once the user gives the go-ahead.
+
+**Dev server left running:** the local `next dev` server for `sites/xoxocom` was left running at http://localhost:3000 for the user's own review of the reworded copy. No further activity this session beyond the dev server writing its own build artifacts under `sites/xoxocom/.next`.
+
+---
+
+### 2026-07-04 00:00
+
+**XoXoCom — visible site signature removed from footer and head meta; committed but not deployed. 🟡**
+
+Removed the rendered site `signature` (`web-xoxocom-fb6b4c`) from every place it reached the live page:
+
+1. `sites/xoxocom/components/Footer.tsx` — deleted the visible `<span>` at the footer bottom-right along with its `data-signature` attribute.
+2. `sites/xoxocom/app/layout.tsx` — removed the `other: { "x-site-signature": site.signature }` entry from the `metadata` export, so the `x-site-signature` meta tag no longer renders in `<head>`.
+
+Verified locally via `next dev` + browser: the footer now shows only copyright, LinkedIn, and legal links; DOM inspection confirmed no signature text, no `data-signature` attribute, and no `x-site-signature` meta tag anywhere in the rendered page.
+
+The `signature` field itself was left untouched in `sites/xoxocom/site.config.json` and its type in `lib/config.ts` — it's unused data now but harmless to keep, consistent with how the equivalent MAtfIT signature removal (2026-06-25) preserved the field in `site.config.json` while only stripping it from rendered output.
+
+Committed to branch `doe` as commit `61c5aea` ("fix(xoxocom): remove site signature from footer and head meta"). **Not deployed** — the user asked to preview and commit only; deploy is being held pending explicit go-ahead.
+
+No directive edits were needed: `design_website.md` and `build_website.md` describe the signature as default template behavior for new site builds ("keep the signature token in the footer," "explain it disambiguates sites in production" if a user asks to remove it) — that general guidance is unaffected by this one-off customization on an already-shipped site, matching the precedent set when the same request was handled for MAtfIT without a directive change.
+
+**Open item added:** deploy XoXoCom's `61c5aea` to Netlify once the user confirms.
+
+---
+
+### 2026-06-26 17:30
+
+**XoXoCom — `deploy_to_netlify.md` DNS-ordering lesson folded into the directive; GSC verification confirmed via successful Bing Webmaster Tools import; sitemap submitted to Bing. ✅**
+
+`directives/deploy_to_netlify.md` gained a new Process subsection "Connecting an externally-hosted custom domain" and a new Edge Case documenting the `422 Unprocessable Entity` failure returned by the Netlify API when the primary-domain/SSL call is made before the registrar DNS resolves to Netlify — with the correct DNS-first sequence (A/CNAME records at the registrar → wait for propagation → then set primary domain via API).
+
+Signed into Bing Webmaster Tools via "Sign in with Google" (SSO, no typed credentials) as albert@xoxocom.net. Bing auto-imported the `www.xoxocom.net` property from Google Search Console — since Bing's import only succeeds against a verified GSC property, this confirms GSC verification for `www.xoxocom.net` is complete under that account. The imported sitemap `https://www.xoxocom.net/sitemap.xml` shows Status = Success, 0 errors, 0 warnings, 10 URLs discovered in Bing.
+
+**Status:** GSC verification and Bing Webmaster Tools setup are both DONE. The only open GSC-side action left is optional: URL Inspection → Request Indexing for the homepage and priority pages (/produkte, /leistungen/ai-transformation, /ueber-uns, /kontakt).
+
+---
+
+### 2026-06-26 16:00
+
+**XoXoCom — Google Search Console verification tag deployed server-side (GSC-side verify/submit/index still pending on the user). 🟡**
+
+Set the Netlify env var `GOOGLE_SITE_VERIFICATION` (production context) on the `xoxocom-ug` site (site id 5ec12ba7-2b39-4c85-8aa4-d3c8db971b2a) to the token the user obtained from GSC's HTML-tag verification method. `app/layout.tsx` was already wired (from the 2026-06-18 AutoResearch SEO work) to emit `<meta name="google-site-verification">` whenever this env var is present, so no code change was needed.
+
+Redeployed via `python execution/deploy_netlify.py --slug xoxocom` — clean build, 2m44s, no OneDrive ENOENT. Verified live: `https://www.xoxocom.net/` now serves the verification meta tag in the head. The env var persists across future deploys, so the tag stays live automatically without further action.
+
+**Status:** the GSC indexation open item is now split — the server-side half (verification tag live) is done; the remainder is entirely on the user's side inside Google Search Console: (1) click "Verify" in GSC, (2) submit the sitemap `sitemap.xml`, (3) URL-inspect + Request Indexing for the homepage and priority pages (/produkte, /leistungen/ai-transformation, /ueber-uns, /kontakt). Optional follow-on: import to Bing Webmaster Tools from GSC.
+
+**Carried forward unchanged:** MAtfIT `LegalShell.tsx` still renders the campaign signature in the legal-pages footer; the `deploy_to_netlify.md` DNS-ordering-lesson reconciliation was offered to the user but not yet applied.
+
+---
+
+### 2026-06-26 00:00
+
+**XoXoCom — production domain connected, TLS provisioned, SEO infrastructure deployed; site live at https://www.xoxocom.net. ✅**
+
+**1. Custom domain connected and TLS provisioned.**
+
+Pre-session reality check revealed the Netlify site had the apex `xoxocom.net` set as primary domain, `www` was not added, DNS was external (no Netlify DNS zone), the apex A-record pointed to a non-Netlify IP (2.57.91.91), and the `www` CNAME already pointed to Netlify but had no SSL cert (broken HTTPS).
+
+DNS ordering lesson (to be folded into `deploy_to_netlify.md`): Netlify rejected setting `www` as primary via API (422 Unprocessable Entity) until the apex A-record pointed at Netlify's load balancer. Netlify cannot verify domain ownership until DNS resolves to Netlify. The correct sequence when an external registrar controls DNS is: (1) update apex A-record → 75.2.60.5 and www CNAME → `<site>.netlify.app` at the registrar; (2) wait for propagation; (3) only then call the Netlify API to set the primary domain and provision TLS.
+
+The user updated the apex A-record at their registrar to 75.2.60.5. Propagation was verified on Google and Cloudflare resolvers. Via Netlify API: `custom_domain` set to `www.xoxocom.net`, `domain_aliases` set to `[xoxocom.net]`; TLS cert provisioned (issued, covers both hosts, expires 2026-09-27). Verified: https://www.xoxocom.net → 200; https://xoxocom.net → 301 → www; cert valid. No code change was needed — `site.config.json` `site_url` was already `https://www.xoxocom.net` and is the single source of truth that feeds `SITE_URL` in `lib/config.ts`, which in turn drives `metadataBase`, `robots.ts`, `sitemap.ts`, `seo.ts`, and JSON-LD throughout the site.
+
+**2. SEO infrastructure deployed (was committed but never live).**
+
+Discovered the SEO-completeness work (commits 264e865 and 6ea5568) had never been deployed — the live site was a stale June-18 manual CLI deploy. `/robots.txt`, `/sitemap.xml`, and `/opengraph-image` all returned 404; the homepage had no canonical, OG, or JSON-LD tags in production HTML.
+
+Redeployed via `python execution/deploy_netlify.py --slug xoxocom`. Build completed cleanly in 2m29s (no OneDrive ENOENT). Post-deploy verification:
+
+- `/robots.txt` — 200; `Host:` directive and sitemap URL both reference `www.xoxocom.net`.
+- `/sitemap.xml` — 200; all public route URLs use `www.xoxocom.net`.
+- `/opengraph-image` — 200 (branded OG image renders).
+- Homepage HTML — canonical `https://www.xoxocom.net`; `og:url` `https://www.xoxocom.net`; JSON-LD Organization present.
+
+Production URL: https://www.xoxocom.net.
+
+**Open items carried forward:**
+
+- Google Search Console indexation is still pending: set `GOOGLE_SITE_VERIFICATION` as a Netlify env var (layout.tsx already wired to emit the meta tag), verify in GSC, submit `https://www.xoxocom.net/sitemap.xml`, request indexing. SEO completeness score = 100 does not mean the site is indexed.
+- (Carryover, lm_landing_pages) MAtfIT `components/LegalShell.tsx` still renders the campaign signature in the legal-pages footer.
+
+---
+
+### 2026-06-25 00:00
+
+**MAtfIT fake-door — campaign signature removed from landing and thank-you footers; deployed to production. ✅**
+
+Commit f008d9f on branch `doe`: "fix(matfit): remove campaign signature code from landing & thank-you footers".
+
+Two files edited in `sites/matfit_fakedoor_12062026/components/content/`:
+
+- `LandingContent.tsx` — the `<div>` containing the visible signature string `lm-matfit-fakedoor-3f9c1a` was removed from the page footer.
+- `ThankYouContent.tsx` — the `<p>` containing the visible signature was removed, along with the now-unused `site` import.
+
+The signature was intentionally preserved in two places that do not render visibly to end users:
+
+- `site.config.json` — source-of-truth config file; unchanged.
+- `sites/matfit_fakedoor_12062026/app/layout.tsx` — still emits `x-campaign-signature` as an HTTP response header for server-side tracking.
+
+Deployed to Netlify via `python execution/deploy_netlify.py --slug matfit_fakedoor_12062026`. Build completed cleanly (no OneDrive ENOENT error this run). Production URL: https://matfit.ai (Netlify site name: matfit-xoxocom-ug).
+
+**Open item carried forward:** `components/LegalShell.tsx` still renders the campaign signature in the legal-pages footer (Impressum, Datenschutz). The user's request covered only the landing page and thank-you page; `LegalShell.tsx` was left untouched. Full removal requires a deliberate follow-up edit to that component.
+
+---
+
+### 2026-06-18 21:45
+
+**AutoResearch — EXPLAINER.md expanded with "How do I run this myself?" section (documentation only). ✅**
+
+Added a new section 7 ("How do I run this myself? Do I need to prompt it?") to `execution/autoresearch/EXPLAINER.md`. It clarifies the two distinct usage modes: getting an SEO grade is fully automatic (run `score_seo.py` directly, no A.I. required); improving the site is prompted (ask Claude to run the change → grade → keep/undo loop). Includes a ready-to-paste example prompt for starting a Mode A run. Also explains the advanced unattended mode (`optimize.py evaluate --auto-git` combined with the /loop tool). Later sections were renumbered to accommodate the insertion. No code or behavior changed; this is a documentation-only addition. No directive reconciliation needed.
+
+---
+
+### 2026-06-18 21:00
+
+**AutoResearch — beginner-friendly EXPLAINER.md added (documentation only). ✅**
+
+Created `execution/autoresearch/EXPLAINER.md`: a plain-language guide written at a 10-year-old reading level covering what SEO completeness means, exactly what changed on the XoXoCom site (sitemap, robots.txt, Open Graph share-preview image, JSON-LD Organization schema, per-page titles/descriptions, and the GSC verification slot), and how the AutoResearch keep-or-revert loop works (Teacher = scorer, Student = AI, illustrated with the 32.57 → 100 score arc including the "false 100" OG-image story). Includes a prominent "See the value RIGHT NOW" section and a "how to view it yourself" walkthrough (start `next dev`, open `/sitemap.xml`, `/robots.txt`, `/opengraph-image`, run the scorer, open `results/seo.tsv`). Also maps where every harness file lives. No code or behavior changed; this is a documentation-only addition. No directive reconciliation needed.
+
+---
 
 ### 2026-06-18 20:00
 
@@ -418,9 +590,21 @@ Follow-up items noted inside directives that carry into future sessions:
 - [x] Leistungen hero set — resolved 2026-06-17: `HeroGraphCluster` (Business Coaching, clustering-coefficient) and `HeroGraphHubs` (Expert Consulting, centrality & hubs) built, recorded, and deployed; all three service pages now have bespoke animated heroes.
 - [x] Commit all unstaged work to git on branch `doe` — resolved 2026-06-18: commit `b2aefc2` ("feat(xoxocom): bilingual DE/EN site with instant language toggle"), 26 files; `.claude/` and `CLAUDE.md` remain gitignored by design.
 - [x] Deploy bilingual XoXoCom to Netlify — resolved 2026-06-18: deployed live, cookie-driven SSR verified in production at https://xoxocom-ug.netlify.app.
-- [ ] AutoResearch SEO — connect canonical domain `www.xoxocom.net` to Netlify and set `NEXT_PUBLIC_SITE_URL=https://www.xoxocom.net` as a Netlify env var. Until done, canonical/OG URLs are not meaningful in production.
-- [ ] AutoResearch SEO — create Google Search Console property for `www.xoxocom.net`, verify ownership (set `GOOGLE_SITE_VERIFICATION=<token>` in Netlify env), submit `https://www.xoxocom.net/sitemap.xml`.
-- [ ] AutoResearch SEO — commit SEO infrastructure files (`sites/xoxocom/lib/seo.ts`, `app/sitemap.ts`, `app/robots.ts`, `app/opengraph-image.tsx`, updated page.tsx files) to git on branch `doe`.
+- [ ] MAtfIT fake-door — `components/LegalShell.tsx` still renders the campaign signature `lm-matfit-fakedoor-3f9c1a` in the legal-pages footer. Edit that component if full visual removal is desired (user only requested landing + thank-you removal).
+- [x] AutoResearch SEO — connect canonical domain `www.xoxocom.net` to Netlify — resolved 2026-06-26: apex A → 75.2.60.5; www CNAME → xoxocom-ug.netlify.app; Netlify primary domain set to www.xoxocom.net; TLS cert provisioned (expires 2026-09-27); https://www.xoxocom.net live and verified.
+- [x] AutoResearch SEO — set `NEXT_PUBLIC_SITE_URL` Netlify env var — resolved 2026-06-26: not required; `site.config.json` `site_url` is the single source of truth; `NEXT_PUBLIC_SITE_URL` overrides it if set but is not needed.
+- [x] AutoResearch SEO — commit SEO infrastructure files (`sites/xoxocom/lib/seo.ts`, `app/sitemap.ts`, `app/robots.ts`, `app/opengraph-image.tsx`, updated page.tsx files) to git on branch `doe` — resolved 2026-06-25: committed as part of commits 264e865 and 6ea5568, deployed 2026-06-26.
+- [x] AutoResearch SEO — set `GOOGLE_SITE_VERIFICATION=<token>` as a Netlify production env var — resolved 2026-06-26: env var set on `xoxocom-ug`, redeployed, verification meta tag confirmed live in production HTML.
+- [x] AutoResearch SEO — Google Search Console verification — resolved 2026-06-26: confirmed complete via Bing Webmaster Tools successfully importing the verified `www.xoxocom.net` property from GSC.
+- [x] AutoResearch SEO — Bing Webmaster Tools setup — resolved 2026-06-26: site verified via GSC import; sitemap `https://www.xoxocom.net/sitemap.xml` submitted, Status = Success, 0 errors/warnings, 10 URLs discovered.
+- [ ] AutoResearch SEO — optional: URL Inspection → Request Indexing in GSC for the homepage and priority pages (/produkte, /leistungen/ai-transformation, /ueber-uns, /kontakt).
+- [x] `deploy_to_netlify.md` DNS-ordering-lesson reconciliation — resolved 2026-06-26: directive gained a "Connecting an externally-hosted custom domain" Process subsection and a new Edge Case for the 422 Unprocessable Entity failure with the correct DNS-first sequence.
+- [ ] XoXoCom — deploy commit `61c5aea` (site signature removed from footer + head meta) to Netlify production, pending user go-ahead.
+- [ ] XoXoCom — commit and deploy the reworded home "About us" copy (`sites/xoxocom/lib/copy.ts`, DE + EN), pending user go-ahead.
+- [ ] AutoResearch Speed — capture the live PSI/Lighthouse BASELINE bookend against https://www.xoxocom.net before deploying the optimized (87.43) build — keyless PSI API quota was exhausted 2026-07-07; retry after quota reset or use pagespeed.web.dev manually; record mobile Performance + LCP/TBT/CLS in `execution/autoresearch/program/speed.md`'s Bookends section. Must happen BEFORE the next deploy — deploying first destroys the "before" measurement.
+- [ ] AutoResearch Speed — deploy the optimized XoXoCom build (commits `718b515`…`943a165`, score 87.43) via `directives/deploy_to_netlify.md`, then capture the after-bookend in `program/speed.md`.
+- [ ] AutoResearch — decide whether to commit the currently-untracked `execution/autoresearch/EXPLAINER.md`, and extend it with a plain-language speed section once before/after PSI numbers exist.
+- [ ] AutoResearch Speed — optional runtime-only hygiene: pause hero canvas `requestAnimationFrame` loops via `IntersectionObserver` when scrolled offscreen (byte-invisible, not scored by `score_speed.py`).
 - [ ] Optional future: locale-routed `app/[locale]/` with `hreflang` + per-locale metadata — needs user sign-off before a new directive is written.
 - [ ] Verify Stop hook is active: user should open the `/hooks` settings panel or restart Claude Code once so the new `.claude/settings.json` is picked up by the settings-file watcher.
 - [ ] `execution/deploy_netlify.py` does not yet automate the OneDrive external-build workaround — currently a manual procedure (documented in `deploy_to_netlify.md` Error Handling). Possible future improvement.
