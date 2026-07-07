@@ -1,3 +1,4 @@
 iter	timestamp	hypothesis	score	prev_best	decision	commit
 1	2026-07-07 17:43:22	baseline (frozen byte budgets, prod build via serve_prod.py)	86.13	0.0	kept	718b515
 2	2026-07-07 17:49:21	lazy-load 3 canvas heroes via next/dynamic ssr:false (4 content components)	86.17	86.13	kept	c43bf87
+3	2026-07-07 17:52:56	i18n server-side for /ueber-uns (getCopy cookie helper); provider router.refresh on toggle	86.54	86.17	kept	c4fa2ea

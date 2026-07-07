@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { COPY, LANG_COOKIE, type Copy, type Lang } from "@/lib/copy";
 
 /**
@@ -24,13 +25,23 @@ const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 export function LanguageProvider({ children, initialLang = "de" }: { children: ReactNode; initialLang?: Lang }) {
   const [lang, setLangState] = useState<Lang>(initialLang);
+  const router = useRouter();
+  const mounted = useRef(false);
 
   // Persist the choice in a cookie (so the server renders the right language on
-  // the next request) and reflect it on <html lang> for a11y/SEO.
+  // the next request) and reflect it on <html lang> for a11y/SEO. After the cookie
+  // is written, router.refresh() re-renders server components with the new cookie —
+  // pages whose copy is server-rendered (via lib/server-copy.ts) switch language
+  // too, not just the client-context consumers. Skipped on initial mount (the
+  // server already rendered with the saved cookie).
   useEffect(() => {
     document.documentElement.lang = lang;
     document.cookie = `${LANG_COOKIE}=${lang};path=/;max-age=31536000;samesite=lax`;
-  }, [lang]);
+    if (mounted.current) {
+      router.refresh();
+    }
+    mounted.current = true;
+  }, [lang, router]);
 
   const setLang = useCallback((l: Lang) => setLangState(l), []);
   const toggle = useCallback(() => setLangState((p) => (p === "de" ? "en" : "de")), []);
