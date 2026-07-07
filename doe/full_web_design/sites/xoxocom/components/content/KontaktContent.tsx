@@ -1,12 +1,10 @@
-"use client";
-
 import { site } from "@/lib/config";
-import { useLang } from "@/lib/i18n";
+import { getCopy } from "@/lib/server-copy";
 import ContactForm from "@/components/ContactForm";
 import SmartLink from "@/components/SmartLink";
 
-export default function KontaktContent() {
-  const { c } = useLang();
+export default async function KontaktContent() {
+  const { c } = await getCopy();
   const t = c.kontakt;
 
   return (
@@ -29,7 +27,7 @@ export default function KontaktContent() {
         </div>
 
         <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6 md:p-8">
-          <ContactForm />
+          <ContactForm t={c.contact} />
         </div>
       </div>
     </main>

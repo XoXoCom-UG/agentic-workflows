@@ -3,7 +3,7 @@ import { Manrope } from "next/font/google";
 import { cookies } from "next/headers";
 import { site, SITE_URL } from "@/lib/config";
 import { LanguageProvider } from "@/lib/i18n";
-import { LANG_COOKIE, type Lang } from "@/lib/copy";
+import { COPY, LANG_COOKIE, type Lang } from "@/lib/copy";
 import { DEFAULT_OG_LOCALE, ALTERNATE_OG_LOCALE, OG_IMAGE, organizationJsonLd } from "@/lib/seo";
 import SiteHeader from "@/components/SiteHeader";
 import Footer from "@/components/Footer";
@@ -59,6 +59,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const cookieStore = await cookies();
   const saved = cookieStore.get(LANG_COOKIE)?.value;
   const initialLang: Lang = saved === "en" ? "en" : "de";
+  // Header copy is passed down as props (server → client), so the bilingual COPY
+  // tree itself never ships in the client bundle; on toggle, router.refresh()
+  // re-renders this layout with the new cookie and fresh props.
+  const c = COPY[initialLang];
 
   return (
     <html lang={initialLang} className={manrope.variable}>
@@ -68,7 +72,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
         />
         <LanguageProvider initialLang={initialLang}>
-          <SiteHeader />
+          <SiteHeader nav={c.nav} header={c.header} cta={c.cta} langToggle={c.langToggle} />
           <div className="flex-1">{children}</div>
           <Footer />
         </LanguageProvider>

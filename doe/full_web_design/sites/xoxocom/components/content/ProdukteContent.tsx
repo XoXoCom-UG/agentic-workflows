@@ -1,10 +1,8 @@
-"use client";
-
-import { useLang } from "@/lib/i18n";
+import { getCopy } from "@/lib/server-copy";
 import SmartLink from "@/components/SmartLink";
 
-export default function ProdukteContent() {
-  const { c } = useLang();
+export default async function ProdukteContent() {
+  const { c } = await getCopy();
   const t = c.produkte;
 
   return (

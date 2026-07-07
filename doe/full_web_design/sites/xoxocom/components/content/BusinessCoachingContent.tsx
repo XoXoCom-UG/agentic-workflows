@@ -1,15 +1,9 @@
-"use client";
-
-import { useLang } from "@/lib/i18n";
-import dynamic from "next/dynamic";
-
-// Decorative canvas animation — loaded after hydration so its chunk stays out of
-// the first-load bundle; ssr:false is safe (absolute overlay, no layout impact).
-const HeroGraphCluster = dynamic(() => import("@/components/HeroGraphCluster"), { ssr: false });
+import { getCopy } from "@/lib/server-copy";
+import LazyHero from "@/components/LazyHero";
 import SmartLink from "@/components/SmartLink";
 
-export default function BusinessCoachingContent() {
-  const { c } = useLang();
+export default async function BusinessCoachingContent() {
+  const { c } = await getCopy();
   const t = c.businessCoaching;
 
   return (
@@ -18,7 +12,7 @@ export default function BusinessCoachingContent() {
         {/* Animated 3D node network visualising the local clustering coefficient — a
             focal node's neighbourhood closes into tight triangles. Reads CSS tokens
             at runtime, so it sits seamlessly on the page background. */}
-        <HeroGraphCluster className="pointer-events-none absolute inset-0 h-full w-full opacity-80" />
+        <LazyHero variant="cluster" className="pointer-events-none absolute inset-0 h-full w-full opacity-80" />
         {/* Text-protection scrim: softly darkens the centre so the headline stays crisp
             over the animation, while the network still reads toward the edges. */}
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(46%_56%_at_50%_46%,var(--color-bg)_22%,transparent_82%)]" />

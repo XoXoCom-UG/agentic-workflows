@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { COPY, LANG_COOKIE, type Copy, type Lang } from "@/lib/copy";
+import { LANG_COOKIE, type Lang } from "@/lib/copy";
 
 /**
  * Client-side language context. The active language is seeded by the server from
@@ -14,11 +14,13 @@ import { COPY, LANG_COOKIE, type Copy, type Lang } from "@/lib/copy";
  * survives route changes, so there is no per-navigation reload or re-translate.
  */
 
+// Deliberately holds NO copy: components get their strings from server parents
+// (props or lib/server-copy.ts), so the bilingual COPY tree stays out of the
+// client bundle. This context only tracks/sets the active language.
 type LanguageContextValue = {
   lang: Lang;
   setLang: (l: Lang) => void;
   toggle: () => void;
-  c: Copy;
 };
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
@@ -47,7 +49,7 @@ export function LanguageProvider({ children, initialLang = "de" }: { children: R
   const toggle = useCallback(() => setLangState((p) => (p === "de" ? "en" : "de")), []);
 
   return (
-    <LanguageContext.Provider value={{ lang, setLang, toggle, c: COPY[lang] }}>
+    <LanguageContext.Provider value={{ lang, setLang, toggle }}>
       {children}
     </LanguageContext.Provider>
   );

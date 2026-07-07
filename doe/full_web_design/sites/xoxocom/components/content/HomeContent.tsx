@@ -1,15 +1,9 @@
-"use client";
-
-import dynamic from "next/dynamic";
-import { useLang } from "@/lib/i18n";
+import { getCopy } from "@/lib/server-copy";
+import LazyHero from "@/components/LazyHero";
 import SmartLink from "@/components/SmartLink";
 
-// Decorative canvas animation — loaded after hydration so its chunk stays out of
-// the first-load bundle; ssr:false is safe (absolute overlay, no layout impact).
-const HeroGraph = dynamic(() => import("@/components/HeroGraph"), { ssr: false });
-
-export default function HomeContent() {
-  const { c } = useLang();
+export default async function HomeContent() {
+  const { c } = await getCopy();
   const t = c.home;
 
   return (
@@ -18,7 +12,7 @@ export default function HomeContent() {
       <section className="relative overflow-hidden px-6 md:px-10 lg:px-12 py-28 md:py-36">
         {/* Animated 3D node network — shortest path highlighted in the brand accent.
             Reads CSS tokens at runtime, so it sits seamlessly on the page background. */}
-        <HeroGraph className="pointer-events-none absolute inset-0 h-full w-full opacity-80" />
+        <LazyHero variant="graph" className="pointer-events-none absolute inset-0 h-full w-full opacity-80" />
         {/* Text-protection scrim: softly darkens the centre so the headline stays crisp
             over the animation, while the network still reads toward the edges. */}
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(46%_56%_at_50%_46%,var(--color-bg)_22%,transparent_82%)]" />

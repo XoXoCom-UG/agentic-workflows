@@ -1,13 +1,12 @@
-"use client";
-
 import { site, SOCIALS } from "@/lib/config";
-import { useLang } from "@/lib/i18n";
+import { getCopy } from "@/lib/server-copy";
 import FooterLinks from "@/components/FooterLinks";
 
 /** Site-wide footer (rendered once in app/layout.tsx). Copyright (left),
- *  socials (middle), legal links (right) — per the brief. */
-export default function Footer() {
-  const { c } = useLang();
+ *  socials (middle), legal links (right) — per the brief. Server component:
+ *  it has no interactivity, so its copy ships as HTML only. */
+export default async function Footer() {
+  const { c } = await getCopy();
   const year = new Date().getFullYear();
   return (
     <footer className="mt-auto border-t border-border bg-surface">

@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { useLang } from "@/lib/i18n";
 import type { Copy } from "@/lib/copy";
 import SmartLink from "@/components/SmartLink";
 
@@ -21,9 +20,9 @@ const FIELDS: FieldMeta[] = [
 const FIELD_CLASS =
   "w-full px-3.5 py-2.5 rounded-[var(--radius-card)] border border-border bg-bg text-fg placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent";
 
-export default function ContactForm() {
-  const { c } = useLang();
-  const t = c.contact;
+// Labels/messages arrive as props from the server-rendered KontaktContent, so the
+// bilingual copy tree stays out of the client bundle (see lib/server-copy.ts).
+export default function ContactForm({ t }: { t: Copy["contact"] }) {
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 

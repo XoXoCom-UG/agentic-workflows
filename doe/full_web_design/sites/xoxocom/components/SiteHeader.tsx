@@ -2,10 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { site } from "@/lib/config";
-import { useLang } from "@/lib/i18n";
-import { type NavItem } from "@/lib/copy";
+import type { Copy, NavItem } from "@/lib/copy";
 import LangToggle from "@/components/LangToggle";
 import SmartLink from "@/components/SmartLink";
+
+// All copy arrives as props from the server-rendered layout (in the language the
+// cookie selected), so the bilingual copy tree stays out of the client bundle.
+// After a toggle the provider's router.refresh() re-renders the layout server-side,
+// which supplies fresh props in the new language.
+type SiteHeaderProps = {
+  nav: NavItem[];
+  header: Copy["header"];
+  cta: Copy["cta"];
+  langToggle: Copy["langToggle"];
+};
 
 function DesktopNavEntry({ item }: { item: NavItem }) {
   const [open, setOpen] = useState(false);
@@ -73,8 +83,7 @@ function DesktopNavEntry({ item }: { item: NavItem }) {
   );
 }
 
-export default function SiteHeader() {
-  const { c } = useLang();
+export default function SiteHeader({ nav, header, cta, langToggle }: SiteHeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const close = () => setMobileOpen(false);
@@ -100,13 +109,13 @@ export default function SiteHeader() {
       }`}
     >
       <div className="mx-auto max-w-7xl px-6 md:px-10 lg:px-12 py-4 flex items-center justify-between gap-6">
-        <SmartLink href="/" aria-label={`${site.company} — ${c.header.homeAria}`} className="text-lg font-extrabold tracking-tight text-fg" onClick={close}>
+        <SmartLink href="/" aria-label={`${site.company} — ${header.homeAria}`} className="text-lg font-extrabold tracking-tight text-fg" onClick={close}>
           Xo<span className="text-accent">Xo</span>Com
         </SmartLink>
 
         {/* Desktop navigation */}
-        <nav aria-label={c.header.navAria} className="hidden md:flex items-center gap-7">
-          {c.nav.map((item) => (
+        <nav aria-label={header.navAria} className="hidden md:flex items-center gap-7">
+          {nav.map((item) => (
             <DesktopNavEntry key={item.label} item={item} />
           ))}
         </nav>
@@ -115,19 +124,19 @@ export default function SiteHeader() {
           {/* Language toggle lives only in the header — at every breakpoint
               (desktop, split, mobile). It is deliberately NOT repeated in the
               mobile hamburger menu. */}
-          <LangToggle />
+          <LangToggle t={langToggle} />
           <SmartLink
-            href={c.cta.href}
+            href={cta.href}
             className="hidden md:inline-flex items-center rounded-[var(--radius-card)] bg-accent px-4 py-2 text-sm font-semibold text-accent-fg transition hover:opacity-90"
           >
-            {c.cta.label}
+            {cta.label}
           </SmartLink>
 
           {/* Mobile hamburger */}
           <button
             type="button"
             className="md:hidden inline-flex items-center justify-center rounded-lg p-2 text-fg transition-colors hover:bg-surface"
-            aria-label={mobileOpen ? c.header.menuClose : c.header.menuOpen}
+            aria-label={mobileOpen ? header.menuClose : header.menuOpen}
             aria-expanded={mobileOpen}
             aria-controls="mobile-menu"
             onClick={() => setMobileOpen((v) => !v)}
@@ -148,8 +157,8 @@ export default function SiteHeader() {
       {/* Mobile menu panel */}
       {mobileOpen && (
         <div id="mobile-menu" className="md:hidden border-t border-border bg-bg/95 backdrop-blur-md">
-          <nav aria-label={c.header.mobileNavAria} className="mx-auto max-w-7xl px-6 py-5 flex flex-col">
-            {c.nav.map((item) => (
+          <nav aria-label={header.mobileNavAria} className="mx-auto max-w-7xl px-6 py-5 flex flex-col">
+            {nav.map((item) => (
               <div key={item.label} className="border-b border-border/60 py-2 last:border-0">
                 {item.href ? (
                   <SmartLink href={item.href} onClick={close} className="block py-2 text-base font-semibold text-fg">
@@ -178,11 +187,11 @@ export default function SiteHeader() {
             ))}
 
             <SmartLink
-              href={c.cta.href}
+              href={cta.href}
               onClick={close}
               className="mt-5 inline-flex items-center justify-center rounded-[var(--radius-card)] bg-accent px-5 py-3 font-semibold text-accent-fg transition hover:opacity-90"
             >
-              {c.cta.label}
+              {cta.label}
             </SmartLink>
           </nav>
         </div>
