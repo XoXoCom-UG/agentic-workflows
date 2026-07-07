@@ -44,6 +44,16 @@ vars in place, and return the live URL to the user.
 
 Skip steps 1 and 2. Re-run `python execution/deploy_netlify.py --slug <slug>`. Env vars are re-set every time so config drift can't accumulate.
 
+### Connecting an externally-hosted custom domain
+
+Use this when the domain is registered elsewhere and its DNS is not managed by Netlify (Netlify's `dns_zone_id` for the domain is null). Do the DNS work first — Netlify cannot verify ownership or issue a certificate for a domain that doesn't yet resolve to it.
+
+1. Confirm `sites/<slug>/site.config.json`'s `site_url` already holds the final domain (e.g. `https://www.xoxocom.net`). This is the single source of truth: `lib/config.ts` reads it into `SITE_URL` (with an optional `NEXT_PUBLIC_SITE_URL` env override), which feeds `metadataBase`, `robots.ts`, `sitemap.ts`, canonical tags, and JSON-LD. If it's already correct, connecting the domain requires no code change.
+2. At the registrar, point the domain at Netlify: apex `@` → A record `75.2.60.5` (Netlify's load balancer); `www` → CNAME `<netlify-site-name>.netlify.app`.
+3. Wait for propagation and confirm against a public resolver, e.g. `nslookup <domain> 8.8.8.8` — the apex should resolve to `75.2.60.5`.
+4. Only once DNS resolves, set the Netlify primary domain (`custom_domain`, e.g. `www.xoxocom.net`) and domain alias (`xoxocom.net`), then provision the TLS certificate. Netlify creates the apex → `www` redirect automatically.
+5. Redeploy (`python execution/deploy_netlify.py --slug <slug>`) so `robots.txt`, `sitemap.xml`, the Open Graph image route, and canonical URLs rebuild against the live domain. A build made before the domain was connected will 404 those routes when requested through the new domain.
+
 ## Per-site Netlify env vars
 
 Pushed by `deploy_netlify.py`:
@@ -76,6 +86,7 @@ A brochure site with `has_contact_form: false` pushes only `SITE_SLUG` + `COMPAN
 - **Submit 500s on a fresh table without the unique index**: the `/api/submit` route upserts with `onConflict: "campaign_slug,email"`, which requires a UNIQUE index on `(campaign_slug, email)`. If it is missing, every submit fails with `error: "db"`. Run `execution/add_prospects_dedup_constraint.py` once (de-dupes existing rows + creates the index). See `capture_contact_submission.md`.
 - **Page 500s on submit**: ~90% of the time a missing env var or a `LEAD_COLUMNS` typo. Check `netlify functions:log submit`.
 - **OneDrive intermittent build failures (repo lives under a synced OneDrive folder)**: `next build` — and therefore `netlify deploy --prod`, which rebuilds via `@netlify/plugin-nextjs` — fails intermittently because OneDrive dehydrates or locks freshly written `.next/server` and `.next/standalone/node_modules` files between write and read. Symptoms vary randomly by run: `Cannot find module for page: /<route>` (ENOENT) during "Collecting page data"; `<Html> should not be imported outside of pages/_document` while prerendering `/500` or `/_error`; `lstat ... ENOENT` during the plugin's `onBuild` copy of `.next/standalone`. Merely pausing OneDrive's watchdog process helps the local build but does not reliably fix the deploy's standalone-copy step. The dependable fix is to build and deploy from a copy outside OneDrive — see the Error Handling section below.
+- **Setting the Netlify primary domain or SSL cert before DNS resolves**: for an externally-hosted domain (registrar DNS, Netlify `dns_zone_id` null), calling Netlify to set `custom_domain` or provision the TLS certificate before the registrar's DNS records actually point at Netlify fails with `422 Unprocessable Entity` — Netlify can't verify ownership yet. Fix the DNS records at the registrar first (apex → A `75.2.60.5`, `www` → CNAME `<netlify-site-name>.netlify.app`), wait for propagation, then retry. See "Connecting an externally-hosted custom domain" above.
 
 ## Error Handling
 
@@ -89,3 +100,4 @@ A brochure site with `has_contact_form: false` pushes only `SITE_SLUG` + `COMPAN
   4. Because Netlify env vars were already set by a previous run of `deploy_netlify.py`, the env:set step does not need to be repeated for this workaround deploy.
   5. After the deploy completes, relaunch OneDrive if you stopped it (`OneDrive.exe /background`).
   Note: this is currently a manual procedure. The `execution/deploy_netlify.py` script does not yet automate the external-build copy; that is a possible future improvement.
+  - **Partial automation now exists for build verification**: `execution/autoresearch/serve_prod.py` (built for the speed AutoResearch loop — see `directives/auto_optimize_speed.md`) automates the copy-and-build half of this procedure: `python execution/autoresearch/serve_prod.py up --slug <slug>` mirrors `sites/<slug>/` to `C:\xoxo-build\<slug>-speed` via robocopy `/MIR` (excluding `node_modules`, `.next`, `.netlify`), runs a hash-cached `npm ci`, and runs `next build` + `next start` outside OneDrive — a fast way to confirm a build succeeds before deploying. It does not run `netlify deploy`; the actual deploy still follows the manual steps above (`netlify link`, `NETLIFY_AUTH_TOKEN`, `netlify deploy --prod`) against the standard build directory, not the `-speed` copy.
