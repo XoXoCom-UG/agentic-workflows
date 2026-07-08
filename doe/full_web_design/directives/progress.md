@@ -46,6 +46,8 @@ Outstanding items: XoXoCom signature-removal commit `61c5aea` AND the reworded h
 
 **Git state:** `execution/autoresearch/program/speed.md` committed at `68c2c0a`. `execution/autoresearch/EXPLAINER.md` remains untracked — it still needs a plain-language speed section now that both bookends exist (open item, carried forward).
 
+**Post-edit verification (documenter pass):** re-read `directives/deploy_to_netlify.md` and `directives/auto_optimize_speed.md` end-to-end after the taskkill/T and Lighthouse-fallback edits above — both reconcile cleanly with each other and with the code (Inputs/Process/Edge Cases/Error Handling stay mutually consistent); no further edits were needed.
+
 ---
 
 ### 2026-07-07 18:15
