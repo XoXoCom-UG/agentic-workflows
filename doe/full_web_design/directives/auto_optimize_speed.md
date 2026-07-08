@@ -103,6 +103,8 @@ This stops the recorded server (or, if the state file was lost, sweeps ports 310
 
 Before the first iteration and again after the final deploy, run PageSpeed Insights (`https://pagespeed.web.dev`, free) against the **live** URL and record mobile Performance + LCP/TBT/CLS in `program/speed.md`'s "Bookends" section. This validates that the byte savings produced real Lighthouse gains — it is never used as the loop's keep/revert signal.
 
+If both the keyless PSI API and the `pagespeed.web.dev` browser UI are unavailable (quota exhausted, or `npx lighthouse`'s own Chrome launcher crashes on this machine — see the Edge Case below), fall back to local Lighthouse against a manually-launched Chrome: start Chrome with `--remote-debugging-port=<port>`, then run `npx lighthouse <url> --port=<port>` so Lighthouse attaches to that already-running instance instead of spawning its own. This was the method used to capture the 92→96 bookend against the live XoXoCom site.
+
 ### Step 8 — Deploy
 
 Once the score plateaus, deploy the committed changes via the existing `directives/deploy_to_netlify.md` workflow.
@@ -131,7 +133,7 @@ Once the score plateaus, deploy the committed changes via the existing `directiv
 
 **Byte-scorer blindness to runtime behavior.** The scorer measures bytes, not behavior. After any i18n/hydration refactor (e.g. converting content components to server components), manually verify the language toggle, the contact form, and the hero canvas animations in a browser — a broken toggle or non-functional form would NOT fail any byte check.
 
-**Keyless PageSpeed Insights API quota.** If scripting the bookend via the free PSI API rather than the browser UI, the keyless quota can be exhausted. Retry the next day, or use `pagespeed.web.dev` directly in a browser, which has no quota.
+**Keyless PageSpeed Insights API quota.** If scripting the bookend via the free PSI API rather than the browser UI, the keyless quota can be exhausted — observed exhausted on two consecutive days on this machine. Retry the next day, or use `pagespeed.web.dev` directly in a browser, which has no quota. If `npx lighthouse` is used directly instead, its bundled chrome-launcher has been observed crashing on this machine with "Session closed" errors when it tries to spawn its own Chrome — work around this by launching Chrome manually with `--remote-debugging-port=<port>` first and passing `--port=<port>` to `npx lighthouse` so it attaches to that instance rather than spawning one. Two separate Chrome instances on two different ports can be kept running side by side to capture a before/after pair without tearing either down between runs.
 
 **SEO regression from a speed change.** `score_speed.py` re-runs `score_seo.py` against the same server as a hard gate and fails (`passed=false`) unless SEO is still exactly 100. This was verified by deliberately deleting `robots.ts`, which correctly produced `passed=false`. Experiment #2 must never silently undo experiment #1's win — if this gate fails, the SEO regression must be fixed (or the speed change reverted) before continuing.
 
