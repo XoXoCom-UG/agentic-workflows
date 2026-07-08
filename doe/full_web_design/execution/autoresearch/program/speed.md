@@ -98,5 +98,20 @@ Before iteration 1 and again after the final deploy, run PageSpeed Insights
 Performance + LCP/TBT/CLS below. This validates that byte savings became real
 Lighthouse gains — Lighthouse's run-to-run noise is why it is NOT the loop metric.
 
-- Baseline PSI (pre-optimization): _to be recorded_
-- Final PSI (post-deploy): _to be recorded_
+- Baseline (2026-07-08, local Lighthouse mobile, https://www.xoxocom.net,
+  pre-optimization live deploy — commit 718b515): **92/100** performance.
+  LCP 1.6s, TBT 160ms, CLS 0.125, FCP 1.5s, Speed Index 3.4s.
+  (Keyless PageSpeed Insights API quota was exhausted both days; measured with
+  `npx lighthouse --port=<debug-port>` against a manually-launched headless
+  Chrome instead — Lighthouse's own chrome-launcher crashed with "Session
+  closed" on this machine, but pointing it at an already-running Chrome via
+  `--remote-debugging-port` worked.)
+- Final (2026-07-08, local Lighthouse mobile, https://www.xoxocom.net,
+  post-deploy — commit 943a165, deployed via the OneDrive external-build
+  workaround after the in-place deploy 500'd on `/` due to OneDrive build
+  corruption — see progress.md): **96/100** performance (+4).
+  LCP 1.2s (-0.4s), FCP 1.1s (-0.4s), Speed Index 2.5s (-0.9s), CLS 0
+  (-0.125). TBT 230ms (+70ms — within Lighthouse's normal run-to-run noise;
+  exactly why Lighthouse is a bookend, not the loop metric). Net: the
+  86.13→87.43 byte-budget improvement translated into a real, measurable
+  Lighthouse gain on the live site.
