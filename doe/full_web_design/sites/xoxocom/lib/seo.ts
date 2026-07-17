@@ -69,7 +69,9 @@ export function buildMetadata({
       locale,
       alternateLocale,
       type: "website",
-      images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: title }],
+      // og:image:type helps scrapers (notably WhatsApp) reliably render the
+      // large-format preview instead of falling back to a small thumbnail.
+      images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: title, type: "image/png" }],
     },
     twitter: {
       card: "summary_large_image",

@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     locale: DEFAULT_OG_LOCALE,
     alternateLocale: ALTERNATE_OG_LOCALE,
     type: "website",
-    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: `${site.company} — ${site.tagline}` }],
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: `${site.company} — ${site.tagline}`, type: "image/png" }],
   },
   twitter: {
     card: "summary_large_image",
