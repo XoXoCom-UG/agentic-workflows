@@ -45,10 +45,10 @@ export default function OpengraphImage() {
             maxWidth: "950px",
           }}
         >
-          Moderne Arbeitsweisen und A.I. gewinnbringend vereinen
+          Uniting modern ways of working with artificial intelligence
         </div>
         <div style={{ marginTop: "44px", fontSize: "30px", color: MUTED, maxWidth: "880px" }}>
-          Coaching · Projekteinsätze · A.I. Transformation für Teams und Unternehmen
+          Coaching · Project placements · A.I. transformation for teams and companies
         </div>
       </div>
     ),

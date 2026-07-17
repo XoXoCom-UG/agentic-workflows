@@ -1,10 +1,10 @@
 {
   "slug": "xoxocom",
   "company": "XoXoCom UG",
-  "tagline": "Moderne Arbeitsweisen und A.I. gewinnbringend vereinen",
+  "tagline": "Uniting modern ways of working with A.I.",
   "site_url": "https://www.xoxocom.net",
   "design_source": "binance",
-  "language": "de",
+  "language": "en",
   "pages": ["home", "produkte", "leistungen", "ueber-uns", "kontakt"],
   "has_contact_form": true,
   "contact_email": "info@xoxocom.net",
