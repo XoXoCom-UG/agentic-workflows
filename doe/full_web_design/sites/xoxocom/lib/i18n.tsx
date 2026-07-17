@@ -1,8 +1,8 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
-import { LANG_COOKIE, type Lang } from "@/lib/copy";
+import { usePathname, useRouter } from "next/navigation";
+import { LANG_COOKIE, isLegalPath, type Lang } from "@/lib/copy";
 
 /**
  * Client-side language context. The active language is seeded by the server from
@@ -25,19 +25,27 @@ type LanguageContextValue = {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-export function LanguageProvider({ children, initialLang = "de" }: { children: ReactNode; initialLang?: Lang }) {
+export function LanguageProvider({ children, initialLang = "en" }: { children: ReactNode; initialLang?: Lang }) {
   const [lang, setLangState] = useState<Lang>(initialLang);
   const router = useRouter();
+  const pathname = usePathname();
   const mounted = useRef(false);
 
-  // Persist the choice in a cookie (so the server renders the right language on
-  // the next request) and reflect it on <html lang> for a11y/SEO. After the cookie
-  // is written, router.refresh() re-renders server components with the new cookie —
-  // pages whose copy is server-rendered (via lib/server-copy.ts) switch language
-  // too, not just the client-context consumers. Skipped on initial mount (the
-  // server already rendered with the saved cookie).
+  // Keep <html lang> in sync with the page's actual content language: the German-only
+  // legal pages stay "de" regardless of the chosen chrome language (matching the
+  // server-rendered value from app/layout.tsx), everything else follows `lang`. Runs
+  // on both language and route changes — a cheap DOM write, no server round-trip.
   useEffect(() => {
-    document.documentElement.lang = lang;
+    document.documentElement.lang = isLegalPath(pathname) ? "de" : lang;
+  }, [lang, pathname]);
+
+  // Persist the choice in a cookie (so the server renders the right language on the
+  // next request). After the cookie is written, router.refresh() re-renders server
+  // components with the new cookie — pages whose copy is server-rendered (via
+  // lib/server-copy.ts) switch language too, not just the client-context consumers.
+  // Skipped on initial mount (the server already rendered with the saved cookie); it
+  // depends only on `lang`, so a plain client-side navigation never triggers a refresh.
+  useEffect(() => {
     document.cookie = `${LANG_COOKIE}=${lang};path=/;max-age=31536000;samesite=lax`;
     if (mounted.current) {
       router.refresh();

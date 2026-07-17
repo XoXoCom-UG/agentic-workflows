@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { site, SITE_URL } from "@/lib/config";
 import { LanguageProvider } from "@/lib/i18n";
-import { COPY, LANG_COOKIE, type Lang } from "@/lib/copy";
+import { COPY, LANG_COOKIE, isLegalPath, type Lang } from "@/lib/copy";
 import { DEFAULT_OG_LOCALE, ALTERNATE_OG_LOCALE, OG_IMAGE, organizationJsonLd } from "@/lib/seo";
 import SiteHeader from "@/components/SiteHeader";
 import Footer from "@/components/Footer";
@@ -17,7 +17,7 @@ const manrope = Manrope({
 });
 
 const DEFAULT_DESCRIPTION =
-  "XoXoCom UG verbindet moderne, agile Arbeitsweisen mit künstlicher Intelligenz — Coaching, Projekteinsätze und A.I. Transformation für Teams und Unternehmen.";
+  "XoXoCom UG combines modern, agile ways of working with artificial intelligence — coaching, project placements, and A.I. transformation for teams and businesses.";
 
 // metadataBase resolves every relative canonical/og:url/og:image to an absolute URL.
 // The default openGraph/twitter blocks below act as the site-wide fallback; each page
@@ -58,20 +58,29 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
   const saved = cookieStore.get(LANG_COOKIE)?.value;
-  const initialLang: Lang = saved === "en" ? "en" : "de";
+  // Site default is English; the cookie only overrides to German once a visitor
+  // explicitly toggles. `chromeLang` drives the bilingual chrome (nav/footer/CTAs)
+  // and the language context.
+  const chromeLang: Lang = saved === "de" ? "de" : "en";
+  // `<html lang>` follows the page's actual content language: the German-only legal
+  // pages are always "de" (so a cookieless crawler never sees German legal content
+  // labelled as English), everything else follows the chosen chrome language. The
+  // pathname comes from middleware.ts via the x-pathname header.
+  const pathname = (await headers()).get("x-pathname") ?? "";
+  const htmlLang: Lang = isLegalPath(pathname) ? "de" : chromeLang;
   // Header copy is passed down as props (server → client), so the bilingual COPY
   // tree itself never ships in the client bundle; on toggle, router.refresh()
   // re-renders this layout with the new cookie and fresh props.
-  const c = COPY[initialLang];
+  const c = COPY[chromeLang];
 
   return (
-    <html lang={initialLang} className={manrope.variable}>
+    <html lang={htmlLang} className={manrope.variable}>
       <body className="min-h-screen flex flex-col bg-bg text-fg">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
         />
-        <LanguageProvider initialLang={initialLang}>
+        <LanguageProvider initialLang={chromeLang}>
           <SiteHeader nav={c.nav} header={c.header} cta={c.cta} langToggle={c.langToggle} />
           <div className="flex-1">{children}</div>
           <Footer />

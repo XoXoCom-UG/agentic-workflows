@@ -17,19 +17,19 @@ export default function LangToggle({ t, className = "" }: { t: Copy["langToggle"
     >
       <button
         type="button"
-        onClick={() => setLang("de")}
-        aria-pressed={lang === "de"}
-        className={`${base} ${lang === "de" ? "bg-accent text-accent-fg" : "text-muted hover:text-fg"}`}
-      >
-        {t.de}
-      </button>
-      <button
-        type="button"
         onClick={() => setLang("en")}
         aria-pressed={lang === "en"}
         className={`${base} ${lang === "en" ? "bg-accent text-accent-fg" : "text-muted hover:text-fg"}`}
       >
         {t.en}
+      </button>
+      <button
+        type="button"
+        onClick={() => setLang("de")}
+        aria-pressed={lang === "de"}
+        className={`${base} ${lang === "de" ? "bg-accent text-accent-fg" : "text-muted hover:text-fg"}`}
+      >
+        {t.de}
       </button>
     </div>
   );

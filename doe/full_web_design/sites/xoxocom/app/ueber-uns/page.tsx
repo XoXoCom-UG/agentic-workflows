@@ -3,9 +3,9 @@ import { buildMetadata } from "@/lib/seo";
 import UeberUnsContent from "@/components/content/UeberUnsContent";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Über uns — Das Team hinter XoXoCom UG",
+  title: "About Us — The Team Behind XoXoCom UG",
   description:
-    "XoXoCom UG ist ein junges Team für die wirtschaftliche und technische Beratung von A.I.-Implementierung — agile Methodik vereint mit künstlicher Intelligenz.",
+    "XoXoCom UG is a young team for the business and technical consulting of A.I. implementation — agile methodology combined with artificial intelligence.",
   path: "/ueber-uns",
 });
 

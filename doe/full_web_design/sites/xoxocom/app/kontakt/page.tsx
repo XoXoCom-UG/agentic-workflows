@@ -3,9 +3,9 @@ import { buildMetadata } from "@/lib/seo";
 import KontaktContent from "@/components/content/KontaktContent";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Kontakt — XoXoCom UG | Jetzt Projekt anfragen",
+  title: "Contact — XoXoCom UG | Request Your Project",
   description:
-    "Nimm Kontakt mit XoXoCom UG auf — ob Coaching, Projekteinsatz oder A.I. Transformation. Wir lesen jede Nachricht und antworten innerhalb eines Werktags.",
+    "Get in touch with XoXoCom UG — whether coaching, project work or A.I. transformation. We read every message and reply within one business day.",
   path: "/kontakt",
 });
 

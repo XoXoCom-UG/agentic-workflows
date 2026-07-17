@@ -18,6 +18,17 @@ export type Lang = "de" | "en";
  *  arrive at the server as a client-reference stub, not the string. */
 export const LANG_COOKIE = "xoxocom-lang";
 
+/** Legal pages are German-only (Impressum/Datenschutz/AGB) — excluded from the
+ *  bilingual toggle for legal validity. Their `<html lang>` must always be "de"
+ *  regardless of the chosen chrome language, so a cookieless crawler never sees
+ *  German legal content mislabelled as English. Defined here (server-safe module)
+ *  so both the server layout and the client provider can share the same list. */
+export const LEGAL_ROUTES = ["/impressum", "/datenschutz", "/agb"] as const;
+
+export function isLegalPath(pathname: string): boolean {
+  return LEGAL_ROUTES.some((r) => pathname === r || pathname.startsWith(`${r}/`));
+}
+
 export type NavChild = { label: string; href: string; external?: boolean; desc?: string };
 export type NavItem = { label: string; href?: string; children?: NavChild[] };
 

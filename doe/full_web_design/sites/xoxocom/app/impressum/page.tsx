@@ -5,13 +5,18 @@ import { marked } from "marked";
 import { buildMetadata } from "@/lib/seo";
 import LegalShell from "@/components/LegalShell";
 
-export const dynamic = "force-static";
+// Rendered per request so middleware's x-pathname header is present and the root
+// layout can pin <html lang="de"> for this German-only legal page.
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = buildMetadata({
   title: "Impressum — Rechtliche Angaben der XoXoCom UG",
   description:
     "Impressum der XoXoCom UG — Anbieterkennzeichnung, vertretungsberechtigte Personen und rechtliche Pflichtangaben gemäß den gesetzlichen Anforderungen.",
   path: "/impressum",
+  // German-only legal page: advertise German as the primary OG locale.
+  locale: "de_DE",
+  alternateLocale: "en_US",
 });
 
 export default async function ImpressumPage() {

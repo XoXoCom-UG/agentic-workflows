@@ -3,9 +3,9 @@ import { buildMetadata } from "@/lib/seo";
 import BusinessCoachingContent from "@/components/content/BusinessCoachingContent";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Business Coaching für Teams & Karriere — XoXoCom",
+  title: "Business Coaching for Teams & Careers — XoXoCom",
   description:
-    "Business Coaching von XoXoCom UG: Wachstum auf allen Ebenen — wir schließen die Lücke zwischen technologischer Innovation und menschlichem Handeln.",
+    "Business coaching by XoXoCom UG: growth on every level — we close the gap between technological innovation and human action for lasting results.",
   path: "/leistungen/business-coaching",
 });
 

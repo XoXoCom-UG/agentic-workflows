@@ -22,10 +22,12 @@ pip installs, no headless Chrome, no paid API. Point it at a running Next server
     python execution/autoresearch/score/score_seo.py --base-url http://localhost:3000
 
 Architecture note — bilingual SEO: the XoXoCom site switches language client-side via
-the `xoxocom-lang` cookie and serves ONE URL per page (German by default), so there are
-no distinct per-language URLs to anchor `rel=alternate hreflang` to. We therefore score
-the achievable bilingual signal — `og:locale` (de_DE) + `og:locale:alternate` (en_US) —
-and leave true locale-routed hreflang as a documented future enhancement.
+the `xoxocom-lang` cookie and serves ONE URL per page (English by default — a cookieless
+crawler/first-time visitor gets English on the main pages; the German legal pages stay
+German by legal requirement), so there are no distinct per-language URLs to anchor
+`rel=alternate hreflang` to. We therefore score the achievable bilingual signal —
+`og:locale` (en_US) + `og:locale:alternate` (de_DE) — and leave true locale-routed
+hreflang as a documented future enhancement.
 """
 
 from __future__ import annotations
@@ -45,15 +47,18 @@ SITE_CONFIG = REPO_ROOT / "sites" / "xoxocom" / "site.config.json"
 
 # Public, indexable routes (path -> expected <html lang>). Legal pages are included
 # because they still need a title/description and belong in the sitemap, but they are
-# weighted like any other route. The server default language is German.
+# weighted like any other route. The server default language for a cookieless request
+# (what a crawler/first-time visitor gets) is English on the main/bilingual pages; the
+# three legal pages (Impressum/Datenschutz/AGB) stay German by legal requirement and are
+# excluded from the bilingual toggle, so they are still expected to render `lang="de"`.
 PUBLIC_ROUTES: dict[str, str] = {
-    "/": "de",
-    "/produkte": "de",
-    "/leistungen/ai-transformation": "de",
-    "/leistungen/expert-consulting": "de",
-    "/leistungen/business-coaching": "de",
-    "/ueber-uns": "de",
-    "/kontakt": "de",
+    "/": "en",
+    "/produkte": "en",
+    "/leistungen/ai-transformation": "en",
+    "/leistungen/expert-consulting": "en",
+    "/leistungen/business-coaching": "en",
+    "/ueber-uns": "en",
+    "/kontakt": "en",
     "/impressum": "de",
     "/datenschutz": "de",
     "/agb": "de",

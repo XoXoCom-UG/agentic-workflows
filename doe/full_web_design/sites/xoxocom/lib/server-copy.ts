@@ -7,9 +7,12 @@ import { COPY, LANG_COOKIE, type Copy, type Lang } from "./copy";
  * this ships as HTML only — the bilingual COPY object stays out of that page's
  * client JS. After the client toggle writes the cookie it calls router.refresh(),
  * so server-rendered copy follows the language switch (see lib/i18n.tsx).
+ *
+ * Site default is English; the cookie only overrides to German once a visitor
+ * explicitly toggles.
  */
 export async function getCopy(): Promise<{ lang: Lang; c: Copy }> {
   const store = await cookies();
-  const lang: Lang = store.get(LANG_COOKIE)?.value === "en" ? "en" : "de";
+  const lang: Lang = store.get(LANG_COOKIE)?.value === "de" ? "de" : "en";
   return { lang, c: COPY[lang] };
 }
