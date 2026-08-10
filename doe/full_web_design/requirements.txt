@@ -1,2 +1,10 @@
 python-dotenv>=1.0.0
 psycopg2-binary>=2.9.0
+
+# Optional, build-time only. Used by execution/build_logo_lab.py to convert the
+# Manrope wordmark glyphs to SVG outlines (brotlicffi lets fontTools read the
+# .woff2 subset). The script degrades gracefully if they are absent — it just
+# skips the wordmark option — and the SVGs it generates have no runtime font
+# dependency, so nothing else in the repo needs these.
+fonttools>=4.50.0
+brotlicffi>=1.1.0

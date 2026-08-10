@@ -52,6 +52,7 @@ const de = {
       ],
     },
     { label: "Über uns", href: "/ueber-uns" },
+    { label: "Blog", href: "/blog" },
   ] as NavItem[],
 
   cta: { label: "Kontaktiere uns", href: "/kontakt" },
@@ -191,6 +192,44 @@ const de = {
     impressumPre: "Vollständige Anschrift und rechtliche Angaben findest du im ",
     impressumLink: "Impressum",
   },
+
+  /**
+   * Blog chrome. Per-post copy (title, excerpt) lives in the database, not here.
+   *
+   * ⚠ DRAFT COPY — written to unblock the build, at the user's explicit request, and
+   * intended to be replaced. It deliberately makes no factual claim that isn't already
+   * on the site (no client names, no years, no headcount beyond the three-person team,
+   * no metrics). Safe to overwrite wholesale; nothing else depends on the wording.
+   *
+   * `metaTitle` (30-60 chars) and `metaDescription` (120-160) are length-checked per
+   * route by execution/autoresearch/score/score_seo.py, and both must stay unique
+   * against every other route or title_unique / desc_unique fail. Keep those budgets
+   * if you rewrite them. Full brief: .tmp/blog_copy_spec.md
+   */
+  blog: {
+    // --- functional labels ---
+    eyebrow: "Blog",
+    filterLabel: "Nach Thema filtern",
+    filterClear: "Zurücksetzen",
+    minRead: "{n} Min. Lesezeit",
+    showOtherLanguage: "Alle Sprachen anzeigen",
+    backToBlog: "Zurück zum Blog",
+    byAuthor: "Von {name}",
+    breadcrumbHome: "Startseite",
+    languageName: { de: "Deutsch", en: "Englisch" },
+
+    // --- draft editorial copy ---
+    title: "Einblicke in A.I.-Transformation",
+    sub: "Was wir lernen, wenn Teams künstliche Intelligenz in ihren Arbeitsalltag bringen — geschrieben von denen, die es tun.",
+    metaTitle: "Blog — A.I.-Transformation | XoXoCom UG",
+    metaDescription: "Praxisnahe Beiträge zu A.I.-Transformation, agilen Methoden und IT-Beratung von XoXoCom UG — dem dreiköpfigen Team hinter MAtfIT.",
+    empty: "Noch keine Beiträge. Die ersten entstehen gerade — schau bald wieder vorbei.",
+    emptyFiltered: "Keine Beiträge zu den gewählten Themen. Entferne ein Thema oder setze die Filter zurück.",
+    emptyForLang: "Auf Deutsch ist noch nichts erschienen — auf Englisch gibt es aber schon Beiträge.",
+    langNotice: "Dieser Artikel ist auf {language}.",
+    notFoundTitle: "Beitrag nicht gefunden",
+    notFoundBody: "Der Link ist vielleicht veraltet oder der Beitrag wurde entfernt. Alles Veröffentlichte findest du in der Blog-Übersicht.",
+  },
 };
 
 const en: typeof de = {
@@ -213,6 +252,7 @@ const en: typeof de = {
       ],
     },
     { label: "About", href: "/ueber-uns" },
+    { label: "Blog", href: "/blog" },
   ] as NavItem[],
 
   cta: { label: "Get in touch", href: "/kontakt" },
@@ -350,6 +390,32 @@ const en: typeof de = {
     emailLabel: "Email:",
     impressumPre: "You'll find the full address and legal details in the ",
     impressumLink: "Impressum",
+  },
+
+  blog: {
+    // --- functional labels ---
+    eyebrow: "Blog",
+    filterLabel: "Filter by topic",
+    filterClear: "Clear",
+    minRead: "{n} min read",
+    showOtherLanguage: "Show all languages",
+    backToBlog: "Back to blog",
+    byAuthor: "By {name}",
+    breadcrumbHome: "Home",
+    languageName: { de: "German", en: "English" },
+
+    // --- draft editorial copy. English is the site default, so THIS is what a
+    //     cookieless visitor and Googlebot see. Rewrite this half first. ---
+    title: "Insights on A.I. transformation",
+    sub: "What we learn helping teams put artificial intelligence into their daily work — written by the people doing it.",
+    metaTitle: "Blog — A.I. Transformation Insights | XoXoCom UG",
+    metaDescription: "Practical articles on A.I. transformation, agile methods and IT consulting from XoXoCom UG — the three-person team building MAtfIT.",
+    empty: "No articles yet. The first ones are being written — check back soon.",
+    emptyFiltered: "No articles match the topics you selected. Remove one, or clear the filters to see everything.",
+    emptyForLang: "Nothing in English yet — but there are already articles in German.",
+    langNotice: "This article is in {language}.",
+    notFoundTitle: "We can't find that article",
+    notFoundBody: "The link may be out of date, or the article was removed. Everything we've published is on the blog index.",
   },
 };
 

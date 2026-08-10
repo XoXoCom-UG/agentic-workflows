@@ -5,8 +5,9 @@
   "site_url": "https://www.xoxocom.net",
   "design_source": "binance",
   "language": "en",
-  "pages": ["home", "produkte", "leistungen", "ueber-uns", "kontakt"],
+  "pages": ["home", "produkte", "leistungen", "ueber-uns", "kontakt", "blog"],
   "has_contact_form": true,
+  "has_blog": true,
   "contact_email": "info@xoxocom.net",
   "signature": "web-xoxocom-fb6b4c",
   "visual_fingerprint": {

@@ -51,9 +51,15 @@ SITE_CONFIG = REPO_ROOT / "sites" / "xoxocom" / "site.config.json"
 # (what a crawler/first-time visitor gets) is English on the main/bilingual pages; the
 # three legal pages (Impressum/Datenschutz/AGB) stay German by legal requirement and are
 # excluded from the bilingual toggle, so they are still expected to render `lang="de"`.
+#
+# `/blog` is the blog INDEX only. Individual article routes are deliberately absent: a
+# slug is content, not code, so an author unpublishing or renaming a post would hard-fail
+# this scorer and the failure would read as a code regression. `/admin` is absent because
+# it is noindex and auth-gated — there is nothing here for it to score.
 PUBLIC_ROUTES: dict[str, str] = {
     "/": "en",
     "/produkte": "en",
+    "/blog": "en",
     "/leistungen/ai-transformation": "en",
     "/leistungen/expert-consulting": "en",
     "/leistungen/business-coaching": "en",

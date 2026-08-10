@@ -41,6 +41,26 @@ type PageMetaInput = {
   /** og:locale:alternate. Defaults to the site-wide alternate; legal pages flip
    *  the pair (de_DE primary → en_US alternate). */
   alternateLocale?: string;
+  /** og:type. Blog articles emit "article" plus the article:* timestamps below. */
+  type?: "website" | "article";
+  /** article:* metadata. Ignored unless `type` is "article". */
+  article?: {
+    publishedTime: string;
+    modifiedTime?: string;
+    authors?: string[];
+    tags?: string[];
+  };
+  /**
+   * Per-page og:image override, used by blog posts that have a cover.
+   *
+   * This parameter is load-bearing, not a convenience: buildMetadata sets
+   * openGraph.images unconditionally, and Next only auto-attaches a file-based
+   * opengraph-image.tsx to routes that declare none. Without this, a post could
+   * never show its own cover in a link preview, whatever else we did.
+   */
+  image?: string;
+  /** Robots directives. Filtered index views (?tags=, ?lang=) set index:false. */
+  robots?: Metadata["robots"];
 };
 
 /**
@@ -55,12 +75,18 @@ export function buildMetadata({
   path,
   locale = DEFAULT_OG_LOCALE,
   alternateLocale = ALTERNATE_OG_LOCALE,
+  type = "website",
+  article,
+  image,
+  robots,
 }: PageMetaInput): Metadata {
   const url = path === "/" ? "/" : path.replace(/\/+$/, "");
+  const img = image ?? OG_IMAGE;
   return {
     title,
     description,
     alternates: { canonical: url },
+    ...(robots ? { robots } : {}),
     openGraph: {
       title,
       description,
@@ -68,16 +94,29 @@ export function buildMetadata({
       siteName: site.company,
       locale,
       alternateLocale,
-      type: "website",
       // og:image:type helps scrapers (notably WhatsApp) reliably render the
       // large-format preview instead of falling back to a small thumbnail.
-      images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: title, type: "image/png" }],
+      // A per-post cover is a remote URL of unknown dimensions, so width/height
+      // and type are only asserted for the site-wide image we actually generate.
+      ...(type === "article" && article
+        ? {
+            type: "article" as const,
+            publishedTime: article.publishedTime,
+            modifiedTime: article.modifiedTime,
+            authors: article.authors,
+            tags: article.tags,
+            images: [{ url: img, alt: title }],
+          }
+        : {
+            type: "website" as const,
+            images: [{ url: img, width: 1200, height: 630, alt: title, type: "image/png" }],
+          }),
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [OG_IMAGE],
+      images: [img],
     },
   };
 }
@@ -96,5 +135,66 @@ export function organizationJsonLd(): Record<string, unknown> {
     description: site.tagline,
     email: site.contact_email,
     sameAs: SOCIALS.map((s) => s.href),
+  };
+}
+
+/**
+ * JSON-LD BlogPosting for a single article. score_seo.py's `jsonld_present` check
+ * already passes via the layout's Organization block, so this is for rich results
+ * rather than the score: it is what lets a search engine show a byline and a date.
+ */
+export function blogPostingJsonLd(post: {
+  slug: string;
+  title: string;
+  description: string;
+  lang: string;
+  publishedAt: string;
+  updatedAt?: string | null;
+  authorName?: string | null;
+  coverUrl?: string | null;
+  tags?: string[];
+}): Record<string, unknown> {
+  const url = `${SITE_URL}/blog/${post.slug}`;
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.description,
+    inLanguage: post.lang,
+    datePublished: post.publishedAt,
+    dateModified: post.updatedAt ?? post.publishedAt,
+    image: post.coverUrl ?? `${SITE_URL}${OG_IMAGE}`,
+    ...(post.tags?.length ? { keywords: post.tags.join(", ") } : {}),
+    author: post.authorName
+      ? { "@type": "Person", name: post.authorName }
+      : { "@type": "Organization", name: site.company, url: SITE_URL },
+    publisher: {
+      "@type": "Organization",
+      name: site.company,
+      url: SITE_URL,
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/opengraph-image` },
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    url,
+  };
+}
+
+/**
+ * JSON-LD BreadcrumbList. score_seo.py explicitly accepts this type and its own
+ * comment asks for breadcrumbs on inner pages, so this is aligned with the scorer's
+ * intent as well as being the cheapest rich-result win on an article.
+ */
+export function breadcrumbJsonLd(
+  items: { name: string; path: string }[],
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      item: `${SITE_URL}${item.path === "/" ? "" : item.path}`,
+    })),
   };
 }

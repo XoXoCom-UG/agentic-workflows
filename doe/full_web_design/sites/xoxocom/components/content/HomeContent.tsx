@@ -35,7 +35,7 @@ export default async function HomeContent() {
       </section>
 
       {/* Section 2 — Services */}
-      <section id="leistungen" className="px-6 md:px-10 lg:px-12 py-20 md:py-28 bg-surface">
+      <section id="leistungen" className="px-6 md:px-10 lg:px-12 py-20 md:py-28 bg-bg">
         <div className="mx-auto max-w-6xl">
           <div className="max-w-2xl mb-12">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">{t.servicesEyebrow}</p>
@@ -44,7 +44,7 @@ export default async function HomeContent() {
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {t.leistungen.map((l) => (
-              <SmartLink key={l.title} href={l.href} className="group flex flex-col rounded-[var(--radius-card)] border border-border bg-bg p-7 transition hover:border-accent/60">
+              <SmartLink key={l.title} href={l.href} className="group flex flex-col rounded-[var(--radius-card)] border border-border bg-surface p-7 transition hover:border-accent/60">
                 <h3 className="text-xl font-bold text-fg">{l.title}</h3>
                 <p className="mt-1 text-sm font-semibold text-accent">{l.lede}</p>
                 <p className="mt-4 text-sm leading-relaxed text-muted">{l.body}</p>
@@ -75,11 +75,11 @@ export default async function HomeContent() {
       </section>
 
       {/* Section 4 — About teaser */}
-      <section className="px-6 md:px-10 lg:px-12 py-20 md:py-28 bg-surface">
+      <section className="px-6 md:px-10 lg:px-12 py-20 md:py-28 bg-bg">
         <div className="mx-auto max-w-4xl text-center space-y-6">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-fg">{t.aboutTitle}</h2>
           <p className="mx-auto max-w-2xl text-lg text-muted">{t.aboutBody}</p>
-          <SmartLink href="/ueber-uns" className="inline-flex items-center rounded-[var(--radius-card)] border border-border bg-bg px-6 py-3 font-semibold text-fg transition hover:border-accent/60">
+          <SmartLink href="/ueber-uns" className="inline-flex items-center rounded-[var(--radius-card)] border border-border bg-surface px-6 py-3 font-semibold text-fg transition hover:border-accent/60">
             {t.aboutCta}
           </SmartLink>
         </div>

@@ -57,9 +57,11 @@ HERE = Path(__file__).resolve().parent
 SEO_SCORER = HERE / "score_seo.py"
 
 # Public routes — kept in lockstep with score_seo.py's PUBLIC_ROUTES.
+# `/blog` is the index only; see the note there for why article slugs are excluded.
 PUBLIC_ROUTES: list[str] = [
     "/",
     "/produkte",
+    "/blog",
     "/leistungen/ai-transformation",
     "/leistungen/expert-consulting",
     "/leistungen/business-coaching",

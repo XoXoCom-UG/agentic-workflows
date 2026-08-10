@@ -16,6 +16,13 @@ export type SiteConfig = {
   language: string;
   pages: string[];
   has_contact_form: boolean;
+  /**
+   * Whether this site has the blog + /admin surface. Read by
+   * execution/sync_env_local.py and execution/deploy_netlify.py to decide whether the
+   * NEXT_PUBLIC_SUPABASE_* pair needs to be provisioned. Optional so the site.config.json
+   * files written before the blog existed stay valid.
+   */
+  has_blog?: boolean;
   contact_email: string;
   signature: string;
   visual_fingerprint: VisualFingerprint;

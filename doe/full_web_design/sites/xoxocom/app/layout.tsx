@@ -68,6 +68,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // pathname comes from middleware.ts via the x-pathname header.
   const pathname = (await headers()).get("x-pathname") ?? "";
   const htmlLang: Lang = isLegalPath(pathname) ? "de" : chromeLang;
+  // The admin area renders inside this layout — App Router gives no way for a nested
+  // route to escape the root layout — but it is an internal tool, not a page of the
+  // website. The public nav, its CTA button, and the legal footer are noise in an
+  // editor, and keeping them would blur "I am editing" into "I am browsing". So the
+  // chrome is dropped for /admin and app/admin/layout.tsx supplies its own.
+  const isAdmin = pathname === "/admin" || pathname.startsWith("/admin/");
   // Header copy is passed down as props (server → client), so the bilingual COPY
   // tree itself never ships in the client bundle; on toggle, router.refresh()
   // re-renders this layout with the new cookie and fresh props.
@@ -81,9 +87,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
         />
         <LanguageProvider initialLang={chromeLang}>
-          <SiteHeader nav={c.nav} header={c.header} cta={c.cta} langToggle={c.langToggle} />
+          {!isAdmin && (
+            <SiteHeader nav={c.nav} header={c.header} cta={c.cta} langToggle={c.langToggle} />
+          )}
           <div className="flex-1">{children}</div>
-          <Footer />
+          {!isAdmin && <Footer />}
         </LanguageProvider>
       </body>
     </html>

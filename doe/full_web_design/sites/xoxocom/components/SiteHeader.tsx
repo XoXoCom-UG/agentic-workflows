@@ -110,7 +110,8 @@ export default function SiteHeader({ nav, header, cta, langToggle }: SiteHeaderP
     >
       <div className="mx-auto max-w-7xl px-6 md:px-10 lg:px-12 py-4 flex items-center justify-between gap-6">
         <SmartLink href="/" aria-label={`${site.company} — ${header.homeAria}`} className="text-lg font-extrabold tracking-tight text-fg" onClick={close}>
-          Xo<span className="text-accent">Xo</span>Com
+          {/* Wordmark: the two X's carry the Coral accent; every other letter is ink (--color-fg, #eaecef). */}
+          <span className="text-accent">X</span>o<span className="text-accent">X</span>oCom
         </SmartLink>
 
         {/* Desktop navigation */}
