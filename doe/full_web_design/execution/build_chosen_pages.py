@@ -1,32 +1,37 @@
 #!/usr/bin/env python3
-"""Build the two chosen page directions as *content specs*: About = A3 (founder-led),
-Press & Media = P2 (press kit first).
+"""Build the two chosen page directions — About = A2 (company dossier), Press & Media = P2
+(press kit first), i.e. Option 2 in both rounds of build_page_prototypes.py. The About page
+keeps A2's layout but takes its closing CTA heading from A1 ("Tell us what you're trying to
+change."), as the owner asked.
 
-Round 1 (execution/build_page_prototypes.py) showed six layout options and filled them
-with drafted prose so the layouts could be judged. This script is the follow-up and it
-writes no copy at all. Every piece of text a human must supply renders as a slot showing
-the template/formula from website-about-press-checklists.md plus a length spec. Only three
-categories appear as real text:
+Two modes, same layouts:
 
-  1. Facts verifiable in this repo — legal name, seat, register, Geschäftsführer, product
-     name and URL, service names, team size (see sites/xoxocom/content/impressum.md and
-     sites/xoxocom/lib/copy.ts).
-  2. Wording the checklist itself dictates — the boilerplate formulae, the product-status
-     phrasing, the who-to-quote split, the 24-hour reply line.
-  3. Functional UI labels — button text, nav, field labels.
+  --mode present   (default) A clean prototype to show someone. No slots, no templates, no
+                   process notes, no provenance — just the pages. Every sentence on them is
+                   copy that is already live and approved on www.xoxocom.net (see LIVE COPY
+                   below), or a fact from sites/xoxocom/content/impressum.md. Where a fact is
+                   genuinely unknown (founding year, two of the three names, press-kit size
+                   and date, a consulting track record) the element is left out rather than
+                   filled with a guess — nothing on the page is invented.
 
-Layout CSS and the page chrome are imported from build_page_prototypes so the two files
+  --mode spec      The internal content spec. Every text block a human must still supply
+                   renders as a slot showing the checklist's own template and a length spec,
+                   plus the notes and fact bank that say what is still needed. This is the
+                   working document, not the thing you present.
+
+The layout CSS and page chrome are imported from build_page_prototypes so the two files
 cannot drift apart.
 
 Usage:
-    python execution/build_chosen_pages.py
-    python execution/build_chosen_pages.py --out .tmp/chosen_pages
+    python execution/build_chosen_pages.py                      # presentation build
+    python execution/build_chosen_pages.py --mode spec          # internal content spec
+    python execution/build_chosen_pages.py --out .tmp/whatever
 
 Outputs:
-    .tmp/chosen_pages/index.html     standalone preview (open locally)
-    .tmp/chosen_pages/artifact.html  body-only fragment (for publishing)
+    <out>/index.html     standalone preview (open locally)
+    <out>/artifact.html  body-only fragment (for publishing)
 
-Deterministic and std-lib only.
+Deterministic and std-lib only (aside from importing the sibling script).
 """
 
 from __future__ import annotations
@@ -56,17 +61,138 @@ footer_bar = lab.footer_bar
 copy_block = lab.copy_block
 dl_tile = lab.dl_tile
 
+# Set from --mode in main(). True = presentation build.
+PRESENT = True
+
 
 # =========================================================================
-# Slots — the only way text enters these pages
+# LIVE COPY — every sentence below is already published on www.xoxocom.net
+# (sites/xoxocom/lib/copy.ts, English tree) or verified in
+# sites/xoxocom/content/impressum.md. Nothing here was written for these
+# pages; it is the company's own approved wording, re-used.
 # =========================================================================
 
-def slot(tag: str, template: str, spec: str = "", scale: str = "") -> str:
-    """A block of copy somebody still has to write. Shows what goes there, the template,
-    and how long it should be — never a guess at the actual words.
+HEADLINE = "People, methodology and A.I."                      # ueberUns.title
+LEAD = ("We combine agile methodology with artificial intelligence — so teams and organizations "
+        "work faster, smarter and measurably better.")          # home.heroSub
 
-    `scale` ("hero" / "head") sets the template at headline size so the layout still reads
-    at the right visual weight with the copy missing."""
+ABOUT_BODY = [                                                  # ueberUns.body
+    ("We're a young team specialized in the business and technical consulting of A.I. implementation. "
+     "We combine agile ways of working with artificial intelligence — and close the gap between "
+     "technological innovation and human action."),
+    ("Whether as a strategic partner for companies or a personal mentor for professionals: we empower "
+     "people and organizations not just to keep up in the new world of work, but to lead — individual, "
+     "disruptive and measurably superior."),
+]
+
+DELIBERATE_TITLE = "A.I. implementation, done deliberately"     # home.aboutTitle
+
+SERVICES_LIVE = [                                               # nav labels + home.leistungen bodies
+    ("A.I. Transformation",
+     "Where classic agility reaches its limits, we combine methodology with the power of A.I. — into a "
+     "measurably superior model for success."),
+    ("Expert Consulting",
+     "Specialists for your critical key roles — from Agile Coach to Software Architect, exactly when "
+     "your project needs them."),
+    ("Business Coaching",
+     "We close the gap between innovation and people — as a strategic partner for your company and a "
+     "mentor for your career."),
+]
+
+PRODUCT_TAGLINE = "Train your AI Project-Agents"                # produkte.products[0].tagline
+PRODUCT_DESC = ("AI project-agents you train yourself, enriching every dev team with time savings, "
+                "optimization ideas and guidance on innovations and market trends.")
+PRODUCT_CTA = "Try it now"                                      # produkte.products[0].ctaLabel
+
+REPLY = "We read every message and reply within one business day."   # kontakt.intro
+
+# Assembled from the facts above and nothing else: legal name and seat (Impressum), the
+# specialisation and framing (ueberUns.body), team size (site), the product and its
+# description (produkte). No founding year, because it is not confirmed anywhere.
+BOILER_SHORT = (
+    "XoXoCom UG (haftungsbeschränkt) is a consultancy based in Monheim am Rhein, Germany, specialising "
+    "in the business and technical side of A.I. implementation. The three-person team combines agile "
+    "ways of working with artificial intelligence for companies and professionals, and builds Agentix "
+    "Projects — A.I. project-agents that development teams train themselves."
+)
+
+BOILER_LONG = (
+    "XoXoCom UG (haftungsbeschränkt) is a consultancy based in Monheim am Rhein, Germany. The "
+    "three-person team specialises in the business and technical consulting of A.I. implementation, "
+    "combining agile ways of working with artificial intelligence to close the gap between technological "
+    "innovation and human action. Its client work spans three areas: A.I. Transformation for "
+    "organisations, Expert Consulting that fills critical key roles with specialists, and Business "
+    "Coaching for teams and individuals. Alongside that, the company builds Agentix Projects — A.I. "
+    "project-agents that development teams train themselves, for time savings, optimisation ideas and "
+    "guidance on innovations and market trends."
+)
+
+# The three differentiators. Each claim restates something the site already says or a fact
+# from the Impressum — the team size, the combination of method and A.I., and the fact that
+# the product is the company's own software.
+HOW_LIVE = [
+    ("Method and A.I. in one workflow",
+     "Agile ways of working and artificial intelligence in the same workflow, not two separate "
+     "conversations — that combination is the basis of everything we do."),
+    ("We build our own product",
+     f"{PRODUCT} is our own software, not a badge on someone else's platform. The team advising on "
+     "implementation is the team building it."),
+    ("Small enough to stay accountable",
+     "Three people. The person you meet is the person who does the work."),
+]
+
+# Only one name is on the public record (Geschäftsführer, per the Impressum). The other two
+# cards lead with the role instead of inventing a name.
+TEAM_LIVE = [
+    {"initials": "PK", "name": FOUNDER, "role": "Geschäftsführer",
+     "line": "Business and technical consulting on A.I. implementation, and the direction of the company."},
+    {"initials": "", "name": "", "role": "A.I. Engineering &amp; Marketing",
+     "line": "Builds the A.I. workflows the company runs on, and the marketing around them."},
+    {"initials": "", "name": "", "role": "Product Lead",
+     "line": f"Leads {PRODUCT} — what it does, who it is for, and what ships next."},
+]
+
+FACTS_LIVE = [
+    ("Legal name", LEGAL_NAME),
+    ("Headquarters", f"{CITY}, Germany"),
+    ("Legal form", "UG (haftungsbeschränkt)"),
+    ("Register", REGISTER),
+    ("Team size", "3"),
+    ("Website", SITE_URL),
+]
+
+PRESS_INTRO = (f"Logos, headshots, product screenshots and a ready-to-use company description — "
+               f"everything you need to write about {COMPANY} and {PRODUCT}. {REPLY}")
+
+# Topic labels, each naming work the company actually does.
+ANGLES_LIVE = [
+    "Bringing A.I. into how a team works day to day",
+    "Where classic agility reaches its limits",
+    "Filling critical key roles with specialists",
+    "Building your own A.I. product as a three-person consultancy",
+]
+
+QUOTE_SPLIT_LIVE = [
+    ("Geschäftsführer", "the company, consulting engagements and direction"),
+    ("A.I. Engineering", "building with A.I. and the workflows behind it"),
+    ("Product Lead", f"{PRODUCT} — what it does and where it goes next"),
+]
+
+
+# =========================================================================
+# Mode-aware helpers — the only way text enters these pages
+# =========================================================================
+
+def slot(tag: str, template: str, spec: str = "", scale: str = "", real: str | None = None) -> str:
+    """In spec mode: a block of copy somebody still has to write, shown as its name, the
+    checklist's template and a length spec — never a guess at the actual words.
+    In presentation mode: the live, approved copy passed as `real`, or nothing at all if
+    there is none, so an unknown never renders as a visible gap."""
+    if PRESENT:
+        if not real:
+            return ""
+        cls = f"copy is-{scale}" if scale else "copy"
+        return f'<p class="{cls}">{real}</p>'
     spec_html = f'<span class="slot-spec">{spec}</span>' if spec else ""
     cls = f"slot is-{scale}" if scale else "slot"
     return f"""<span class="{cls}">
@@ -76,17 +202,31 @@ def slot(tag: str, template: str, spec: str = "", scale: str = "") -> str:
           </span>"""
 
 
-def val(label: str) -> str:
-    """A single short value to confirm — a name, a year, a URL."""
+def val(label: str, real: str = "") -> str:
+    """A single short value: the thing to confirm in spec mode, the confirmed value (or
+    nothing) in presentation mode."""
+    if PRESENT:
+        return real
     return f'<span class="ph">{label}</span>'
 
 
 def fact(text: str) -> str:
-    """Marks text that is verified in this repo, so it reads differently from a slot."""
-    return f'<span class="ok">{text}</span>'
+    """Text verified in this repo. Marked in spec mode so it reads differently from a slot;
+    plain copy in presentation mode."""
+    return text if PRESENT else f'<span class="ok">{text}</span>'
 
 
-# --- templates lifted verbatim from the checklist appendix ----------------
+def note(text: str, cls: str = "section-note") -> str:
+    """Guidance for whoever fills the page in. Never present on a page meant to be shown."""
+    return "" if PRESENT else f'<p class="{cls}">{text}</p>'
+
+
+def spec_only(html: str) -> str:
+    """A whole block that exists only to explain what is still needed."""
+    return "" if PRESENT else html
+
+
+# --- templates lifted verbatim from the checklist appendix (spec mode) ----
 
 BOILER_FORMULA = (
     "[Company], founded in [year] and based in [city], is a [what kind of company] that "
@@ -102,8 +242,6 @@ BOILER_LONG_FORMULA = (
     "[what it does for them]. [Product] is [status]."
 )
 
-# Verified facts, offered next to the boilerplate slot so the blanks can be filled
-# without hunting through the repo.
 FACT_BANK = [
     ("Company", LEGAL_NAME),
     ("City", CITY),
@@ -115,79 +253,105 @@ FACT_BANK = [
     ("Contact", EMAIL),
 ]
 
-# Service names are real (sites/xoxocom/lib/copy.ts); their one-liners are yours to write.
-SERVICE_NAMES = ["AI Transformation", "Business Coaching", "Expert Consulting"]
-
-# The checklist names these three differentiators outright: "AI-native, small team,
-# build-it-ourselves". The keys below are its words; the copy is still yours.
+SERVICE_NAMES = [name for name, _ in SERVICES_LIVE]
 HOW_KEYS = ["AI-native", "Build it ourselves", "Small team"]
 
-# Roles the checklist assigns; names stay unconfirmed.
-TEAM_SPEC = [
+def team_spec() -> list[dict]:
+  return [
     {
         "initials": "PK",
         "name": fact(FOUNDER),
-        "role_slot": val("Founder / CEO / Geschäftsführer — pick one, use it everywhere"),
+        "role_slot": val("Founder / CEO / Geschäftsführer — pick one, use it everywhere", "Geschäftsführer"),
         "bio_tag": "founder bio",
         "bio_tpl": "[ IT-consulting background · [X] years of experience · specialisation ]",
         "bio_spec": "2–3 sentences · checklist: “the formal-face implementation”",
+        "real": TEAM_LIVE[0]["line"],
     },
     {
-        "initials": "—",
+        "initials": "AI",
         "name": val("your full name, spelled as it should appear in print"),
-        "role_slot": fact("AI engineering + marketing / workflows"),
+        "role_slot": fact("A.I. Engineering &amp; Marketing"),
         "bio_tag": "bio",
         "bio_tpl": "[ What you build and run, in your words ]",
         "bio_spec": "1–2 sentences",
+        "real": TEAM_LIVE[1]["line"],
     },
     {
-        "initials": "—",
+        "initials": "PL",
         "name": val("product lead — full name"),
-        "role_slot": val("role title"),
+        "role_slot": val("role title", "Product Lead"),
         "bio_tag": "bio",
         "bio_tpl": "[ What they own on the product ]",
         "bio_spec": "1–2 sentences",
+        "real": TEAM_LIVE[2]["line"],
     },
-]
+  ]
 
 
 # =========================================================================
-# About — direction A3 (founder-led)
+# About — direction A2 (company dossier)
 # =========================================================================
+
+RAIL = ["Company", "People", "How we work", "Contact"]
+
 
 def about() -> str:
-    services = "".join(
-        f"""
-              <div class="a3-svc">
-                <h4>{fact(name)}</h4>
-                {slot("one-liner", "[ what this does for a client ]", "1 line · ≤ 15 words")}
-              </div>"""
-        for name in SERVICE_NAMES
+    rail = "".join(
+        f'<span class="a2-rail-item{" is-active" if i == 0 else ""}">{n}</span>'
+        for i, n in enumerate(RAIL)
     )
 
-    bands = ""
-    for i, key in enumerate(HOW_KEYS):
-        side = "is-right" if i % 2 else ""
-        bands += f"""
-            <div class="a3-band {side}">
-              <div class="a3-band-mark"><span>{key}</span></div>
-              <div class="a3-band-body">
-                {slot("heading", "[ the claim, in your words ]", "≤ 6 words")}
-                {slot("body", "[ why this is true of you specifically — the differentiator, said out loud ]",
-                      "1–2 sentences")}
-              </div>
-            </div>"""
-
-    team = "".join(
+    services = "".join(
         f"""
-            <div class="a3-card">
-              {avatar(p['initials'], 'md')}
-              <p class="a3-card-name">{p['name']}</p>
-              <p class="a3-card-role">{p['role_slot']}</p>
-              {slot(p['bio_tag'], p['bio_tpl'], p['bio_spec'])}
-              <span class="a3-li">LinkedIn ↗ {val("profile URL")}</span>
-            </div>"""
-        for p in TEAM_SPEC
+                <div class="a2-svc">
+                  <h4>{fact(name)}</h4>
+                  {slot("one-liner", "[ what this does for a client ]", "1 line · &le; 15 words", real=line)}
+                </div>"""
+        for name, line in SERVICES_LIVE
+    )
+
+    hows = ""
+    for i, key in enumerate(HOW_KEYS):
+        head, body = HOW_LIVE[i]
+        label = "" if PRESENT else f'<span class="label">{key}</span>'
+        hows += f"""
+              <div class="a2-how">
+                {label}
+                {slot("heading", "[ the claim, in your words ]", "&le; 6 words", scale="head", real=head)}
+                {slot("body", "[ why this is true of you specifically — the differentiator, said out loud ]",
+                      "1–2 sentences", real=body)}
+              </div>"""
+
+    if PRESENT:
+        people = "".join(
+            f"""
+              <article class="card a2-person">
+                {avatar(p['initials'], 'md')}
+                {f'<h3>{p["name"]}</h3>' if p['name'] else ''}
+                <p class="a2-role{'' if p['name'] else ' is-lead'}">{p['role']}</p>
+                <p class="copy">{p['line']}</p>
+              </article>"""
+            for p in TEAM_LIVE
+        )
+    else:
+        people = "".join(
+            f"""
+              <article class="card a2-person">
+                {avatar(p['initials'], 'md')}
+                <h3>{p['name']}</h3>
+                <p class="a2-role">{p['role_slot']}</p>
+                {slot(p['bio_tag'], p['bio_tpl'], p['bio_spec'])}
+                <span class="a2-li">LinkedIn ↗ {val("profile URL")}</span>
+              </article>"""
+            for p in team_spec()
+        )
+
+    facts = "".join(
+        f'<div class="a2-fact"><dt>{k}</dt><dd>{v}</dd></div>'
+        for k, v in (FACTS_LIVE if PRESENT else
+                     [("Legal name", fact(LEGAL_NAME)), ("Founded", val("year")),
+                      ("Headquarters", fact(f"{CITY}, Germany")), ("Register", fact(REGISTER)),
+                      ("Team size", fact("3")), ("Website", fact(SITE_URL))])
     )
 
     bank = "".join(
@@ -195,115 +359,144 @@ def about() -> str:
         for k, v in FACT_BANK
     )
 
+    headline = (f'<h1 class="h1">{HEADLINE}</h1>' if PRESENT else
+                slot("page headline", "[ What this company is, in one line a journalist could reuse ]",
+                     "&le; 8 words · a page title, not a sentence", scale="hero"))
+
+    lead = f'<p class="a2-lead">{LEAD}</p>' if PRESENT else ""
+
+    # In presentation mode the boilerplate is simply the company's opening statement; the
+    # "reuse this verbatim" label and the formula belong to the spec.
+    boiler = f"""
+              <div class="a2-boiler">
+                {spec_only('<span class="label">Boilerplate — 2–3 sentences, reused verbatim everywhere</span>')}
+                <p class="formula">{BOILER_SHORT if PRESENT else BOILER_FORMULA}</p>
+                {note("Checklist appendix offers four variants (straight / product-forward / angle-forward / "
+                      "~100 words). Pick <b>one</b>, then use it word-for-word here, on the press page, on "
+                      "LinkedIn and in pitch emails. Only update it when a fact changes.", cls="formula-note")}
+                {spec_only(f'''<div class="bank">
+                  <span class="label">Verified facts available to fill it</span>
+                  <div class="bank-rows">{bank}</div>
+                </div>''')}
+              </div>"""
+
+    why_title = DELIBERATE_TITLE if PRESENT else "Why we built it"
+    why_body = ("".join(f'<p class="copy">{para}</p>' for para in ABOUT_BODY) if PRESENT else
+                slot("why — the problem you saw",
+                     "[ The problem you saw that made this worth building. Warm tone, first person plural. ]",
+                     "1 short paragraph · ~60–90 words · checklist requirement"))
+
+    product_side = f"""
+                <div class="a2-product-side">
+                  {'' if PRESENT else '<span class="pill">In closed testing</span>'}
+                  <span class="a2-link">{fact(PRODUCT_URL)} ↗</span>
+                  <span class="a2-screen"><em>product screenshot</em></span>
+                  {note(val("2–3 captures of the real UI"), cls="shot-note")}
+                </div>"""
+
+    credibility = spec_only(f"""
+            <section class="a2-block">
+              <h2 class="h2">Credibility</h2>
+              <p class="section-note">Honest only. No invented user or revenue numbers, no unverifiable
+                superlatives, and the developer tester is not named without explicit permission.</p>
+              <div class="cred-rows">
+                <div class="cred-row">
+                  <span class="label">Consulting track record</span>
+                  {slot("track record",
+                        "[ years active · types of clients · client logos only where permission is granted ]",
+                        "1–2 lines · names on request is a valid answer")}
+                </div>
+                <div class="cred-row">
+                  <span class="label is-brand">{PRODUCT}</span>
+                  <p class="cred-real">In closed testing with early developer feedback.
+                    <span class="dim">— the checklist's approved wording. Nothing beyond this until there
+                    are real numbers.</span></p>
+                </div>
+              </div>
+              <p class="a2-foot-note">Client names on request; logos published only with written
+                permission. No user or revenue figures until there are audited ones.</p>
+            </section>""")
+
     return f"""
-      <main class="a3">
-        <section class="a3-hero">
-          <div class="a3-hero-portrait">
-            {avatar('PK', 'xl')}
-            <p class="shot-note">{val("professional photo — founder")}</p>
+      <main class="a2">
+        <div class="a2-grid">
+          <aside class="a2-rail">
+            <p class="label">On this page</p>
+            {rail}
+            <div class="a2-rail-cta"><span class="btn btn-sm">Get in touch</span></div>
+          </aside>
+
+          <div class="a2-body">
+            <section>
+              <p class="eyebrow">About</p>
+              {headline}
+              {lead}
+              {boiler}
+            </section>
+
+            <section class="a2-block">
+              <h2 class="h2">What we do</h2>
+              {note("Checklist: business management + IT/AI consulting. Service names are live on the "
+                    "site today; the one-liners are yours to write.")}
+              <div class="a2-svcs">{services}</div>
+              <div class="a2-product">
+                <div>
+                  <span class="label">What we're building</span>
+                  <h3>{fact(PRODUCT)}</h3>
+                  {f'<p class="a2-tagline">{PRODUCT_TAGLINE}</p>' if PRESENT else ''}
+                  {slot("one-line product description", "[ What it is, who it's for, in one line ]",
+                        "&le; 25 words · must match the press page and the boilerplate exactly · "
+                        "a version already exists in lib/copy.ts — reuse or replace it, don't fork it",
+                        real=PRODUCT_DESC)}
+                  <div class="btn-row">
+                    <span class="btn btn-ghost">{PRODUCT_CTA if PRESENT else 'Join the waitlist'}</span>
+                  </div>
+                  {note(f'Waitlist target: {val("landing page / waitlist URL")} · status wording is the '
+                        f'checklist\'s own: “in closed testing with early developer feedback”.')}
+                </div>
+                {product_side}
+              </div>
+            </section>
+
+            <section class="a2-block">
+              <h2 class="h2">{why_title}</h2>
+              {why_body}
+            </section>
+
+            <section class="a2-block">
+              <h2 class="h2">Meet the team</h2>
+              {note("Three equal cards — roles clear enough that a journalist can see who does what.")}
+              <div class="a2-people">{people}</div>
+            </section>
+
+            <section class="a2-block">
+              <h2 class="h2">How we work</h2>
+              {note("The three differentiators the checklist names. Keys are fixed; the wording is yours.")}
+              <div class="a2-hows">{hows}</div>
+            </section>
+
+            <section class="a2-block">
+              <h2 class="h2">Company facts</h2>
+              {note("The same table the press page carries — one set of numbers, two places, no variants.")}
+              <dl class="a2-facts">{facts}</dl>
+            </section>
+            {credibility}
+
+            <section class="a2-block a2-end">
+              <h2 class="h2">Tell us what you're trying to change.</h2>
+              <div class="btn-row">
+                <span class="btn">Get in touch</span>
+                <span class="btn btn-ghost">Press &amp; Media</span>
+                <span class="btn btn-ghost">Join the {PRODUCT} waitlist</span>
+              </div>
+              {note(f"Three exits: talk to us, take the press kit, or join the product waitlist. The "
+                    f"waitlist button links to {PRODUCT_URL} — the product was renamed to {PRODUCT}, "
+                    f"the domain was not.")}
+            </section>
+            {spec_only(f'<p class="a2-legal">{LEGAL_NAME} · {CITY} · <u>Impressum</u> · <u>Datenschutz</u></p>')}
+            {note("English version is live; German follows the existing language toggle.")}
           </div>
-          <div class="a3-hero-copy">
-            <p class="eyebrow">About</p>
-            {slot("hero statement",
-                  "[ One sentence: your position, or a founder quote a journalist could lift verbatim ]",
-                  "≤ 20 words · first person if quoted · this is the whole hero, so it has to earn it",
-                  scale="hero")}
-            <p class="a3-attrib">{fact(FOUNDER)} · {TEAM_SPEC[0]['role_slot']}</p>
-          </div>
-        </section>
-
-        <section class="a3-boiler">
-          <div class="a3-boiler-inner">
-            <span class="label">Boilerplate — 2–3 sentences, reused verbatim everywhere</span>
-            <p class="formula">{BOILER_FORMULA}</p>
-            <p class="formula-note">Checklist appendix offers four variants (straight / product-forward /
-              angle-forward / ~100 words). Pick <b>one</b>, then use it word-for-word here, on the press
-              page, on LinkedIn and in pitch emails. Only update it when a fact changes.</p>
-            <div class="bank">
-              <span class="label">Verified facts available to fill it</span>
-              <div class="bank-rows">{bank}</div>
-            </div>
-          </div>
-        </section>
-
-        <section class="a3-sec a3-why">
-          {slot("section heading", "[ heading for the why section ]", "≤ 8 words", scale="head")}
-          {slot("why — the problem you saw",
-                "[ The problem you saw that made this worth building. Warm tone, first person plural. ]",
-                "1 short paragraph · ~60–90 words · checklist requirement")}
-        </section>
-
-        <section class="a3-sec a3-consulting">
-          <h2 class="h2">What the consulting side does</h2>
-          <p class="section-note">Checklist: business management + IT/AI consulting. Service names are
-            live on the site today; the one-liners are yours to write.</p>
-          <div class="a3-svcs">{services}</div>
-        </section>
-
-        <section class="a3-sec a3-bands">
-          <h2 class="h2">How we work</h2>
-          <p class="section-note">The three differentiators the checklist names. Keys are fixed;
-            the wording is yours.</p>
-          {bands}
-        </section>
-
-        <section class="a3-sec a3-product">
-          <div>
-            <span class="label">What we're building</span>
-            <h2 class="h2">{fact(PRODUCT)}</h2>
-            {slot("one-line product description",
-                  "[ What it is, who it's for, in one line ]",
-                  "≤ 25 words · must match the press page and the boilerplate exactly · "
-                  "a version already exists in lib/copy.ts — reuse or replace it, don't fork it")}
-            <div class="btn-row">
-              <span class="btn">Join the waitlist</span>
-              <span class="pill">In closed testing</span>
-            </div>
-            <p class="section-note">Waitlist target: {val("landing page / waitlist URL")} ·
-              status wording is the checklist's own: “in closed testing with early developer feedback”.</p>
-          </div>
-          <div class="a3-product-frame">
-            <span class="a3-screen"><em>product screenshot</em></span>
-            <p class="shot-note">{val("2–3 captures of the real UI")}</p>
-          </div>
-        </section>
-
-        <section class="a3-sec a3-team">
-          <h2 class="h2">Meet the team</h2>
-          <p class="section-note">Roles clear enough that a journalist can see who does what.</p>
-          <div class="a3-cards">{team}</div>
-        </section>
-
-        <section class="a3-sec a3-cred">
-          <h2 class="h2">Credibility</h2>
-          <p class="section-note">Honest only. No invented user or revenue numbers, no unverifiable
-            superlatives, and the developer tester is not named without explicit permission.</p>
-          <div class="cred-rows">
-            <div class="cred-row">
-              <span class="label">Consulting track record</span>
-              {slot("track record",
-                    "[ years active · types of clients · client logos only where permission is granted ]",
-                    "1–2 lines · names on request is a valid answer")}
-            </div>
-            <div class="cred-row">
-              <span class="label is-brand">{PRODUCT}</span>
-              <p class="cred-real">{fact("In closed testing with early developer feedback.")}
-                <span class="dim">— the checklist's approved wording. Nothing beyond this until there
-                are real numbers.</span></p>
-            </div>
-          </div>
-        </section>
-
-        <section class="a3-sec a3-cta">
-          <h2 class="h2">Want to learn more?</h2>
-          {slot("CTA line", "[ one line inviting the next step ]", "optional · ≤ 15 words")}
-          <div class="btn-row">
-            <span class="btn">Get in touch</span>
-            <span class="btn btn-ghost">Press &amp; Media</span>
-          </div>
-          <p class="a1-legal">{fact(LEGAL_NAME)} · {fact(CITY)} · <u>Impressum</u> · <u>Datenschutz</u></p>
-          <p class="section-note">English version is live; German follows the existing language toggle.</p>
-        </section>
+        </div>
       </main>"""
 
 
@@ -311,36 +504,80 @@ def about() -> str:
 # Press & Media — direction P2 (press kit first)
 # =========================================================================
 
-PRESS_ASSETS = [
+PRESS_ASSETS_LIVE = [
+    ("Logo pack", "SVG + PNG, transparent, light &amp; dark", "logo"),
+    (f"{FOUNDER} — headshot", "High-res JPG, print quality", "portrait"),
+    ("Team headshots", "High-res JPG, print quality", "portrait"),
+    (f"{PRODUCT} screenshots", "PNG, product UI", "screen"),
+    (f"{PRODUCT} demo clip", "MP4, short, no audio", "video"),
+]
+
+def press_assets_spec() -> list[tuple]:
+  return [
     ("Logo pack", "SVG + PNG, transparent, light &amp; dark", "logo", val("prepare files")),
     (f"{FOUNDER} — headshot", "High-res JPG, print quality", "portrait", val("photo needed")),
     (val("team member") + " — headshot", "High-res JPG, print quality", "portrait", val("photo needed")),
     (f"{PRODUCT} screenshots", "2–3 × PNG, product UI", "screen", val("captures needed")),
     (f"{PRODUCT} demo clip", "MP4, short, no audio", "video", val("optional")),
+  ]
+
+PRESS_FACTS_LIVE = [
+    ("Legal name", LEGAL_NAME),
+    ("Headquarters", f"{CITY}, Germany"),
+    ("Legal form", "UG (haftungsbeschränkt)"),
+    ("Register", REGISTER),
+    ("Team size", "3"),
+    ("Product name", PRODUCT),
+    ("One-line description", PRODUCT_DESC),
+    ("Website", SITE_URL),
 ]
 
-PRESS_FACTS = [
+def press_facts_spec() -> list[tuple]:
+  return [
     ("Legal name", fact(LEGAL_NAME)),
     ("Founded", val("year")),
     ("Headquarters", fact(f"{CITY}, Germany")),
     ("Legal form", fact("UG (haftungsbeschränkt)")),
     ("Register", fact(REGISTER)),
     ("Team size", fact("3")),
-    ("Product name", fact(PRODUCT) + ' <span class="dim">— confirm exact casing for print</span>'),
+    ("Product name", fact(PRODUCT) + ' <span class="dim">— renamed from MAtfIT; domain still matfit.ai</span>'),
     ("Product status", fact("In closed testing with early developer feedback")),
     ("One-line description", val("same line as the About page and the boilerplate")),
     ("Website", fact(SITE_URL)),
-]
+  ]
 
 
 def press() -> str:
-    tiles = "".join(dl_tile(*a) for a in PRESS_ASSETS)
-    facts = "".join(f'<div class="p2-fact"><dt>{k}</dt><dd>{v}</dd></div>' for k, v in PRESS_FACTS)
-    angles = "".join(
-        f'<span class="p2-chip">{val(f"angle {i} — suggested topic")}</span>' for i in range(1, 5)
-    )
-    people = "".join(
-        f"""
+    tiles = "".join(dl_tile(t, m, k, "") for t, m, k in PRESS_ASSETS_LIVE) if PRESENT else \
+            "".join(dl_tile(*a) for a in press_assets_spec())
+
+    facts = "".join(f'<div class="p2-fact"><dt>{k}</dt><dd>{v}</dd></div>'
+                    for k, v in (PRESS_FACTS_LIVE if PRESENT else press_facts_spec()))
+
+    if PRESENT:
+        angles = "".join(f'<span class="p2-chip">{a}</span>' for a in ANGLES_LIVE)
+        people = "".join(
+            f"""
+            <div class="p2-person">
+              {avatar(p['initials'], 'sm')}
+              <div>
+                {f'<p class="p2-person-name">{p["name"]}</p>' if p['name'] else ''}
+                <p class="p2-person-role{'' if p['name'] else ' is-lead'}">{p['role']}</p>
+                <p class="copy">{p['line']}</p>
+              </div>
+            </div>"""
+            for p in TEAM_LIVE
+        )
+        quote_split = "".join(
+            f'<p class="quote-line"><b>{who}</b> — {what}.</p>' for who, what in QUOTE_SPLIT_LIVE
+        )
+        hero_meta = f'<p class="p2-hero-meta">{LEGAL_NAME} · {CITY}</p>'
+    else:
+        angles = "".join(
+            f'<span class="p2-chip">{val(f"angle {i} — suggested topic")}</span>' for i in range(1, 5)
+        )
+        people = "".join(
+            f"""
             <div class="p2-person">
               {avatar(p['initials'], 'sm')}
               <div>
@@ -349,8 +586,24 @@ def press() -> str:
                 {slot("bio for attribution", "[ one sentence, third person ]", "journalists paste this as-is")}
               </div>
             </div>"""
-        for p in TEAM_SPEC
-    )
+            for p in team_spec()
+        )
+        quote_split = ('<p>Founder — business, consulting, company direction. A.I. engineering — AI '
+                       'engineering and building with AI.</p>'
+                       '<p class="dim">The checklist\'s own split. Third person, exact job titles, '
+                       'LinkedIn links next to each name.</p>')
+        hero_meta = (f'<p class="p2-hero-meta">{val("file size")} · updated {val("date")} · '
+                     f'{fact(LEGAL_NAME)}</p>')
+
+    intro = slot("intro line", "[ What's in the kit and how fast you reply ]",
+                 "1–2 sentences · &le; 30 words", real=PRESS_INTRO)
+
+    featured = spec_only("""
+        <section class="p2-block">
+          <h2 class="h2">As featured in</h2>
+          <div class="empty">Empty by design — this fills up as reactive-PR quotes and podcast
+            appearances land. Past appearances and published research get their own blocks later.</div>
+        </section>""")
 
     return f"""
       <main class="p2">
@@ -358,16 +611,14 @@ def press() -> str:
           <div class="p2-hero-copy">
             <p class="eyebrow">Press &amp; Media</p>
             <h1 class="h1">Press kit</h1>
-            {slot("intro line",
-                  "[ What's in the kit and how fast you reply ]",
-                  "1–2 sentences · ≤ 30 words")}
+            {intro}
             <div class="btn-row">
               <span class="btn btn-lg">Download press kit (.zip)</span>
               <span class="btn btn-ghost btn-lg">Email press contact</span>
             </div>
-            <p class="p2-hero-meta">{val("file size")} · updated {val("date")} · {fact(LEGAL_NAME)}</p>
-            <p class="section-note">Clean URL: <b>{SITE_URL}/press</b> · linked from the footer and from
-              the About page · bookmark it, it goes in every pitch email.</p>
+            {hero_meta}
+            {note(f"Clean URL: <b>{SITE_URL}/press</b> · linked from the footer and from the About page · "
+                  f"bookmark it, it goes in every pitch email.")}
           </div>
           <div class="p2-hero-art" aria-hidden="true">
             <span class="p2-logo-tile is-dark"><span class="wordmark"><b>X</b>o<b>X</b>oCom</span></span>
@@ -377,20 +628,22 @@ def press() -> str:
 
         <section class="p2-block">
           <h2 class="h2">Individual assets</h2>
-          <p class="section-note">Downloadable files, not embedded images. The zip above bundles all
-            of these — build it last.</p>
+          {note("Downloadable files, not embedded images. The zip above bundles all of these — build "
+                "it last.")}
           <div class="p2-tiles">{tiles}</div>
         </section>
 
         <section class="p2-split">
           <div>
-            <h2 class="h2">Boilerplate</h2>
-            <p class="section-note">Marked “for use in articles”. Identical to the About page and
-              LinkedIn — same words, no variants.</p>
-            {copy_block(BOILER_FORMULA, "Short — 2–3 sentences",
-                        "Checklist formula. Fill once, then never paraphrase it.")}
-            {copy_block(BOILER_LONG_FORMULA, "Long — ~100 words",
-                        "For anyone who wants more than the short version.")}
+            <h2 class="h2">{"About the company" if PRESENT else "Boilerplate"}</h2>
+            {note("Marked “for use in articles”. Identical to the About page and LinkedIn — same words, "
+                  "no variants.")}
+            {copy_block(BOILER_SHORT if PRESENT else BOILER_FORMULA,
+                        "Short version" if PRESENT else "Short — 2–3 sentences",
+                        "" if PRESENT else "Checklist formula. Fill once, then never paraphrase it.")}
+            {copy_block(BOILER_LONG if PRESENT else BOILER_LONG_FORMULA,
+                        "Long version — ~100 words" if PRESENT else "Long — ~100 words",
+                        "" if PRESENT else "For anyone who wants more than the short version.")}
           </div>
           <div>
             <h2 class="h2">The facts</h2>
@@ -403,17 +656,14 @@ def press() -> str:
           <div class="p2-people">{people}</div>
           <div class="quote-split">
             <span class="label">Who to quote for what</span>
-            <p>{fact("Founder")} — business, consulting, company direction.
-               {fact("AI engineering")} — AI engineering and building with AI.</p>
-            <p class="dim">The checklist's own split. Third person, exact job titles, LinkedIn links
-               next to each name.</p>
+            {quote_split}
           </div>
         </section>
 
         <section class="p2-block">
           <h2 class="h2">Topics we can speak to</h2>
-          <p class="section-note">3–5 angles. This is the part that turns the page into an inbound
-            podcast magnet, so it's worth writing properly.</p>
+          {note("3–5 angles. This is the part that turns the page into an inbound podcast magnet, so "
+                "it's worth writing properly.")}
           <div class="p2-chips">{angles}</div>
         </section>
 
@@ -421,29 +671,24 @@ def press() -> str:
           <div class="p2-contact">
             <div>
               <span class="label">Press contact</span>
-              <p class="p2-contact-name">{val("you or the founder — decide now")}</p>
-              <p class="p2-contact-mail">{val("press email address")}</p>
-              <p class="p2-contact-note">{fact("Podcast and interview requests welcome. We usually reply within 24 hours.")}
-                <span class="dim">— checklist wording; drop the promise if you can't keep it.</span></p>
+              <p class="p2-contact-name">{val("you or the founder — decide now", COMPANY)}</p>
+              <p class="p2-contact-mail">{val("press email address", EMAIL)}</p>
+              <p class="p2-contact-note">Podcast and interview requests welcome. {REPLY}</p>
             </div>
             <div class="btn-row"><span class="btn">Email press contact</span></div>
           </div>
         </section>
-
-        <section class="p2-block">
-          <h2 class="h2">As featured in</h2>
-          <div class="empty">Empty by design — this fills up as reactive-PR quotes and podcast
-            appearances land. Past appearances and published research get their own blocks later.</div>
-        </section>
+        {featured}
       </main>"""
 
 
 # =========================================================================
-# Extra CSS — the slot system and the blocks A3/P2 didn't have in round 1
+# Extra CSS — the slot system, presentation copy, and the blocks A2/P2
+# didn't have in round 1
 # =========================================================================
 
 EXTRA_CSS = """
-/* ---------- slots: text somebody still has to write ---------- */
+/* ---------- slots: text somebody still has to write (spec mode) ---------- */
 .slot{display:block;border:1px dashed rgba(251,107,76,.42);border-radius:10px;
   background:rgba(251,107,76,.045);padding:11px 13px;margin:0 0 4px}
 .slot-tag{display:block;font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
@@ -467,34 +712,62 @@ EXTRA_CSS = """
 .bank-row{display:flex;gap:10px;font-size:.82rem;padding:3px 0}
 .bank-k{color:var(--muted);flex:none;min-width:118px}
 .bank-v{color:var(--fg)}
+.tile-status:empty{display:none}
 
-/* ---------- A3 additions ---------- */
-#a3 .a3-hero-copy .slot{margin-bottom:16px}
-#a3 .a3-boiler-inner{max-width:880px;margin:0 auto}
-/* The round-1 boilerplate band centres its paragraph; a formula and its note read as
-   left-aligned text, so override both (the centred rule targets `.a3-boiler p`). */
-#a3 .a3-boiler p.formula,#a3 .a3-boiler p.formula-note{text-align:left;margin-left:0;margin-right:0}
-#a3 .a3-consulting{padding-top:58px}
-#a3 .a3-svcs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-#a3 .a3-svc{border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);
-  padding:16px}
-#a3 .a3-svc h4{margin:0 0 10px;font-size:.95rem;font-weight:700}
-#a3 .a3-cred{padding-top:58px}
-#a3 .cred-rows{display:flex;flex-direction:column;gap:20px}
-#a3 .cred-row{display:grid;grid-template-columns:190px minmax(0,1fr);gap:22px;padding-top:16px;
+/* ---------- copy (presentation mode) ---------- */
+.copy{margin:0 0 12px;font-size:.98rem;line-height:1.72;color:var(--muted);max-width:70ch}
+.copy:last-child{margin-bottom:0}
+.copy.is-head{margin:0 0 8px;font-size:1.06rem;line-height:1.3;letter-spacing:-.01em;
+  font-weight:700;color:var(--fg)}
+
+/* ---------- A2 ---------- */
+#a2 .a2-lead{margin:14px 0 24px;font-size:1.12rem;line-height:1.6;color:var(--fg);max-width:62ch}
+#a2 .a2-boiler p.formula{font-size:1rem;line-height:1.68;color:var(--fg)}
+#a2 .a2-boiler p.formula-note{font-size:.8rem;line-height:1.6;color:var(--muted)}
+#a2 .a2-body .slot.is-hero{margin:4px 0 22px}
+#a2 .a2-svc .slot,#a2 .a2-svc .copy{margin:0}
+#a2 .a2-svc .slot-tpl,#a2 .a2-svc .copy{font-size:.86rem;line-height:1.6}
+#a2 .a2-product{align-items:flex-start}
+#a2 .a2-product .slot,#a2 .a2-product .copy{margin:8px 0 0;max-width:52ch}
+#a2 .a2-tagline{margin:2px 0 10px;font-size:.84rem;font-weight:600;color:var(--accent)}
+#a2 .a2-product .btn-row{margin-top:16px}
+/* `.section-note` carries a negative top margin for sitting under a heading; under the
+   product slot it needs a positive one or the two blocks collide. */
+#a2 .a2-product .section-note{margin:12px 0 0}
+#a2 .a2-product-side{align-items:flex-end;max-width:250px}
+#a2 .a2-screen{display:flex;align-items:center;justify-content:center;width:100%;height:104px;
+  border:1px dashed var(--border);border-radius:10px;background:var(--bg)}
+#a2 .a2-screen em{font-style:normal;font-size:.74rem;color:var(--muted)}
+#a2 .a2-product-side .shot-note{margin:8px 0 0;text-align:right}
+#a2 .a2-person .slot{margin:0}
+#a2 .a2-person .copy{margin:0;font-size:.88rem;line-height:1.65}
+#a2 .a2-role.is-lead{margin:14px 0 8px;font-size:1rem;font-weight:700;color:var(--fg)}
+/* The round-1 `.a2-how h3` carried the accent top rule; presentation mode has no h3 there,
+   so the rule moves onto the column itself. */
+#a2 .a2-how{padding-top:14px;border-top:2px solid var(--accent)}
+#a2 .a2-how .label{display:block;margin-bottom:9px}
+#a2 .a2-how .slot{margin-bottom:8px}
+#a2 .cred-rows{display:flex;flex-direction:column;gap:20px}
+#a2 .cred-row{display:grid;grid-template-columns:190px minmax(0,1fr);gap:22px;padding-top:16px;
   border-top:1px solid var(--border)}
-#a3 .cred-real{margin:0;font-size:.94rem;line-height:1.65}
-#a3 .a3-product-frame{position:relative}
-#a3 .a3-product-frame .shot-note{position:absolute;left:0;right:0;bottom:-30px}
-#a3 .a3-band-body .slot{margin-bottom:8px}
-#a3 .a3-card .slot{margin-top:4px}
+#a2 .cred-real{margin:0;font-size:.94rem;line-height:1.65}
+/* Round F's `.a2-end` is a heading-left / buttons-right flex row; the closing CTA stacks. */
+#a2 .a2-end{display:block}
+#a2 .a2-end .btn-row{margin-top:22px}
+#a2 .a2-end .section-note{margin-top:16px}
+#a2 .a2-legal{margin:34px 0 0;font-size:.78rem;color:var(--muted)}
+#a2 .a2-legal + .section-note{margin-top:10px}
 
-/* ---------- P2 additions ---------- */
+/* ---------- P2 ---------- */
 #p2 .quote-split{margin-top:22px;border:1px solid var(--border);border-left:2px solid var(--accent);
   border-radius:var(--radius);background:var(--surface);padding:16px 18px}
 #p2 .quote-split p{margin:9px 0 0;font-size:.92rem;line-height:1.6}
+#p2 .quote-line b{color:var(--fg);font-weight:700}
 #p2 .p2-person-role{margin:2px 0 8px;font-size:.8rem;color:var(--accent);font-weight:600}
+#p2 .p2-person-role.is-lead{margin:0 0 8px;font-size:.95rem;color:var(--fg);font-weight:700}
 #p2 .p2-person .slot{margin-top:8px}
+#p2 .p2-person .copy{margin:0;font-size:.86rem;line-height:1.65}
+#p2 .p2-hero .copy{max-width:56ch}
 #p2 .p2-contact{display:flex;align-items:center;justify-content:space-between;gap:28px;flex-wrap:wrap;
   border:1px solid var(--border);border-left:2px solid var(--accent);border-radius:var(--radius);
   background:var(--surface);padding:24px}
@@ -507,12 +780,13 @@ EXTRA_CSS = """
 #p2 .p2-hero .section-note{margin-top:12px}
 
 @media (max-width:1080px){
-  #a3 .a3-svcs{grid-template-columns:repeat(2,minmax(0,1fr))}
   .bank-rows{grid-template-columns:minmax(0,1fr)}
+  #a2 .a2-product{flex-direction:column}
+  #a2 .a2-product-side{align-items:flex-start;max-width:none}
+  #a2 .a2-product-side .shot-note{text-align:left}
 }
 @media (max-width:720px){
-  #a3 .a3-svcs{grid-template-columns:minmax(0,1fr)}
-  #a3 .cred-row{grid-template-columns:minmax(0,1fr);gap:10px}
+  #a2 .cred-row{grid-template-columns:minmax(0,1fr);gap:10px}
 }
 """
 
@@ -523,15 +797,17 @@ EXTRA_CSS = """
 
 PAGES = [
     {
-        "id": "a3", "tag": "About page", "name": "Founder-led",
-        "note": "Portrait and a statement carry the hero, then the boilerplate band, why, what the "
-                "consulting side does, the three differentiators, the product, the team, and credibility. "
-                "Headings renamed as you asked: “Meet the team” and “Want to learn more?”.",
+        "id": "a2", "tag": "About page", "name": "Company dossier",
+        "note": "A section rail, a headline slot, then the boilerplate labelled as reusable, what we do "
+                "with the product beside it, why we built it, three equal team cards, the three "
+                "differentiators, the fact table, credibility, and the closing CTA. The closing heading "
+                "is Option 1's — “Tell us what you're trying to change.” — as you asked, in place of "
+                "Option 2's original “Work with us”.",
         "active": "About", "build": about,
     },
     {
         "id": "p2", "tag": "Press &amp; Media page", "name": "Press kit first",
-        "note": "One prominent .zip download, the logo shown on both light and dark, individual assets, "
+        "note": "One prominent .zip download, the logo shown on light and dark, individual assets, "
                 "then the boilerplate formulae beside the fact table, who to talk to, topics, press "
                 "contact, and an intentionally empty coverage block.",
         "active": "", "build": press,
@@ -540,13 +816,15 @@ PAGES = [
 
 
 def page_section(p: dict) -> str:
-    return f"""
-    <section class="proto" id="{p['id']}">
+    head = f"""
       <div class="proto-head">
         <span class="tag">{p['tag']}</span>
-        <h2>{p['name']}</h2>
-        <p class="why">{p['note']}</p>
-      </div>
+        {'' if PRESENT else f"<h2>{p['name']}</h2>"}
+        {note(p['note'], cls="why")}
+      </div>"""
+    return f"""
+    <section class="proto" id="{p['id']}">
+      {head}
       <div class="frame">
         <div class="page" data-page="{p['id']}">
           {chrome(p['active'])}
@@ -559,14 +837,24 @@ def page_section(p: dict) -> str:
 
 def page_body() -> str:
     pages = "".join(page_section(p) for p in PAGES)
-    return f"""
-  <div class="lab">
+    if PRESENT:
+        head = """
+    <div class="lab-head">
+      <p class="eyebrow">Prototype</p>
+      <h1>About page &amp; Press / Media page</h1>
+      <p>Two new pages for xoxocom.net, shown at full width in the site's own header, footer and
+        type.</p>
+    </div>"""
+    else:
+        head = f"""
     <div class="lab-head">
       <p class="eyebrow">Chosen directions — content spec</p>
       <h1>About page &amp; Press / Media page</h1>
-      <p>The two directions you picked, with the copy stripped out. Nothing on these pages is drafted
-        prose: every text block is a slot showing what belongs there, the checklist's formula, and how
-        long it should be.</p>
+      <p><b>Option 2 on both</b>: About = “Company dossier”, Press &amp; Media = “Press kit first”. The
+        one change to Option 2's About page is its closing call to action — it now uses Option 1's
+        heading, “Tell us what you're trying to change.”, instead of “Work with us”.</p>
+      <p>Both pages have the copy stripped out. Nothing here is drafted prose: every text block is a slot
+        showing what belongs there, the checklist's formula, and how long it should be.</p>
       <div class="legend">
         <span><span class="slot-tag" style="display:inline">dashed block</span> = you write this; the
           template and length are given</span>
@@ -578,31 +866,40 @@ def page_body() -> str:
       <p>Verified from <code>content/impressum.md</code> and <code>lib/copy.ts</code>: legal name, seat,
         register, Geschäftsführer, {PRODUCT} and its URL, the three service names, team size. Everything
         else is a blank.</p>
-    </div>
+    </div>"""
+    return f"""
+  <div class="lab">
+    {head}
     {pages}
   </div>"""
 
 
-TITLE = "About &amp; Press — content spec — XoXoCom"
+def title() -> str:
+    return "XoXoCom Dossier &amp; Press Kit"
 
 
 def full_document(body: str, style: str) -> str:
     return (
         '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
-        f"<title>{TITLE}</title>\n<style>{style}</style>\n</head>\n<body>{body}\n"
+        f"<title>{title()}</title>\n<style>{style}</style>\n</head>\n<body>{body}\n"
         f"<script>{lab.JS}</script>\n</body>\n</html>\n"
     )
 
 
 def fragment_document(body: str, style: str) -> str:
-    return f"<title>{TITLE}</title>\n<style>{style}</style>\n{body}\n<script>{lab.JS}</script>\n"
+    return f"<title>{title()}</title>\n<style>{style}</style>\n{body}\n<script>{lab.JS}</script>\n"
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Build the two chosen page directions as content specs.")
+    global PRESENT
+    ap = argparse.ArgumentParser(description="Build the two chosen page directions.")
+    ap.add_argument("--mode", choices=("present", "spec"), default="present",
+                    help="present = clean prototype to show (default); spec = internal content spec")
     ap.add_argument("--out", default=str(DEFAULT_OUT), help="output directory")
     args = ap.parse_args()
+
+    PRESENT = args.mode == "present"
 
     face = lab.manrope_face()
     style = lab.css(face) + EXTRA_CSS
@@ -613,8 +910,9 @@ def main() -> int:
     (out / "index.html").write_text(full_document(body, style), encoding="utf-8")
     (out / "artifact.html").write_text(fragment_document(body, style), encoding="utf-8")
 
+    print(f"mode:  {args.mode}")
     print("pages: " + ", ".join(p["id"] for p in PAGES))
-    print("font: " + ("Manrope inlined from the Next build" if face else "system stack"))
+    print("font:  " + ("Manrope inlined from the Next build" if face else "system stack"))
     print(f"preview  -> {out / 'index.html'}")
     print(f"fragment -> {out / 'artifact.html'}")
     return 0

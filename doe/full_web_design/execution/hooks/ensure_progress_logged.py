@@ -36,6 +36,14 @@ EXCLUDE_DIR_PARTS = {
     "hooks",  # this hook's own dir — editing the hook isn't "session work"
 }
 
+# Generated, gitignored files that are rewritten as a side effect of routine
+# commands rather than authored. `execution/sync_env_local.py` rewrites
+# `sites/<slug>/.env.local` unconditionally every time a preview is started, so
+# without this the hook blocks at the end of EVERY session that previewed a site
+# and demands a documenter run for a file containing no work. Same category as
+# .next: regenerable from the two sources of truth (root .env + site.config.json).
+EXCLUDE_NAME_PREFIXES = (".env",)
+
 
 def newest_work_mtime() -> float:
     """Newest mtime of any file under the watched dirs, pruning excluded dirs
@@ -49,7 +57,7 @@ def newest_work_mtime() -> float:
             # Prune excluded dirs in-place so os.walk skips descending into them.
             dirnames[:] = [dn for dn in dirnames if dn not in EXCLUDE_DIR_PARTS]
             for fn in filenames:
-                if fn in EXCLUDE_NAMES:
+                if fn in EXCLUDE_NAMES or fn.startswith(EXCLUDE_NAME_PREFIXES):
                     continue
                 try:
                     m = (Path(dirpath) / fn).stat().st_mtime

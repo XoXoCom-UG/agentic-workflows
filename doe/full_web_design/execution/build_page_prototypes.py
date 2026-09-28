@@ -73,7 +73,7 @@ LEGAL_NAME = "XoXoCom UG (haftungsbeschränkt)"
 CITY = "Monheim am Rhein"
 REGISTER = "Amtsgericht Düsseldorf, HRB 110495"
 FOUNDER = "Patryk Kwitowski"
-PRODUCT = "MAtfIT"
+PRODUCT = "Agentix Projects"  # renamed from MAtfIT 2026-09-02; the domain is still matfit.ai
 PRODUCT_URL = "matfit.ai"
 SITE_URL = "xoxocom.net"
 EMAIL = "info@xoxocom.net"
@@ -172,7 +172,7 @@ FACTS = [
     ("Legal form", "UG (haftungsbeschränkt)"),
     ("Register", REGISTER),
     ("Team size", "3"),
-    ("Product", f"{PRODUCT} <span class=\"dim\">— spelling to confirm for print</span>"),
+    ("Product", f"{PRODUCT} <span class=\"dim\">— domain is still matfit.ai</span>"),
     ("Product status", "In closed testing with early developer feedback"),
     ("What it is", "An AI coach that guides developers, product owners and founders from idea to shipped product"),
     ("Website", SITE_URL),

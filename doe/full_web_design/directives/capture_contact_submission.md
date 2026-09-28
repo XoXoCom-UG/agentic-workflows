@@ -40,7 +40,7 @@ flow and this directive does not apply.
 
 5. **Upsert**: `supabase.schema("leads").from("prospects").upsert(row, { onConflict: "campaign_slug,email", ignoreDuplicates: true }).select()`. A UNIQUE index on `(campaign_slug, email)` backs the conflict target, so a repeat submission from the same email on the same site is a no-op at the row level — no duplicate row is written. On error → `500 { ok: false, error: "db" }`. No email. (The conflict is silenced by `ignoreDuplicates`, so a repeat is not a DB error; the route still proceeds to send the email — see step 6.)
 
-6. **Send emails** (best-effort, non-blocking; only when `CONTACT_EMAIL` and `GMAIL_USER` are set): `sendContactEmails` sends (a) a notification to `CONTACT_EMAIL` with the full message and `replyTo` the visitor, and (b) an acknowledgment to the visitor. If `sendMail` throws, log and continue — the DB row is already saved.
+6. **Send emails** (best-effort on errors, but the route awaits the send before responding; only when `CONTACT_EMAIL` and `GMAIL_USER` are set): `sendContactEmails` sends (a) a notification to `CONTACT_EMAIL` with the full message and `replyTo` the visitor, and (b) an acknowledgment to the visitor. If `sendMail` throws, log and continue — the DB row is already saved. "Best-effort" here only covers failure handling: a slow or unreachable Gmail SMTP still delays the HTTP response by the full send duration, since the route does `await sendContactEmails(...)` with no timeout. See Edge Cases.
 
 7. **Respond** `200 { ok: true }`. The client (`ContactForm`) shows an inline "message received" state; there is no redirect and no thank-you route.
 
@@ -60,9 +60,11 @@ flow and this directive does not apply.
 - **Unique index missing from `leads.prospects`**: the upsert's `onConflict: "campaign_slug,email"` has no backing index, so Postgres rejects it and the submit 500s with `error: "db"`. Run `execution/add_prospects_dedup_constraint.py` once to collapse existing duplicates and create the index (idempotent; needs `SUPABASE_DB_URL`).
 - **Email send fails**: the row is already saved, so no lead is lost; the visitor sees the success state regardless. Monitor `netlify functions:log submit` for repeat failures (likely an expired Gmail app password).
 - **Bot submits**: no bot protection in v1. Symptoms: junk rows + bounce emails. Add Turnstile to the form if it becomes a problem.
+- **Slow or unreachable Gmail SMTP delays the response**: the row is already committed before the email step, but the route still `await`s `sendContactEmails` with no timeout, so the visitor's spinner runs for the full SMTP round trip (or hangs if outbound SMTP is blocked on the network) before the success state appears. A sibling route on the same site, `app/api/course-waitlist/route.ts`, hit this exact shape and fixed it with an 8-second `Promise.race` time-box (`EMAIL_TIMEOUT_MS`) that lets the response return on schedule while the send continues in the background with its own attached rejection handler. That fix has not been ported to `submit/route.ts` as of this writing — apply the same pattern here if the latency becomes a problem.
 
 ## Error Handling
 
 - The Supabase service-role key is server-side only (Netlify env, never bundled into the client). If you ever see `NEXT_PUBLIC_` in front of it, that's a bug — remove the prefix and rotate the key.
 - Gmail SMTP: ~500 sends/day per account, and a contact submit sends two. For higher volume switch to a transactional provider (Resend, Postmark).
 - Cold-start latency on Netlify Functions: first hit after idle can be ~1–2s before SMTP is ready; the inline success state absorbs it.
+- Unbounded SMTP wait: unlike `app/api/course-waitlist/route.ts` (see Edge Cases), this route has no timeout around the email send, so a hung or very slow Gmail connection is visible to the visitor as response latency, not just a delayed notification.
