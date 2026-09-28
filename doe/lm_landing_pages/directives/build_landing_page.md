@@ -96,6 +96,7 @@ Required env in `.env` at repo root: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `LE
 ## Error Handling
 
 - `npm install` failures in `sites/<slug>/`: surface the npm output to the user. Most likely cause is a missing Node version (requires Node 20+).
+- **Multiple dev servers running concurrently (Windows EADDRINUSE)**: On Windows, Node/libuv creates listeners with `SO_REUSEADDR`, which means a competing bind test incorrectly reports a port as free while `next dev` then dies with `EADDRINUSE` on `::`. `start_preview_server.py` avoids this by probing ports 3000–3099 with `connect()` on both `127.0.0.1` and `::1`, picking the first port with no active listener. If the error still appears, check whether another `next dev` process is already bound to `::` on the chosen port (e.g. via `netstat -ano | findstr :3000`) and kill it before retrying.
 - Netlify CLI not authenticated: prompt the user to run `netlify login` once.
 - The taste-skill needs Tailwind v4, Motion, and the chosen icon library installed. `_template/package.json` ships them; if the user customizes the template, keep these.
 - Don't auto-retry the deploy step on failure — Netlify deploys can be partial and re-running blindly creates orphan deploys.

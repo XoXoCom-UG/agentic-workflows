@@ -4,10 +4,12 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 import { COPY, type Copy, type Lang } from "@/lib/copy";
 
 /**
- * Client-side language context. Default is German (matches the server-rendered
- * `<html lang="de">`, so the first paint never mismatches); a saved preference
- * in localStorage is applied after mount. Switching is instant — no reload, no
- * route change. `c` is the resolved copy tree for the active language.
+ * Client-side language context. The initial language is chosen per route on the
+ * server (`initialLang`, from app/layout.tsx) so the first paint matches the
+ * server-rendered `<html lang>` exactly — English on marketing pages, German on
+ * the German-only legal pages. A saved preference in localStorage is applied
+ * after mount. Switching is instant — no reload, no route change. `c` is the
+ * resolved copy tree for the active language.
  */
 
 const STORAGE_KEY = "matfit-lang";
@@ -21,8 +23,14 @@ type LanguageContextValue = {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("de");
+export function LanguageProvider({
+  children,
+  initialLang = "en",
+}: {
+  children: ReactNode;
+  initialLang?: Lang;
+}) {
+  const [lang, setLangState] = useState<Lang>(initialLang);
 
   // Apply any saved preference after mount (keeps SSR output deterministic).
   useEffect(() => {

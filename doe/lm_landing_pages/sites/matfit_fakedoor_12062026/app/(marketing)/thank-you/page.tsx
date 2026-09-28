@@ -3,7 +3,7 @@ import ThankYouContent from "@/components/content/ThankYouContent";
 
 // Post-conversion page — keep it out of the index and the sitemap.
 export const metadata: Metadata = {
-  title: "Du stehst auf der Liste — MAtfIT",
+  title: "You're on the list — MAtfIT",
   robots: { index: false, follow: true },
 };
 

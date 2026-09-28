@@ -20,13 +20,28 @@ SITES = REPO_ROOT / "sites"
 PORT_RANGE = range(3000, 3100)
 
 
+def _in_use(port: int) -> bool:
+    # A bind test is unreliable on Windows: listeners created with SO_REUSEADDR
+    # (Node/libuv default) don't block competing binds, so the port looks free
+    # while `next dev` then dies with EADDRINUSE. Probing with connect() detects
+    # any active listener on either stack.
+    probes = [(socket.AF_INET, ("127.0.0.1", port))]
+    if socket.has_ipv6:
+        probes.append((socket.AF_INET6, ("::1", port)))
+    for family, addr in probes:
+        try:
+            with socket.socket(family, socket.SOCK_STREAM) as s:
+                s.settimeout(0.25)
+                if s.connect_ex(addr) == 0:
+                    return True
+        except OSError:
+            continue
+    return False
+
+
 def find_free_port() -> int:
     for port in PORT_RANGE:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            try:
-                s.bind(("127.0.0.1", port))
-            except OSError:
-                continue
+        if not _in_use(port):
             return port
     raise RuntimeError(f"no free port in {PORT_RANGE.start}-{PORT_RANGE.stop - 1}")
 

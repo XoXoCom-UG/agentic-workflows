@@ -5,6 +5,7 @@ import { useLang } from "@/lib/i18n";
 import SiteHeader from "@/components/SiteHeader";
 import HeroIntro from "@/components/HeroIntro";
 import HeroMockup from "@/components/HeroMockup";
+import HeroStats from "@/components/HeroStats";
 import ValueProps from "@/components/ValueProps";
 import LeadForm from "@/components/LeadForm";
 import FooterLinks from "@/components/FooterLinks";
@@ -34,6 +35,7 @@ export default function LandingContent() {
             <HeroIntro />
             <HeroMockup />
           </div>
+          <HeroStats />
         </div>
 
         {/* Bottom-edge fade into the next section */}

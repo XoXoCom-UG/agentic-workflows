@@ -25,16 +25,17 @@ const de = {
 
   hero: {
     eyebrow: "Dein KI-Strategie-Consultant",
-    titleLine1: "Plane wie mit Top-Beratern.",
-    titleAccent: "Nur schneller. Nur günstiger.",
+    titleLine1: "KI-Ideen und Roadmaps.",
+    titleAccent: "Auf Berater-Niveau.",
     subPre:
-      "MAtfIT ist dein KI-Strategie-Consultant: Business-Transformation-Know-how, das sonst nur teure Beratungen liefern — von der Tech-Stack-Analyse bis zur Roadmap, die dein Team sofort umsetzen kann. ",
+      "MAtfIT analysiert deinen Tech-Stack und liefert dir die Ideen und den Umsetzungsplan — die seltene Kombination aus Business-Strategie und Tech-Tiefe, für die du sonst eine Beratung bezahlen würdest. ",
     subStrong: "Ohne Berater-Budget. Ohne Wartezeit.",
     cta: "Jetzt Frühzugang sichern",
     ctaNote: "Sichere dir deinen Platz auf der Early-Access-Liste.",
     chips: [
       { label: "24/7", sub: "verfügbar" },
       { label: "Bruchteil", sub: "der Beratungskosten" },
+      { label: "Jedes Level", sub: "vom Einsteiger zum Profi" },
       { label: "DACH", sub: "Markt-Fokus" },
     ] as Chip[],
   },
@@ -135,16 +136,17 @@ const en: typeof de = {
 
   hero: {
     eyebrow: "Your AI strategy consultant",
-    titleLine1: "Plan like top consultants.",
-    titleAccent: "Just faster. Just cheaper.",
+    titleLine1: "AI ideas and roadmaps.",
+    titleAccent: "Consultant-grade.",
     subPre:
-      "MAtfIT is your AI strategy consultant: the business-transformation know-how usually reserved for expensive consultancies — from tech-stack analysis to a roadmap your team can execute right away. ",
+      "MAtfIT analyzes your tech stack and hands you the ideas and execution plan — the rare mix of business strategy and technical depth you'd otherwise pay a consultancy for. ",
     subStrong: "No consulting budget. No waiting.",
     cta: "Get early access now",
     ctaNote: "Secure your spot on the early-access list.",
     chips: [
       { label: "24/7", sub: "available" },
       { label: "Fraction", sub: "of consulting fees" },
+      { label: "Any level", sub: "beginner to expert" },
       { label: "DACH", sub: "market focus" },
     ] as Chip[],
   },

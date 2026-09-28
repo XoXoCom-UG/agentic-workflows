@@ -3,3 +3,10 @@ iter	timestamp	hypothesis	score	prev_best	decision	commit
 2	2026-06-18 21:05:11	Add sitemap.ts + robots.ts + SITE_URL config (site.config.json site_url, lib/config.ts)	54.95	0.0	kept	264e865
 3	2026-06-18 21:07:53	metadataBase + default OG/Twitter + title template + JSON-LD Organization + branded opengraph-image + per-page buildMetadata (canonical, OG, tuned titles/descriptions); thank-you noindex	94.0	54.95	kept	264e865
 4	2026-06-18 21:12:16	Fix crashing OG image (Satori multi-child: single interpolated tagline string) so og:image renders on every route	100.0	94.0	kept	264e865
+5	2026-07-05 00:32:04	post-rebrand baseline (light theme, KI-Strategie-Consultant copy) — external change, decision column advisory	98.1	100.0	reverted	61c5aea
+6	2026-07-05 00:32:31	Trim over-length meta descriptions (home 161->153, impressum 161->157) back into 120-160 band after rebrand	100.0	100.0	reverted	61c5aea
+7	2026-07-05 00:43:57	final post-rebrand state (Alle-wollen-KI copy + trimmed impressum desc) — restored to 100, keeping	100.0	100.0	reverted	61c5aea
+8	2026-07-05 01:19:08	second rebrand pass (datenschutz metadata, copy, OG image, mailer) — still 100, keeping	100.0	100.0	reverted	61c5aea
+9	2026-07-17 14:22:21	English default (lang=en) on marketing pages; German legal pages keep lang=de via middleware+per-route layout lang	90.19	100.0	reverted	503f5e2
+10	2026-07-17 14:38:58	English marketing pages (lang=en) + German legal pages (lang=de) via route-group multiple root layouts; copy/headline refresh. 99.05 (only html_lang on / flagged: scorer hard-codes de-expectation for /, but / now correctly serves English content). KEEP by Mode A judgment.	99.05	100.0	reverted	af065aa
+11	2026-07-17 14:59:37	Unify SEO/OG metadata to English (home title+description, OG title/description/image text, JSON-LD, default title/desc, og:locale primary=en_US); legal pages keep German content + de_DE locale. 99.05 passed, all desc checks 100%.	99.05	100.0	reverted	c818d32

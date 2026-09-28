@@ -3,9 +3,9 @@ import { buildMetadata } from "@/lib/seo";
 import LandingContent from "@/components/content/LandingContent";
 
 export const metadata: Metadata = buildMetadata({
-  title: "MAtfIT — Dein KI-Strategie-Consultant",
+  title: "MAtfIT — Your AI Strategy Consultant",
   description:
-    "Plane wie mit Top-Beratern — nur schneller und günstiger. MAtfIT ist dein KI-Strategie-Consultant: von der Tech-Stack-Analyse bis zur umsetzbaren Roadmap.",
+    "MAtfIT is your AI strategy consultant. It analyzes your tech stack and hands you the ideas and roadmap — consultant-grade insight, without the bill.",
   path: "/",
 });
 

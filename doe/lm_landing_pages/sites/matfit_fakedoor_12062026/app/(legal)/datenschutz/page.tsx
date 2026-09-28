@@ -12,6 +12,9 @@ export const metadata: Metadata = buildMetadata({
   description:
     "Datenschutzerklärung der XoXoCom UG (haftungsbeschränkt) für MAtfIT: welche Daten wir erheben, wie wir sie verwenden und welche Rechte du als Nutzer hast.",
   path: "/datenschutz",
+  // German-only legal page — advertise German as the primary locale for its share card.
+  locale: "de_DE",
+  alternateLocale: "en_US",
 });
 
 export default async function DatenschutzPage() {

@@ -47,12 +47,12 @@ export default function OpengraphImage() {
             maxWidth: "950px",
           }}
         >
-          Plane wie mit Top-Beratern. Nur schneller. Nur günstiger.
+          AI ideas and roadmaps. Consultant-grade.
         </div>
         {/* Single interpolated string (not expression + text) so this multi-child-free
             div doesn't trip Satori's "explicit display:flex" requirement. */}
         <div style={{ marginTop: "44px", fontSize: "30px", color: ACCENT, maxWidth: "900px" }}>
-          {`${site.tagline} — Business-Transformation-Know-how bis zur umsetzbaren Roadmap.`}
+          {`${site.tagline} — from tech-stack analysis to a ready-to-build roadmap.`}
         </div>
       </div>
     ),

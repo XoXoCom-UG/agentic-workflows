@@ -58,22 +58,6 @@ export default function HeroIntro() {
         </a>
         <p className="text-sm text-neutral-500">{c.hero.ctaNote}</p>
       </motion.div>
-
-      <motion.dl
-        variants={item}
-        className="mt-12 flex flex-wrap gap-x-10 gap-y-6 border-t border-neutral-200 pt-8"
-      >
-        {c.hero.chips.map((chip) => (
-          <div key={chip.label} className="flex flex-col">
-            <dt className="text-2xl md:text-3xl font-semibold tracking-tight text-neutral-900">
-              {chip.label}
-            </dt>
-            <dd className="mt-1 text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-500">
-              {chip.sub}
-            </dd>
-          </div>
-        ))}
-      </motion.dl>
     </motion.div>
   );
 }
