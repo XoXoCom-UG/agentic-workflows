@@ -110,10 +110,11 @@ export default function SiteHeader({ nav, header, cta, langToggle }: SiteHeaderP
       }`}
     >
       <div className="mx-auto max-w-7xl px-6 md:px-10 lg:px-12 py-4 flex items-center justify-between gap-6">
-        <SmartLink href="/" aria-label={`${site.company} — ${header.homeAria}`} className="flex items-center" onClick={close}>
-          {/* Mark only, in Coral; its cut-out eyes show the header background through.
-              The link's aria-label carries the company name for screen readers. */}
-          <BrandMark className="h-9 w-auto shrink-0 text-accent" />
+        <SmartLink href="/" aria-label={`${site.company} — ${header.homeAria}`} className="flex items-center gap-3 text-[22px] font-extrabold leading-none tracking-[-0.035em] text-fg" onClick={close}>
+          {/* Lockup: Coral mark (cut-out eyes show the header background) + an all-ink
+              wordmark. The accent lives in the mark alone, so the letters stay one colour. */}
+          <BrandMark className="h-8 w-auto shrink-0 text-accent" />
+          <span>XoXoCom</span>
         </SmartLink>
 
         {/* Desktop navigation */}
