@@ -18,6 +18,7 @@ export default async function ProdukteContent() {
           {t.products.map((p) => (
             <article key={p.title} className="rounded-[var(--radius-card)] border border-border bg-surface p-8 md:p-10">
               <h2 className="text-2xl font-bold text-fg">{p.title}</h2>
+              <p className="mt-2 font-semibold text-accent">{p.tagline}</p>
               <p className="mt-4 max-w-2xl text-muted">{p.desc}</p>
               <SmartLink
                 href={p.href}

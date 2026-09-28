@@ -3,9 +3,9 @@ import { buildMetadata } from "@/lib/seo";
 import ProdukteContent from "@/components/content/ProdukteContent";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Products & MAtfIT — A.I. Solutions by XoXoCom",
+  title: "Products & Agentix Projects — A.I. by XoXoCom",
   description:
-    "Products and projects from XoXoCom UG — including MAtfIT, the A.I. transformation coach that saves dev teams time and supplies them with fresh ideas.",
+    "Products and projects from XoXoCom UG — including Agentix Projects, where dev teams train A.I. project-agents that save them time.",
   path: "/produkte",
 });
 

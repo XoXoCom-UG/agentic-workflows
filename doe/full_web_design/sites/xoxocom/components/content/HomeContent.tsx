@@ -55,7 +55,7 @@ export default async function HomeContent() {
         </div>
       </section>
 
-      {/* Section 3 — Latest / MAtfIT */}
+      {/* Section 3 — Latest / Agentix Projects */}
       <section className="relative overflow-hidden px-6 md:px-10 lg:px-12 py-20 md:py-28">
         {/* Accent hues — soft coral glow to draw the eye and spark curiosity, kept subtle. */}
         <div aria-hidden className="hue-breathe pointer-events-none absolute -left-24 top-4 h-[420px] w-[420px] rounded-full bg-[radial-gradient(circle,rgba(251,107,76,0.18),transparent_70%)] blur-2xl" />
@@ -66,6 +66,8 @@ export default async function HomeContent() {
           <div className="relative">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">{t.newsEyebrow}</p>
             <h2 className="mt-3 text-3xl md:text-4xl font-bold tracking-tight text-fg">{t.newsTitle}</h2>
+            {/* Product slogan — sits between name and body so the positioning reads before the detail. */}
+            <p className="mt-2 text-lg font-semibold text-accent">{t.newsTagline}</p>
             <p className="mt-5 max-w-2xl text-lg text-muted">{t.newsBody}</p>
             <a href="https://matfit.ai" target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex items-center rounded-[var(--radius-card)] bg-accent px-6 py-3 font-semibold text-accent-fg transition hover:opacity-90">
               {t.newsCta}

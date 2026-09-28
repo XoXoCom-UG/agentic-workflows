@@ -77,6 +77,14 @@ export default async function BlogIndexContent({
   const otherLangHasPosts =
     nothingPublished && (await listPosts({ lang: view === "de" ? "en" : "de" })).length > 0;
 
+  // Nothing published anywhere, in any language, with no filter narrowing the view —
+  // i.e. what every visitor sees before the first article ships. That deserves a
+  // deliberate "coming soon" panel, not the one-line "no results" note the other two
+  // states use: those are recoverable dead ends with a button back, this one is the
+  // page. `active` is already intersected with known tags, and tag_counts is derived
+  // from published posts, so with nothing published `active` is necessarily empty.
+  const preLaunch = posts.length === 0 && !otherLangHasPosts && active.length === 0;
+
   return (
     <main className="px-6 py-20 md:px-10 md:py-28 lg:px-12">
       <div className="mx-auto max-w-4xl">
@@ -103,6 +111,22 @@ export default async function BlogIndexContent({
                 showLangPill={showAll}
               />
             ))}
+          </div>
+        ) : preLaunch ? (
+          <div className="mt-10 rounded-[var(--radius-card)] border border-dashed border-border bg-surface/40 px-6 py-16 text-center md:py-20">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
+              {t.emptyEyebrow}
+            </p>
+            <h2 className="mx-auto mt-4 max-w-xl text-2xl font-bold tracking-tight text-fg md:text-3xl">
+              {t.emptyTitle}
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-muted">{t.empty}</p>
+            <SmartLink
+              href="/kontakt"
+              className="mt-8 inline-flex items-center rounded-[var(--radius-card)] border border-border bg-surface px-6 py-3 font-semibold text-fg transition hover:border-accent/60"
+            >
+              {t.emptyCta}
+            </SmartLink>
           </div>
         ) : (
           <div className="mt-10 flex flex-col items-center gap-4 rounded-[var(--radius-card)] border border-dashed border-border px-6 py-14 text-center">
