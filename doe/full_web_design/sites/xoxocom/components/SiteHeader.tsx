@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { site } from "@/lib/config";
 import type { Copy, NavItem } from "@/lib/copy";
+import BrandMark from "@/components/BrandMark";
 import LangToggle from "@/components/LangToggle";
 import SmartLink from "@/components/SmartLink";
 
@@ -109,9 +110,10 @@ export default function SiteHeader({ nav, header, cta, langToggle }: SiteHeaderP
       }`}
     >
       <div className="mx-auto max-w-7xl px-6 md:px-10 lg:px-12 py-4 flex items-center justify-between gap-6">
-        <SmartLink href="/" aria-label={`${site.company} — ${header.homeAria}`} className="text-lg font-extrabold tracking-tight text-fg" onClick={close}>
-          {/* Wordmark: the two X's carry the Coral accent; every other letter is ink (--color-fg, #eaecef). */}
-          <span className="text-accent">X</span>o<span className="text-accent">X</span>oCom
+        <SmartLink href="/" aria-label={`${site.company} — ${header.homeAria}`} className="flex items-center" onClick={close}>
+          {/* Mark only, in Coral; its cut-out eyes show the header background through.
+              The link's aria-label carries the company name for screen readers. */}
+          <BrandMark className="h-9 w-auto shrink-0 text-accent" />
         </SmartLink>
 
         {/* Desktop navigation */}
