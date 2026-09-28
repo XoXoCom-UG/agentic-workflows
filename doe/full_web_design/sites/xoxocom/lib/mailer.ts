@@ -80,6 +80,76 @@ export async function sendContactEmails(args: ContactArgs): Promise<void> {
   });
 }
 
+export type WaitlistArgs = {
+  fromEmail: string;
+  operatorEmail: string;
+  companyName: string;
+  gmailUser: string;
+  courseSlug: string;
+  /** Site language at signup time — decides which language the acknowledgment is in. */
+  lang: "de" | "en";
+  firstName: string | null;
+  note: string | null;
+};
+
+/**
+ * Operator notification + acknowledgment for a course waiting-list signup.
+ *
+ * Unlike sendContactEmails (German-only, matching the Kontakt page's German form), the
+ * acknowledgment here follows the language the visitor had the site in: the waitlist
+ * is a promise to email them later, and the first email they get should not arrive in a
+ * language they didn't choose. The operator notification stays German.
+ */
+export async function sendWaitlistEmails(args: WaitlistArgs): Promise<void> {
+  const transporter = getTransporter();
+  const name = args.firstName?.trim();
+
+  // 1. Operator notification — reply-to the signup, so answering a question is one click.
+  await transporter.sendMail({
+    from: `"${args.companyName} Website" <${args.gmailUser}>`,
+    to: args.operatorEmail,
+    replyTo: args.fromEmail,
+    subject: `Neue Warteliste-Anmeldung — ${args.courseSlug}`,
+    html: `
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#111;">
+        <p style="font-size:16px;margin:0 0 14px;">Neue Anmeldung auf der Kurs-Warteliste.</p>
+        <table style="font-size:14px;border-collapse:collapse;margin:0 0 20px;">
+          <tr><td style="padding:4px 12px 4px 0;color:#555;">Kurs</td><td style="padding:4px 0;">${escapeHtml(args.courseSlug)}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0;color:#555;">E-Mail</td><td style="padding:4px 0;"><a href="mailto:${escapeHtml(args.fromEmail)}">${escapeHtml(args.fromEmail)}</a></td></tr>
+          ${name ? `<tr><td style="padding:4px 12px 4px 0;color:#555;">Vorname</td><td style="padding:4px 0;">${escapeHtml(name)}</td></tr>` : ""}
+          <tr><td style="padding:4px 12px 4px 0;color:#555;">Sprache</td><td style="padding:4px 0;">${args.lang}</td></tr>
+        </table>
+        ${
+          args.note
+            ? `<p style="font-size:13px;color:#555;margin:0 0 6px;">Was sie bauen wollen:</p>
+        <blockquote style="margin:0;padding:14px 16px;border-left:3px solid #fb6b4c;background:#f7f7f7;border-radius:6px;font-size:15px;white-space:pre-wrap;">${escapeHtml(args.note)}</blockquote>`
+            : ""
+        }
+      </div>`.trim(),
+  });
+
+  // 2. Acknowledgment to the person who signed up, in their language.
+  const de = args.lang === "de";
+  const greeting = name ? (de ? `Hallo ${name},` : `Hi ${name},`) : de ? "Hallo," : "Hi,";
+  await transporter.sendMail({
+    from: `"${args.companyName}" <${args.gmailUser}>`,
+    to: args.fromEmail,
+    subject: de
+      ? `Du stehst auf der Warteliste — ${args.companyName}`
+      : `You're on the waitlist — ${args.companyName}`,
+    html: `
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#111;">
+        <p style="font-size:16px;margin:0 0 16px;">${escapeHtml(greeting)}</p>
+        <p style="font-size:16px;margin:0 0 24px;">${
+          de
+            ? `danke für dein Interesse — du stehst auf der Warteliste. Wir melden uns per E-Mail, sobald der Kurs einen Starttermin hat.`
+            : `thanks for your interest — you're on the waitlist. We'll email you as soon as the course has a start date.`
+        }</p>
+        <p style="font-size:14px;color:#555;margin:0;">— ${de ? "Dein Team von" : "The team at"} ${escapeHtml(args.companyName)}</p>
+      </div>`.trim(),
+  });
+}
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, "&amp;")

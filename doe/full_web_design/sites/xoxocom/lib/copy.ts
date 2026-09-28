@@ -10,6 +10,8 @@
  * stay German for legal validity.
  */
 
+import { COURSES_ENABLED } from "@/lib/features";
+
 export type Lang = "de" | "en";
 
 /** Cookie that persists the language choice. Defined here (a server-safe module,
@@ -52,6 +54,8 @@ const de = {
       ],
     },
     { label: "Über uns", href: "/ueber-uns" },
+    // Hidden while the courses section is parked (lib/features.ts).
+    ...(COURSES_ENABLED ? [{ label: "Kurse", href: "/courses" }] : []),
     { label: "Blog", href: "/blog" },
   ] as NavItem[],
 
@@ -174,6 +178,92 @@ const de = {
     ],
   },
 
+  /**
+   * Courses. `catalog` is the single source of truth for both surfaces: the card on
+   * /courses and the whole detail page at /courses/<slug>. Adding a course means adding
+   * one entry here (in BOTH language trees — `en: typeof de` makes a missing one a
+   * compile error) and one artwork case in components/courses/CourseArtwork.tsx.
+   *
+   * `slug` MUST be identical in the German and English entries: it is the URL, not copy.
+   * `lib/courses.ts` asserts this at module load so a translated slug fails loudly
+   * instead of silently 404-ing for half the visitors.
+   *
+   * ⚠ DRAFT EDITORIAL COPY — the course title, price and level are the user's; the
+   * headline, subheadline and highlights are written to launch the page and are meant
+   * to be reviewed. They deliberately make no claim the course can't keep: no job
+   * outcomes, no durations, no cohort sizes, no metrics.
+   */
+  courses: {
+    // --- index page chrome ---
+    eyebrow: "Kurse",
+    title: "Lerne zu bauen, was wir bauen",
+    sub: "Praxisnahe Kurse, die A.I. in die tägliche Arbeit bringen — aus echter Projekterfahrung, nicht von der Folie.",
+    metaTitle: "Kurse — A.I.-Agenten selbst bauen | XoXoCom",
+    metaDescription:
+      "Praxisnahe A.I.-Kurse von XoXoCom UG. Den Anfang macht: Baue deinen eigenen RAG-Agenten mit n8n und Pinecone — jetzt auf die Warteliste.",
+    viewCourse: "Kurs ansehen",
+    carouselAria: "Kurse",
+    scrollPrev: "Vorheriger Kurs",
+    scrollNext: "Nächster Kurs",
+    // --- detail page chrome ---
+    comingSoon: "Demnächst",
+    backToCourses: "Zurück zu den Kursen",
+    breadcrumbHome: "Startseite",
+    priceLabel: "Preis",
+    levelLabel: "Level",
+    stackLabel: "Stack",
+    stackNote: "Die Werkzeuge, mit denen du in diesem Kurs arbeitest.",
+    // --- waiting-list form ---
+    waitlist: {
+      eyebrow: "Warteliste",
+      title: "Sei dabei, wenn die Türen aufgehen",
+      body: "Wir stellen den Kurs gerade fertig und öffnen ihn für eine kleine erste Gruppe. Trag deine E-Mail ein und du erfährst den Starttermin vor allen anderen — kein Spam, keine Verpflichtung.",
+      firstName: "Vorname",
+      email: "E-Mail",
+      note: "Was willst du damit bauen? (optional)",
+      submit: "Kurs jetzt buchen",
+      submitting: "Wird gesendet…",
+      successTitle: "Du stehst auf der Liste.",
+      successBody: "Wir melden uns per E-Mail, sobald die erste Gruppe einen Termin hat.",
+      errInvalidEmail: "Diese E-Mail-Adresse sieht nicht korrekt aus — bitte prüfe sie.",
+      errGeneric: "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+      errNetwork: "Netzwerkfehler. Bitte versuche es erneut.",
+      privacyPre: "Mit dem Absenden akzeptierst du unsere ",
+      privacyLink: "Datenschutzerklärung",
+    },
+    catalog: [
+      {
+        slug: "rag-agent-n8n-pinecone",
+        title: "Baue deinen eigenen RAG-Agenten mit n8n und Pinecone",
+        level: "Einsteiger bis Fortgeschrittene",
+        price: "1.099 €",
+        tags: ["n8n", "Pinecone", "RAG"],
+        cardSummary:
+          "Vom leeren n8n-Canvas zum Retrieval-Agenten, der aus deinen eigenen Dokumenten antwortet.",
+        headline: "Baue einen A.I.-Agenten, der aus deinen Dokumenten antwortet — statt zu raten.",
+        subheadline:
+          "Ein Praxiskurs, der dich vom leeren n8n-Canvas zum funktionierenden Retrieval-Agenten führt: deine Dokumente in Pinecone eingebettet, bei Bedarf abgerufen und vom Modell deiner Wahl beantwortet. Keine A.I.-Engineering-Vorkenntnisse nötig — wer einem Workflow folgen kann, baut das.",
+        metaTitle: "RAG-Agent-Kurs — n8n & Pinecone | XoXoCom",
+        metaDescription:
+          "Baue deinen eigenen Retrieval-Agenten mit n8n und Pinecone. Einsteiger bis Fortgeschrittene, 1.099 €. Jetzt auf die Warteliste für die erste Gruppe.",
+        highlights: [
+          {
+            title: "Abrufen statt halluzinieren",
+            body: "Du zerlegst deine eigenen Dokumente, bettest sie ein und legst sie in Pinecone ab — damit der Agent zur Frage die passenden Stellen holt und seine Antwort auf deinem Material steht.",
+          },
+          {
+            title: "Gebaut in n8n, nicht im Notebook",
+            body: "Jeder Schritt ist ein Node, den du siehst, debuggst und übergibst — ein Workflow, den dein Team ohne Python-Umgebung betreiben und verändern kann.",
+          },
+          {
+            title: "Verbunden mit deinen Werkzeugen",
+            body: "Du hängst den Agenten an die Modelle und Dienste, mit denen du ohnehin arbeitest — damit er dort landet, wo die Arbeit passiert, und nicht im Demo-Tab.",
+          },
+        ],
+      },
+    ],
+  },
+
   ueberUns: {
     eyebrow: "Über uns",
     title: "Menschen, Methodik und A.I.",
@@ -252,6 +342,8 @@ const en: typeof de = {
       ],
     },
     { label: "About", href: "/ueber-uns" },
+    // Hidden while the courses section is parked (lib/features.ts).
+    ...(COURSES_ENABLED ? [{ label: "Courses", href: "/courses" }] : []),
     { label: "Blog", href: "/blog" },
   ] as NavItem[],
 
@@ -373,6 +465,76 @@ const en: typeof de = {
     ],
   },
 
+  // English is the site default, so THIS half is what a cookieless visitor and
+  // Googlebot see. `slug` must match the German entry exactly — it is the URL.
+  courses: {
+    eyebrow: "Courses",
+    title: "Learn to build what we build",
+    sub: "Hands-on courses that put A.I. into everyday work — taught from real delivery experience, not from slideware.",
+    metaTitle: "Courses — Build A.I. Agents Yourself | XoXoCom",
+    metaDescription:
+      "Hands-on A.I. courses from XoXoCom UG. First up: Build Your Own RAG Agent with n8n and Pinecone — join the waitlist for the first cohort.",
+    viewCourse: "View course",
+    carouselAria: "Courses",
+    scrollPrev: "Previous course",
+    scrollNext: "Next course",
+    comingSoon: "Coming soon",
+    backToCourses: "Back to courses",
+    breadcrumbHome: "Home",
+    priceLabel: "Price",
+    levelLabel: "Level",
+    stackLabel: "Stack",
+    stackNote: "The tools you'll be working with on this course.",
+    waitlist: {
+      eyebrow: "Waitlist",
+      title: "Be first in line when the doors open",
+      body: "We're finishing the course now and opening it to a small first cohort. Leave your email and you'll hear the start date before anyone else — no spam, no commitment.",
+      firstName: "First name",
+      email: "Email",
+      note: "What do you want to build with it? (optional)",
+      submit: "Book the course now",
+      submitting: "Sending…",
+      successTitle: "You're on the list.",
+      successBody: "We'll email you as soon as the first cohort has a date.",
+      errInvalidEmail: "That email address doesn't look right — please check it.",
+      errGeneric: "Something went wrong. Please try again.",
+      errNetwork: "Network error. Please try again.",
+      privacyPre: "By submitting you accept our ",
+      privacyLink: "privacy policy",
+    },
+    catalog: [
+      {
+        slug: "rag-agent-n8n-pinecone",
+        title: "Build Your Own RAG Agent with n8n and Pinecone",
+        level: "Beginner to intermediate",
+        price: "€1,099",
+        tags: ["n8n", "Pinecone", "RAG"],
+        cardSummary:
+          "Go from an empty n8n canvas to a retrieval agent that answers from your own documents.",
+        headline: "Build an A.I. agent that answers from your documents — instead of guessing.",
+        subheadline:
+          "A hands-on course that takes you from an empty n8n canvas to a working retrieval agent: your documents embedded in Pinecone, pulled back on demand, and answered by the model of your choice. No A.I. engineering background needed — if you can follow a workflow, you can build this.",
+        metaTitle: "RAG Agent Course — n8n & Pinecone | XoXoCom",
+        metaDescription:
+          "Build your own retrieval agent with n8n and Pinecone. Beginner to intermediate, €1,099. Join the waitlist for the first cohort of the course.",
+        highlights: [
+          {
+            title: "Retrieval, not hallucination",
+            body: "You chunk, embed and store your own documents in Pinecone, so the agent pulls the passages that actually answer the question and its reply stands on your material.",
+          },
+          {
+            title: "Built in n8n, not in a notebook",
+            body: "Every step is a node you can see, debug and hand over — a workflow your team can run and change without a Python environment.",
+          },
+          {
+            title: "Wired into the tools you already use",
+            body: "You connect the agent to the models and services you work with anyway, so it ends up where the work happens rather than in a demo tab.",
+          },
+        ],
+      },
+    ],
+  },
+
   ueberUns: {
     eyebrow: "About",
     title: "People, methodology and A.I.",
@@ -421,3 +583,6 @@ const en: typeof de = {
 
 export const COPY = { de, en };
 export type Copy = typeof de;
+
+/** One course, in one language — everything both the card and the detail page render. */
+export type CourseEntry = Copy["courses"]["catalog"][number];

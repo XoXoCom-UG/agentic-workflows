@@ -44,6 +44,14 @@ body {
 }
 .hue-breathe { animation: hueBreathe 7s ease-in-out infinite; will-change: opacity, transform; }
 
+/* Course artwork (components/courses/CourseArtwork.tsx).
+   dash-flow: a dashed overlay travelling along the n8n → Pinecone link, so the graphic
+   reads as a pipeline moving data rather than as a static diagram. The offset equals
+   one full dash+gap cycle (4 + 6), times four, so the loop is seamless. */
+@keyframes dashFlow { to { stroke-dashoffset: -40; } }
+.dash-flow { stroke-dasharray: 4 6; animation: dashFlow 2.8s linear infinite; }
+
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after {

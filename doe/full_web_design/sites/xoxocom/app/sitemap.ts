@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/config";
 import { listPublishedForSitemap } from "@/lib/blog";
+import { COURSE_SLUGS } from "@/lib/courses";
+import { COURSES_ENABLED } from "@/lib/features";
 
 // Public, indexable routes. Legal pages are included (lower priority) so search engines
 // can reach them. URLs derive from SITE_URL (config-driven). Served at /sitemap.xml.
@@ -15,6 +17,20 @@ const ROUTES: { path: string; priority: number; changeFrequency: MetadataRoute.S
   // Only the bare index. Filtered views (?tags=, ?lang=) are noindex with canonical
   // /blog, so listing them would advertise pages we ask crawlers to ignore.
   { path: "/blog", priority: 0.7, changeFrequency: "weekly" },
+  // Courses are parked (lib/features.ts) — keep them out of the sitemap until relaunch.
+  ...(COURSES_ENABLED
+    ? [
+        { path: "/courses", priority: 0.8, changeFrequency: "monthly" as const },
+        // Course detail pages come from the catalog in lib/copy.ts — a compile-time constant,
+        // so unlike the blog posts appended further down they need no database round-trip and
+        // cannot fail at request time.
+        ...COURSE_SLUGS.map((slug) => ({
+          path: `/courses/${slug}`,
+          priority: 0.8,
+          changeFrequency: "monthly" as const,
+        })),
+      ]
+    : []),
   { path: "/impressum", priority: 0.2, changeFrequency: "yearly" },
   { path: "/datenschutz", priority: 0.2, changeFrequency: "yearly" },
   { path: "/agb", priority: 0.2, changeFrequency: "yearly" },
