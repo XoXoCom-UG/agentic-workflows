@@ -74,7 +74,9 @@ export default async function CourseDetailContent({ slug }: { slug: string }) {
               <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{t.priceLabel}</p>
-                  <p className="mt-1 text-2xl font-extrabold tracking-tight text-fg">{course.price}</p>
+                  <p className="mt-1 text-2xl font-extrabold tracking-tight text-fg">
+                    {course.price} <span className="text-sm font-medium text-muted">{t.priceUnit}</span>
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">{t.levelLabel}</p>

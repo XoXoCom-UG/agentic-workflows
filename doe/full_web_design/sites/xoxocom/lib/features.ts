@@ -9,4 +9,4 @@
  * Lives in its own module (not lib/courses.ts) because lib/copy.ts reads it for the nav,
  * and lib/courses.ts imports lib/copy.ts — putting it there would be a circular import.
  */
-export const COURSES_ENABLED = false;
+export const COURSES_ENABLED = true;

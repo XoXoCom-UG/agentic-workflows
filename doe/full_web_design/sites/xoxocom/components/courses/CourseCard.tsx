@@ -36,7 +36,9 @@ export default function CourseCard({ course, t }: { course: CourseEntry; t: Copy
           <span className="rounded-md bg-accent/12 px-2.5 py-1 text-[0.66rem] font-bold uppercase tracking-[0.13em] text-accent">
             {course.level}
           </span>
-          <span className="text-base font-bold text-fg">{course.price}</span>
+          <span className="text-base font-bold text-fg">
+            {course.price} <span className="text-xs font-medium text-muted">{t.priceUnit}</span>
+          </span>
         </div>
 
         <h3 className="mt-4 text-lg font-bold leading-snug tracking-tight text-fg transition-colors duration-300 group-hover:text-accent">

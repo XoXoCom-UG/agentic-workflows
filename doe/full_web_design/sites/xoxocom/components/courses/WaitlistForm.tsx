@@ -1,16 +1,24 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import type { Copy } from "@/lib/copy";
 import SmartLink from "@/components/SmartLink";
 
 type Status = "idle" | "submitting" | "success" | "error";
+type BookingType = "self" | "team";
+
+// Same range the API route and the course_waitlist_booking_shape CHECK enforce.
+const MIN_TEAM_PLACES = 2;
+const MAX_TEAM_PLACES = 20;
 
 const FIELD_CLASS =
   "w-full rounded-[var(--radius-card)] border border-border bg-bg px-3.5 py-2.5 text-fg placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent";
 
 /**
- * Waiting-list signup for one course. Mirrors ContactForm's shape on purpose — same
+ * Booking request for one course (vocabulary in CONTEXT.md). A "For myself" / "For my
+ * team" toggle decides which fields show: the team variant adds company (required),
+ * last name (optional) and number of participants (2-20). Beyond that it is the
+ * waiting-list form it grew out of. Mirrors ContactForm's shape on purpose — same
  * field styling, same status machine, same "labels arrive as props" rule that keeps the
  * bilingual copy tree out of the client bundle — but posts to /api/course-waitlist,
  * which writes to leads.course_waitlist rather than leads.prospects.
@@ -29,10 +37,27 @@ export default function WaitlistForm({
 }) {
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [bookingType, setBookingType] = useState<BookingType>("self");
+  const team = bookingType === "team";
+  const radioRefs = useRef<Record<BookingType, HTMLButtonElement | null>>({ self: null, team: null });
+
+  function chooseType(value: BookingType) {
+    setBookingType(value);
+    setErrorMsg(null);
+  }
+
+  // ARIA radiogroup keyboard pattern: one tab stop for the group, arrow keys move the
+  // selection. With only two options every arrow simply flips to the other one.
+  function onRadioKey(e: KeyboardEvent<HTMLButtonElement>) {
+    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) return;
+    e.preventDefault();
+    const next: BookingType = bookingType === "self" ? "team" : "self";
+    chooseType(next);
+    radioRefs.current[next]?.focus();
+  }
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setStatus("submitting");
     setErrorMsg(null);
 
     // Capture the form node now: React nulls e.currentTarget across the await below.
@@ -43,6 +68,21 @@ export default function WaitlistForm({
       return typeof v === "string" && v.trim() ? v.trim() : undefined;
     };
 
+    // Checked here first so the visitor gets the message without a round trip; the
+    // route re-checks both, since a client check is only a convenience.
+    const places = team ? Number(read("places")) : 1;
+    if (team && !read("company")) {
+      setStatus("error");
+      setErrorMsg(t.errCompany);
+      return;
+    }
+    if (team && (!Number.isInteger(places) || places < MIN_TEAM_PLACES || places > MAX_TEAM_PLACES)) {
+      setStatus("error");
+      setErrorMsg(t.errPlaces);
+      return;
+    }
+    setStatus("submitting");
+
     try {
       const res = await fetch("/api/course-waitlist", {
         method: "POST",
@@ -51,17 +91,28 @@ export default function WaitlistForm({
           email: read("email") ?? "",
           course_slug: courseSlug,
           lang,
-          fields: { first_name: read("first_name"), note: read("note") },
+          fields: {
+            booking_type: bookingType,
+            first_name: read("first_name"),
+            note: read("note"),
+            ...(team && { company: read("company"), last_name: read("last_name"), places }),
+          },
         }),
       });
       const body = (await res.json().catch(() => null)) as { ok: boolean; error?: string } | null;
       if (!res.ok || !body?.ok) {
         setStatus("error");
-        setErrorMsg(body?.error === "invalid_email" ? t.errInvalidEmail : t.errGeneric);
+        const byCode: Record<string, string> = {
+          invalid_email: t.errInvalidEmail,
+          invalid_company: t.errCompany,
+          invalid_places: t.errPlaces,
+        };
+        setErrorMsg((body?.error && byCode[body.error]) || t.errGeneric);
         return;
       }
       setStatus("success");
       form.reset();
+      setBookingType("self");
     } catch {
       setStatus("error");
       setErrorMsg(t.errNetwork);
@@ -87,6 +138,38 @@ export default function WaitlistForm({
 
   return (
     <form onSubmit={onSubmit} className="space-y-4" noValidate>
+      <fieldset>
+        <legend id="wl-booking-for" className="mb-2 block text-sm font-medium text-fg">{t.bookingFor}</legend>
+        <div role="radiogroup" aria-labelledby="wl-booking-for" className="grid grid-cols-2 gap-2">
+          {(
+            [
+              ["self", t.forMyself],
+              ["team", t.forMyTeam],
+            ] as const
+          ).map(([value, label]) => (
+            <button
+              key={value}
+              ref={(el) => {
+                radioRefs.current[value] = el;
+              }}
+              type="button"
+              role="radio"
+              aria-checked={bookingType === value}
+              tabIndex={bookingType === value ? 0 : -1}
+              onClick={() => chooseType(value)}
+              onKeyDown={onRadioKey}
+              className={`rounded-[var(--radius-card)] border px-3 py-2.5 text-sm font-semibold transition ${
+                bookingType === value
+                  ? "border-accent bg-accent/12 text-fg"
+                  : "border-border bg-bg text-muted hover:border-accent/60 hover:text-fg"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </fieldset>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
           <label htmlFor="wl-first-name" className="block text-sm font-medium text-fg">
@@ -102,6 +185,51 @@ export default function WaitlistForm({
           <input id="wl-email" name="email" type="email" required autoComplete="email" className={FIELD_CLASS} />
         </div>
       </div>
+
+      {team && (
+        <>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <label htmlFor="wl-last-name" className="block text-sm font-medium text-fg">
+                {t.lastName}
+              </label>
+              <input id="wl-last-name" name="last_name" type="text" autoComplete="family-name" className={FIELD_CLASS} />
+            </div>
+            <div className="space-y-1.5">
+              <label htmlFor="wl-company" className="block text-sm font-medium text-fg">
+                {t.company}
+                <span className="text-accent"> *</span>
+              </label>
+              <input id="wl-company" name="company" type="text" required autoComplete="organization" className={FIELD_CLASS} />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="wl-places" className="block text-sm font-medium text-fg">
+              {t.participants}
+              <span className="text-accent"> *</span>
+            </label>
+            <input
+              id="wl-places"
+              name="places"
+              type="number"
+              inputMode="numeric"
+              min={MIN_TEAM_PLACES}
+              max={MAX_TEAM_PLACES}
+              defaultValue={MIN_TEAM_PLACES}
+              required
+              aria-describedby="wl-places-hint"
+              className={`${FIELD_CLASS} sm:max-w-[10rem]`}
+            />
+            <p id="wl-places-hint" className="text-xs text-muted">
+              {t.participantsHint}
+              <SmartLink href="/kontakt" className="underline hover:text-fg">
+                {t.participantsHintLink}
+              </SmartLink>
+              .
+            </p>
+          </div>
+        </>
+      )}
 
       <div className="space-y-1.5">
         <label htmlFor="wl-note" className="block text-sm font-medium text-fg">

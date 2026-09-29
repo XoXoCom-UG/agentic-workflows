@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Create `leads.course_waitlist` — the table behind the course waiting-list form.
+"""Create `leads.course_waitlist` — the table behind the course booking form.
+
+(Named for the waiting list it started as; since 2026-09-29 each row is a booking
+request — see "Booking type" in the design notes.)
 
 Why a separate table instead of reusing `leads.prospects`: a waitlist signup answers a
 different question than a contact request. It is per-course (one person may join two
@@ -31,6 +34,15 @@ Design notes:
 
   * `email` is text, not citext, so the project needs no extra extension. The
     lowercase CHECK above is what makes plain text behave case-insensitively here.
+
+  * Booking type (added 2026-09-29, when the form became a booking request with a
+    "For myself" / "For my team" choice). `booking_type` is 'self' or 'team'; `places`
+    is how many places the booking asks for. One CHECK ties them together: a 'self'
+    booking is exactly one place, a 'team' booking is 2-20 places and must name a
+    company. Existing rows pick up the defaults ('self', 1), which is what they were.
+    `updated_at` is set by the route when a repeat booking replaces an earlier one;
+    `created_at` keeps the date of the first booking. The table keeps its original
+    name: renaming it would break the route and the index names for no user benefit.
 
 Idempotent and safe to re-run: CREATE SCHEMA / TABLE / INDEX all use IF NOT EXISTS and
 the column adds are additive, so running this against a database that already has the
@@ -145,6 +157,31 @@ BEGIN
     END IF;
 END $$;
 
+-- Booking type + places (2026-09-29). ADD COLUMN IF NOT EXISTS so a re-run is a no-op;
+-- the defaults backfill existing rows as the one-place, for-myself signups they were.
+ALTER TABLE {SCHEMA}.{TABLE}
+    ADD COLUMN IF NOT EXISTS booking_type text        NOT NULL DEFAULT 'self',
+    ADD COLUMN IF NOT EXISTS places       integer     NOT NULL DEFAULT 1,
+    ADD COLUMN IF NOT EXISTS updated_at   timestamptz;
+
+-- The route validates the same rule, but a direct insert (seed, import, admin tool)
+-- must not be able to store a team booking with no company or a 'self' booking for
+-- five people — the operator's running total of places would silently be wrong.
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conrelid = '{SCHEMA}.{TABLE}'::regclass
+          AND conname = '{TABLE}_booking_shape'
+    ) THEN
+        ALTER TABLE {SCHEMA}.{TABLE}
+            ADD CONSTRAINT {TABLE}_booking_shape CHECK (
+                (booking_type = 'self' AND places = 1)
+                OR (booking_type = 'team' AND places BETWEEN 2 AND 20 AND company IS NOT NULL)
+            );
+    END IF;
+END $$;
+
 -- Demand reporting reads "everyone waiting for course X, newest first".
 CREATE INDEX IF NOT EXISTS ix_course_waitlist_course_created
     ON {SCHEMA}.{TABLE} (course_slug, created_at DESC);
@@ -187,7 +224,7 @@ def report(cur) -> bool:
     cur.execute(VERIFY_INDEX_SQL, (SCHEMA, TABLE, INDEX))
     has_index = cur.fetchone() is not None
     checks = {}
-    for name in (f"{TABLE}_email_lowercase", f"{TABLE}_lang_known"):
+    for name in (f"{TABLE}_email_lowercase", f"{TABLE}_lang_known", f"{TABLE}_booking_shape"):
         cur.execute(VERIFY_CHECK_SQL, (f"{SCHEMA}.{TABLE}", name))
         checks[name] = cur.fetchone() is not None
     cur.execute(COUNT_SQL)
