@@ -134,7 +134,8 @@ export function organizationJsonLd(): Record<string, unknown> {
     logo: `${SITE_URL}/opengraph-image`,
     description: site.tagline,
     email: site.contact_email,
-    sameAs: SOCIALS.map((s) => s.href),
+    // An empty sameAs is noise to validators — only emit it when there are profiles.
+    ...(SOCIALS.length > 0 && { sameAs: SOCIALS.map((s) => s.href) }),
   };
 }
 

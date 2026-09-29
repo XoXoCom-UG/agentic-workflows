@@ -16,7 +16,8 @@ export default async function Footer() {
           © {year} {site.company}. {c.footer.rights}
         </p>
 
-        {/* Middle: socials */}
+        {/* Middle: socials — omitted entirely while SOCIALS is empty. */}
+        {SOCIALS.length > 0 && (
         <div className="flex items-center gap-4 order-1 md:order-2">
           {SOCIALS.map((s) => (
             <a
@@ -37,6 +38,7 @@ export default async function Footer() {
             </a>
           ))}
         </div>
+        )}
 
         {/* Right: legal */}
         <div className="order-3 flex flex-col gap-2 md:items-end">

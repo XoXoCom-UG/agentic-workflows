@@ -43,6 +43,8 @@ export const SITE_URL: string = (
 // Navigation, CTA, and all user-facing copy now live in `lib/copy.ts` (bilingual)
 // and are consumed via the language context in `lib/i18n.tsx`.
 
-export const SOCIALS = [
-  { label: "LinkedIn", href: "https://www.linkedin.com/company/xoxocom/" },
+// No socials for now (2026-09-28). The footer icons and JSON-LD `sameAs` both skip an
+// empty list, so re-adding an entry here is all it takes to bring one back.
+export const SOCIALS: { label: string; href: string }[] = [
+  // { label: "LinkedIn", href: "https://www.linkedin.com/company/xoxocom/" },
 ];
