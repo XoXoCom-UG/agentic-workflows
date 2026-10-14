@@ -69,7 +69,7 @@ export default async function HomeContent() {
             {/* Product slogan — sits between name and body so the positioning reads before the detail. */}
             <p className="mt-2 text-lg font-semibold text-accent">{t.newsTagline}</p>
             <p className="mt-5 max-w-2xl text-lg text-muted">{t.newsBody}</p>
-            <a href="https://matfit.ai" target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex items-center rounded-[var(--radius-card)] bg-accent px-6 py-3 font-semibold text-accent-fg transition hover:opacity-90">
+            <a href="https://agentix-projects.com" target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex items-center rounded-[var(--radius-card)] bg-accent px-6 py-3 font-semibold text-accent-fg transition hover:opacity-90">
               {t.newsCta}
             </a>
           </div>
