@@ -42,7 +42,7 @@ const de = {
       label: "Produkte",
       href: "/produkte",
       children: [
-        { label: "Agentix Projects", href: "https://matfit.ai", external: true, desc: "Train your AI Project-Agents" },
+        { label: "Agentix Projects", href: "https://agentix-projects.com", external: true, desc: "Train your AI Project-Agents" },
       ],
     },
     {
@@ -174,7 +174,7 @@ const de = {
         tagline: "Train your AI Project-Agents",
         desc: "Trainierbare A.I. Projekt-Agenten, die jedes Dev-Team mit Zeitersparnis, Optimierungsideen sowie Beratung zu Innovationen und Markttrends bereichern.",
         ctaLabel: "Jetzt probieren",
-        href: "https://matfit.ai",
+        href: "https://agentix-projects.com",
         external: true,
       },
     ],
@@ -346,7 +346,7 @@ const en: typeof de = {
       label: "Products",
       href: "/produkte",
       children: [
-        { label: "Agentix Projects", href: "https://matfit.ai", external: true, desc: "Train your AI Project-Agents" },
+        { label: "Agentix Projects", href: "https://agentix-projects.com", external: true, desc: "Train your AI Project-Agents" },
       ],
     },
     {
@@ -477,7 +477,7 @@ const en: typeof de = {
         tagline: "Train your AI Project-Agents",
         desc: "AI project-agents you train yourself, enriching every dev team with time savings, optimization ideas and guidance on innovations and market trends.",
         ctaLabel: "Try it now",
-        href: "https://matfit.ai",
+        href: "https://agentix-projects.com",
         external: true,
       },
     ],
