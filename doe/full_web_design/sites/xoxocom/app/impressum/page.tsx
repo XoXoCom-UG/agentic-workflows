@@ -10,9 +10,9 @@ import LegalShell from "@/components/LegalShell";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Impressum — Rechtliche Angaben der XoXoCom UG",
+  title: "Impressum – Rechtliche Angaben der XoXoCom UG",
   description:
-    "Impressum der XoXoCom UG — Anbieterkennzeichnung, vertretungsberechtigte Personen und rechtliche Pflichtangaben gemäß den gesetzlichen Anforderungen.",
+    "Impressum der XoXoCom UG – Anbieterkennzeichnung, vertretungsberechtigte Personen und rechtliche Pflichtangaben gemäß den gesetzlichen Anforderungen.",
   path: "/impressum",
   // German-only legal page: advertise German as the primary OG locale.
   locale: "de_DE",
