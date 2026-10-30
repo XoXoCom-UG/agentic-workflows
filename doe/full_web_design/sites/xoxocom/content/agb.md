@@ -1,12 +1,9 @@
 # Allgemeine Geschäftsbedingungen (AGB)
 
-> **Platzhalter — noch nicht final.** Diese AGB sind ein Entwurf und ersetzen keine
-> Rechtsberatung. Vor Veröffentlichung durch die XoXoCom UG zu prüfen und freizugeben.
-
 ## 1. Geltungsbereich
 
 Diese Allgemeinen Geschäftsbedingungen gelten für alle Verträge zwischen der XoXoCom UG
-(haftungsbeschränkt) (nachfolgend „XoXoCom") und ihren Kundinnen und Kunden über
+(haftungsbeschränkt) (nachfolgend „XoXoCom“) und ihren Kundinnen und Kunden über
 Coaching-, Beratungs- und Projektleistungen sowie die Nutzung der von XoXoCom
 bereitgestellten Produkte.
 
@@ -39,4 +36,4 @@ unwirksam sein, bleibt die Wirksamkeit der übrigen Bestimmungen unberührt.
 
 ---
 
-*Stand: Entwurf. Endgültige Fassung folgt nach rechtlicher Prüfung.*
+*Stand: Oktober 2026*
