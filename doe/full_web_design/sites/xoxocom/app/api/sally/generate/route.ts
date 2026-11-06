@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { SALLY_ADMIN_COOKIE, isValidSession, rateLimit } from "@/lib/sally-admin";
-import { GenerateRequest, SallyAgentError, demoGeneration, generatePosts } from "@/lib/sally-agent";
+import { GenerateRequest, SALLY_MODEL, SallyAgentError, costUsd, demoGeneration, generatePosts } from "@/lib/sally-agent";
+import { recordGeneration, storeEnabled } from "@/lib/sally-store";
 
 export const runtime = "nodejs";
 // Several variants with analysis can take a while on a cold start.
@@ -35,7 +36,19 @@ export async function POST(req: NextRequest) {
 
   try {
     const { result, usage } = await generatePosts(input);
-    return NextResponse.json({ ok: true, demo: false, result, usage });
+    const cost = costUsd(usage);
+
+    // Record the generation and its drafts. A database hiccup must not throw away a
+    // result that has already been paid for, so failure only means "not stored".
+    let draftIds: string[] = [];
+    if (storeEnabled()) {
+      try {
+        draftIds = await recordGeneration(input, result, { ...usage, costUsd: cost }, SALLY_MODEL);
+      } catch (err) {
+        console.error("[sally/generate] could not store generation", err);
+      }
+    }
+    return NextResponse.json({ ok: true, demo: false, result, usage: { ...usage, costUsd: cost }, draftIds });
   } catch (err) {
     if (err instanceof SallyAgentError) {
       const status = err.code === "rate_limited" ? 429 : err.code === "auth" ? 500 : 502;

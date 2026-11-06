@@ -18,6 +18,13 @@ import { z } from "zod";
 
 export const SALLY_MODEL = "claude-haiku-5-5";
 
+/** List price of SALLY_MODEL in USD per million tokens — used for the studio's cost ledger. */
+const PRICE_PER_MTOK = { input: 0.1, output: 0.5 };
+
+export function costUsd(usage: { input: number; output: number }): number {
+  return (usage.input * PRICE_PER_MTOK.input + usage.output * PRICE_PER_MTOK.output) / 1_000_000;
+}
+
 export const GOALS = ["awareness", "engagement", "leads", "beta"] as const;
 export const FORMATS = ["story", "list", "behind-the-scenes", "announcement", "insight", "question"] as const;
 export const TONES = ["friendly", "professional", "inspiring", "witty"] as const;

@@ -1,14 +1,44 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import type { GenerateRequest, SallyGeneration, SallyPostDraft } from "@/lib/sally-agent";
+import type { DraftStatus, StoredDraft, UsageSummary } from "@/lib/sally-store";
 import SallyFigure from "@/components/sally/SallyFigure";
 import LinkedInPreview from "@/components/sally/admin/LinkedInPreview";
 
 type Idea = { title: string; body: string };
+// Browser-only fallback for when the deploy has no database (local dev). Same shape as
+// a stored draft minus the workflow.
 type Saved = { id: string; savedAt: string; lang: "de" | "en"; topic: string; post: SallyPostDraft };
+type LibraryFilter = "library" | DraftStatus | "all";
 
 const SAVED_KEY = "sally-studio-saved";
+
+const FILTER_LABELS: { value: LibraryFilter; label: string }[] = [
+  { value: "library", label: "Kept" },
+  { value: "saved", label: "Saved" },
+  { value: "approved", label: "Approved" },
+  { value: "posted", label: "Posted" },
+  { value: "all", label: "All generated" },
+  { value: "archived", label: "Archived" },
+];
+
+const STATUS_STYLE: Record<DraftStatus, string> = {
+  generated: "bg-border text-muted",
+  saved: "bg-sky-400/15 text-sky-300",
+  approved: "bg-emerald-400/15 text-emerald-300",
+  posted: "bg-accent/15 text-accent",
+  archived: "bg-border text-muted line-through",
+};
+
+// What can happen next from each status (LinkedIn publishing will read 'approved').
+const NEXT: Record<DraftStatus, { to: DraftStatus; label: string }[]> = {
+  generated: [{ to: "saved", label: "Save" }, { to: "archived", label: "Archive" }],
+  saved: [{ to: "approved", label: "Approve" }, { to: "archived", label: "Archive" }],
+  approved: [{ to: "posted", label: "Mark as posted" }, { to: "saved", label: "Unapprove" }, { to: "archived", label: "Archive" }],
+  posted: [{ to: "archived", label: "Archive" }],
+  archived: [{ to: "saved", label: "Restore" }],
+};
 
 const GOALS: { value: GenerateRequest["goal"]; label: string }[] = [
   { value: "awareness", label: "Awareness" },
@@ -259,7 +289,17 @@ const PLAYBOOK: { title: string; items: string[] }[] = [
   },
 ];
 
-export default function SallyStudio({ ideas, hasApiKey, signOutButton }: { ideas: Idea[]; hasApiKey: boolean; signOutButton: ReactNode }) {
+export default function SallyStudio({
+  ideas,
+  hasApiKey,
+  hasDatabase,
+  signOutButton,
+}: {
+  ideas: Idea[];
+  hasApiKey: boolean;
+  hasDatabase: boolean;
+  signOutButton: ReactNode;
+}) {
   const [tab, setTab] = useState<"generate" | "saved" | "playbook">("generate");
   const [form, setForm] = useState<GenerateRequest>({
     topic: "",
@@ -272,12 +312,57 @@ export default function SallyStudio({ ideas, hasApiKey, signOutButton }: { ideas
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<{ gen: SallyGeneration; demo: boolean; lang: "de" | "en"; topic: string; usage?: { input: number; output: number } } | null>(null);
+  const [result, setResult] = useState<{
+    gen: SallyGeneration;
+    demo: boolean;
+    lang: "de" | "en";
+    topic: string;
+    usage?: { input: number; output: number; costUsd: number };
+    draftIds: string[];
+  } | null>(null);
   const [active, setActive] = useState(0);
   const [saved, setSaved] = useState<Saved[]>([]);
   const [openSaved, setOpenSaved] = useState<string | null>(null);
+  // Database-backed library (when the deploy has Supabase).
+  const [filter, setFilter] = useState<LibraryFilter>("library");
+  const [drafts, setDrafts] = useState<StoredDraft[]>([]);
+  const [usage, setUsage] = useState<UsageSummary | null>(null);
+  const [libError, setLibError] = useState<string | null>(null);
+  const [savedIds, setSavedIds] = useState<string[]>([]);
 
   useEffect(() => setSaved(loadSaved()), []);
+
+  const loadLibrary = useCallback(async (f: LibraryFilter) => {
+    if (!hasDatabase) return;
+    try {
+      const res = await fetch(`/api/sally/drafts?filter=${f}`);
+      if (res.status === 401) return window.location.reload();
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.message || "Could not load the library.");
+      setDrafts(data.drafts);
+      setUsage(data.usage);
+      setLibError(null);
+    } catch (e) {
+      setLibError(e instanceof Error ? e.message : "Could not load the library.");
+    }
+  }, [hasDatabase]);
+
+  useEffect(() => { loadLibrary(filter); }, [filter, loadLibrary]);
+
+  const moveDraft = async (id: string, status: DraftStatus) => {
+    const res = await fetch("/api/sally/drafts", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, status }),
+    });
+    const data = await res.json().catch(() => ({ ok: false }));
+    if (!data.ok) {
+      setLibError(data.message || "Could not update the draft.");
+      return false;
+    }
+    await loadLibrary(filter);
+    return true;
+  };
 
   const set = <K extends keyof GenerateRequest>(k: K, v: GenerateRequest[K]) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -296,8 +381,9 @@ export default function SallyStudio({ ideas, hasApiKey, signOutButton }: { ideas
         return;
       }
       if (!data.ok) throw new Error(data.message || "Generation failed.");
-      setResult({ gen: data.result, demo: data.demo, lang: form.language, topic: form.topic, usage: data.usage });
+      setResult({ gen: data.result, demo: data.demo, lang: form.language, topic: form.topic, usage: data.usage, draftIds: data.draftIds ?? [] });
       setActive(0);
+      loadLibrary(filter); // refresh the month's cost card
     } catch (e) {
       setError(e instanceof Error ? e.message : "Generation failed.");
     } finally {
@@ -305,13 +391,25 @@ export default function SallyStudio({ ideas, hasApiKey, signOutButton }: { ideas
     }
   };
 
-  const save = (post: SallyPostDraft) => {
+  // Stored generations are already in the database as 'generated'; saving promotes the
+  // row. Demo results and deploys without a database keep the old browser-only save.
+  const save = async (index: number) => {
     if (!result) return;
+    const id = result.draftIds[index];
+    if (id) {
+      if (await moveDraft(id, "saved")) setSavedIds((s) => [...s, id]);
+      return;
+    }
+    const post = result.gen.posts[index];
     const next = [{ id: `${Date.now()}`, savedAt: new Date().toISOString(), lang: result.lang, topic: result.topic, post }, ...saved];
     setSaved(next);
     storeSaved(next);
   };
-  const isSaved = (post: SallyPostDraft) => saved.some((s) => s.post.text === post.text);
+  const isSaved = (index: number) => {
+    if (!result) return false;
+    const id = result.draftIds[index];
+    return id ? savedIds.includes(id) : saved.some((s) => s.post.text === result.gen.posts[index].text);
+  };
   const remove = (id: string) => {
     const next = saved.filter((s) => s.id !== id);
     setSaved(next);
@@ -320,7 +418,7 @@ export default function SallyStudio({ ideas, hasApiKey, signOutButton }: { ideas
 
   const tabs = [
     { id: "generate", label: "Generate" },
-    { id: "saved", label: `Saved (${saved.length})` },
+    { id: "saved", label: hasDatabase ? "Library" : `Saved (${saved.length})` },
     { id: "playbook", label: "Playbook" },
   ] as const;
 
@@ -337,6 +435,14 @@ export default function SallyStudio({ ideas, hasApiKey, signOutButton }: { ideas
             <span className={`rounded-full px-3 py-1.5 text-xs font-semibold ${hasApiKey ? "bg-emerald-400/15 text-emerald-300" : "bg-amber-400/15 text-amber-300"}`}>
               {hasApiKey ? "● Live" : "● Demo mode — no API key"}
             </span>
+            <span className={`rounded-full px-3 py-1.5 text-xs font-semibold ${hasDatabase ? "bg-emerald-400/15 text-emerald-300" : "bg-amber-400/15 text-amber-300"}`}>
+              {hasDatabase ? "● Database" : "● No database — drafts stay in this browser"}
+            </span>
+            {usage && (
+              <span className="rounded-full border border-border px-3 py-1.5 text-xs text-muted" title={`All time: ${usage.totalGenerations} generations · $${usage.totalCostUsd.toFixed(4)}`}>
+                This month: <span className="font-semibold text-fg">{usage.monthGenerations} generations · ${usage.monthCostUsd.toFixed(4)}</span>
+              </span>
+            )}
             {signOutButton}
           </div>
         </header>
@@ -440,8 +546,8 @@ export default function SallyStudio({ ideas, hasApiKey, signOutButton }: { ideas
                     <p className="mt-1.5">{result.gen.strategyNote}</p>
                     {result.usage && (
                       <p className="mt-2 text-[11px] text-muted">
-                        {result.usage.input.toLocaleString()} input + {result.usage.output.toLocaleString()} output tokens ≈ $
-                        {((result.usage.input * 0.1 + result.usage.output * 0.5) / 1_000_000).toFixed(4)}
+                        {result.usage.input.toLocaleString()} input + {result.usage.output.toLocaleString()} output tokens ≈ ${result.usage.costUsd.toFixed(4)}
+                        {result.draftIds.length > 0 && " · stored in the library as “generated”"}
                       </p>
                     )}
                   </div>
@@ -458,8 +564,8 @@ export default function SallyStudio({ ideas, hasApiKey, signOutButton }: { ideas
                     <PostReview
                       post={result.gen.posts[active]}
                       lang={result.lang}
-                      onSave={() => save(result.gen.posts[active])}
-                      saved={isSaved(result.gen.posts[active])}
+                      onSave={() => save(active)}
+                      saved={isSaved(active)}
                     />
                   )}
                 </div>
@@ -468,7 +574,58 @@ export default function SallyStudio({ ideas, hasApiKey, signOutButton }: { ideas
           </div>
         )}
 
-        {tab === "saved" && (
+        {tab === "saved" && hasDatabase && (
+          <div className="mt-8 space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
+              {FILTER_LABELS.map((f) => (
+                <Chip key={f.value} active={filter === f.value} onClick={() => setFilter(f.value)}>{f.label}</Chip>
+              ))}
+            </div>
+            <p className="text-xs text-muted">
+              Shared with the whole team. Every generation lands here as “generated”; Save → Approve → Mark as posted.
+              LinkedIn publishing (later) will only pick up approved drafts.
+            </p>
+            {libError && <p role="alert" className="text-sm text-accent">{libError}</p>}
+            {!libError && drafts.length === 0 && <p className="text-sm text-muted">Nothing here yet.</p>}
+            {drafts.map((d) => (
+              <div key={d.id} className="rounded-[var(--radius-card)] border border-border bg-surface">
+                <div className="flex flex-wrap items-center gap-3 p-4">
+                  <button type="button" onClick={() => setOpenSaved(openSaved === d.id ? null : d.id)} className="min-w-0 flex-1 text-left">
+                    <p className="flex flex-wrap items-center gap-2 text-sm font-bold text-fg">
+                      {d.post.title}
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${STATUS_STYLE[d.status]}`}>{d.status}</span>
+                      <span className="font-normal text-muted">{d.post.analysis.score}/10 · {d.lang.toUpperCase()}</span>
+                    </p>
+                    <p className="truncate text-xs text-muted">{d.post.hook}</p>
+                  </button>
+                  <span className="text-[11px] text-muted">{new Date(d.createdAt).toLocaleString()}</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {NEXT[d.status].map((n) => (
+                      <button
+                        key={n.to}
+                        type="button"
+                        onClick={() => moveDraft(d.id, n.to)}
+                        className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                          n.to === "archived" ? "border-border text-muted hover:text-accent" : "border-accent/50 text-fg hover:bg-accent/10"
+                        }`}
+                      >
+                        {n.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {openSaved === d.id && (
+                  <div className="border-t border-border p-4">
+                    {d.topic && <p className="mb-3 text-xs text-muted"><span className="font-semibold text-fg">Topic:</span> {d.topic}</p>}
+                    <PostReview post={d.post} lang={d.lang} />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {tab === "saved" && !hasDatabase && (
           <div className="mt-8 space-y-4">
             <p className="text-xs text-muted">Saved drafts are kept in this browser only.</p>
             {saved.length === 0 && <p className="text-sm text-muted">No saved drafts yet — generate some and press “Save draft”.</p>}

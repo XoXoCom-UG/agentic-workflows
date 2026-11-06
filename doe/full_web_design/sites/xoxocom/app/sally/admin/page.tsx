@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { isSallyAdmin } from "@/lib/sally-admin";
+import { storeEnabled } from "@/lib/sally-store";
 import { COPY } from "@/lib/copy";
 import { signIn, signOut } from "./actions";
 import SallyStudio from "@/components/sally/admin/SallyStudio";
@@ -56,6 +57,7 @@ export default async function SallyAdminPage({ searchParams }: { searchParams: P
     <SallyStudio
       ideas={ideas}
       hasApiKey={!!process.env.ANTHROPIC_API_KEY}
+      hasDatabase={storeEnabled()}
       signOutButton={
         <form action={signOut}>
           <button type="submit" className="rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-muted transition hover:text-fg">
