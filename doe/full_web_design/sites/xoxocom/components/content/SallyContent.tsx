@@ -11,7 +11,21 @@ export default async function SallyContent() {
       <section className="relative overflow-hidden px-6 md:px-10 lg:px-12 pt-10 pb-20 md:pt-14 md:pb-28">
         <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-1/3 h-[560px] bg-[radial-gradient(55%_60%_at_60%_0%,rgba(251,107,76,0.16),transparent_70%)]" />
         <div className="relative mx-auto max-w-7xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">{t.eyebrow}</p>
+          <div className="flex items-center justify-between gap-4">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">{t.eyebrow}</p>
+            {/* Team entrance to Sally Studio (password-protected LinkedIn generator). */}
+            <SmartLink
+              href="/sally/admin"
+              rel="nofollow"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-muted transition hover:border-accent/60 hover:text-fg"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="2" />
+                <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" strokeWidth="2" />
+              </svg>
+              Enter admin
+            </SmartLink>
+          </div>
           <div className="mt-6">
             <SallyStage t={t} lang={lang} />
           </div>

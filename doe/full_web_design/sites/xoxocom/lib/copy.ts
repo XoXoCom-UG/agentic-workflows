@@ -48,10 +48,24 @@ export type SallyPost = {
  * One canned answer of Sally's chat. Sally deliberately has no LLM behind her: every
  * reply is written here, so a chat costs nothing and nothing the visitor types leaves
  * the browser. `keywords` are matched as word prefixes against the lower-cased input
- * (see lib/sally-brain.ts); the first intent with the most hits wins, so list order
- * breaks ties.
+ * (see lib/sally-brain.ts). Keep them specific: a question that matches several
+ * intents equally well gets several answers.
  */
+export type SallyTopic = "sally" | "agentix" | "xoxocom" | "courses" | "contact";
+
 export type SallyIntent = {
+  /** Stable key, identical in both languages (the quick-pick chips refer to it). */
+  id: string;
+  /** Catalog group. Intents without a topic/question (small talk) stay out of the catalog. */
+  topic?: SallyTopic;
+  /** How the question reads in the catalog and on the chips. */
+  question?: string;
+  /**
+   * A topic's catch-all answer (e.g. "What is Agentix Projects?"). It is dropped when a
+   * more specific intent of the same topic scores as well, so "Was kostet Agentix?"
+   * gets the price, not the price plus the product pitch.
+   */
+  broad?: boolean;
   keywords: string[];
   answer: string;
   href?: string;
@@ -446,68 +460,193 @@ const de = {
       send: "Senden",
       typing: "Sally tippt …",
       you: "Du",
-      suggestions: ["Wer bist du?", "Was ist Agentix Projects?", "Warum gibt es dich?", "Wie erreiche ich das Team?"],
+      // Quick-pick chips under the chat: intent ids, identical in both languages.
+      suggestions: ["who", "agentix", "beta", "contact"],
       disclaimer: "Sally antwortet mit vorbereiteten Antworten. Deine Eingaben werden nicht gespeichert.",
+      catalogOpen: "Alle Fragen",
+      catalogTitle: "Was möchtest du wissen?",
+      catalogHint: "Wähle eine oder mehrere Fragen – Sally beantwortet sie nacheinander.",
+      catalogAsk: "Fragen stellen",
+      catalogClose: "Schließen",
+      topics: {
+        sally: "Über Sally",
+        agentix: "Agentix Projects",
+        xoxocom: "XoXoCom & Leistungen",
+        courses: "Kurse",
+        contact: "Kontakt",
+      },
       fallback: {
+        id: "fallback",
         keywords: [],
-        answer: "Hmm, darauf habe ich noch keine Antwort 🙈 Ich bin bewusst einfach gehalten. Frag mich zu Agentix Projects, LinkedIn, unseren Leistungen – oder schreib dem Team direkt.",
+        answer: "Hmm, darauf habe ich noch keine Antwort 🙈 Ich bin bewusst einfach gehalten. Schau in „Alle Fragen“ – oder schreib dem Team direkt.",
         href: "/kontakt",
         linkLabel: "Zum Kontakt",
       } as SallyIntent,
       intents: [
+        // --- Über Sally ---
         {
-          keywords: ["warum", "wieso", "weshalb", "zweck", "wozu"],
+          id: "who", topic: "sally", question: "Wer bist du?",
+          keywords: ["wer bist", "was bist", "sally", "stell dich"],
+          answer: "Ich bin Sally 🤖 die elektronische Assistentin der XoXoCom. Ich teile News aus der Firma und aus dem Team – hier auf der Website und bald auch auf LinkedIn.",
+        },
+        {
+          id: "why", topic: "sally", question: "Warum gibt es dich?",
+          keywords: ["warum", "wieso", "weshalb", "wozu", "zweck"],
           answer: "Weil wir A.I. nicht nur beraten, sondern selbst einsetzen. Ich bin sozusagen der Beweis: eine A.I., die für ein A.I.-Team kommuniziert 😉",
         },
         {
+          id: "human", topic: "sally", question: "Bist du ein Mensch oder eine KI?",
+          keywords: ["mensch", "echt", "ki", "bot", "roboter", "kunstlich"],
+          answer: "Ich bin eine A.I.-Assistentin, kein Mensch 🤖 Hier im Chat antworte ich mit Antworten, die das XoXoCom-Team für mich vorbereitet hat – so bleibt alles korrekt.",
+        },
+        {
+          id: "linkedin", topic: "sally", question: "Was machst du auf LinkedIn?",
           keywords: ["linkedin", "post", "beitr", "social"],
           answer: "Ich kümmere mich bald um unseren LinkedIn-Auftritt ✍️ Dort erzähle ich, wie Agentix Projects entsteht, was im Team passiert und was A.I. Consultants für deine Ideen tun können.",
         },
         {
-          keywords: ["agentix", "agent", "beta", "consultant", "coach", "transformation concept", "app"],
-          answer: "Agentix Projects ist unser eigenes Produkt: Dort arbeitest du mit A.I. Consultants und Coaches an deiner Business-Idee – Schritt für Schritt bis zum fertigen Transformation Concept. Gerade bereiten wir die Closed Beta vor 🚀",
+          id: "data", topic: "sally", question: "Speicherst du, was ich schreibe?",
+          keywords: ["speicher", "daten", "datenschutz", "privat", "gespeichert", "dsgvo"],
+          answer: "Nein. Unser Chat läuft komplett in deinem Browser – nichts, was du hier schreibst, wird gesendet oder gespeichert 🔒",
+          href: "/datenschutz",
+          linkLabel: "Datenschutzerklärung",
+        },
+        {
+          id: "news", topic: "sally", question: "Was gibt es Neues?",
+          keywords: ["news", "neu", "aktuell", "update", "neuigkeit"],
+          answer: "Die neuesten Meldungen findest du im News-Board 📰 – getrennt nach „Aus der Firma“ und „Aus dem Team“.",
+        },
+        // --- Agentix Projects ---
+        {
+          id: "agentix", broad: true, topic: "agentix", question: "Was ist Agentix Projects?",
+          keywords: ["agentix", "app", "produkt"],
+          answer: "Agentix Projects ist unser eigenes Produkt: Dort arbeitest du mit A.I. Consultants und Coaches an deiner Business-Idee – Schritt für Schritt bis zum fertigen Transformation Concept 🚀",
           href: "https://agentix-projects.com",
           linkLabel: "Agentix Projects öffnen",
         },
         {
-          keywords: ["kurs", "schulung", "training", "lernen", "workshop"],
-          answer: "Wir bieten praxisnahe A.I.-Kurse an – für dich allein oder für dein ganzes Team 🎓",
-          href: "/courses",
-          linkLabel: "Zu den Kursen",
+          id: "audience", topic: "agentix", question: "Für wen ist Agentix Projects?",
+          keywords: ["fur wen", "zielgruppe", "geeignet", "startup", "grunder"],
+          answer: "Für alle, die eine Business-Idee mit A.I. umsetzen wollen – von Gründer:innen über Produktteams bis zu Dev-Teams, die mit A.I.-Agenten Zeit sparen und neue Ideen entwickeln möchten.",
         },
         {
-          keywords: ["leistung", "beratung", "transformation", "coaching", "consulting", "angebot", "unterstütz", "helfen", "hilfe"],
-          answer: "XoXoCom verbindet agile Arbeitsweisen mit A.I.: A.I. Transformation, Expert Consulting und Business Coaching – für Teams und Unternehmen.",
-          href: "/leistungen/ai-transformation",
-          linkLabel: "Leistungen ansehen",
+          id: "consultant", topic: "agentix", question: "Was macht ein A.I. Consultant?",
+          keywords: ["consultant", "berater", "umsetz"],
+          answer: "Ein A.I. Consultant begleitet die Umsetzung deiner Idee: Er stellt die richtigen Fragen, strukturiert dein Vorhaben und arbeitet mit dir an Ausführung und Wachstum 📈",
         },
         {
-          keywords: ["kontakt", "mail", "anruf", "termin", "sprechen", "erreich", "schreib", "telefon"],
-          answer: "Am schnellsten erreichst du das Team über das Kontaktformular – wir antworten innerhalb eines Werktags 📬",
+          id: "coach", topic: "agentix", question: "Und was macht der Coach?",
+          keywords: ["coach", "prozess", "begleit"],
+          answer: "Der Coach kümmert sich um Prozess & Support: Er gibt dir Orientierung im Projekt, hilft dir dranzubleiben und achtet darauf, dass du Schritt für Schritt vorankommst 🧭",
+        },
+        {
+          id: "concept", topic: "agentix", question: "Was ist das Transformation Concept?",
+          keywords: ["transformation concept", "konzept", "concept", "station", "fortschritt"],
+          answer: "Das Transformation Concept ist das Ergebnis deiner Arbeit in Agentix Projects: Du gehst mit deinem Consultant Station für Station durch deine Idee, siehst deinen Fortschritt – und erhältst am Ende ein vollständiges Konzept inklusive Transformationskosten.",
+        },
+        {
+          id: "beta", topic: "agentix", question: "Wie komme ich in die Beta?",
+          keywords: ["beta", "zugang", "key", "registr", "anmeld", "testen", "ausprobier"],
+          answer: "Agentix Projects startet als Closed Beta: Die Registrierung läuft über einen Beta-Key. Schreib dem Team, wenn du dabei sein möchtest – wir melden uns 🔑",
           href: "/kontakt",
-          linkLabel: "Zum Kontakt",
+          linkLabel: "Beta-Zugang anfragen",
         },
         {
-          keywords: ["team", "wer steckt", "mitarbeiter", "gründer", "über euch", "firma", "xoxocom"],
+          id: "price", topic: "agentix", question: "Was kostet Agentix Projects?",
+          keywords: ["kost", "preis", "geld", "bezahl", "abo", "plan", "gratis"],
+          answer: "Preise und Pläne geben wir zum offiziellen Start bekannt. Geplant ist auch ein kostenloser Einstieg, mit dem du Agentix Projects in Ruhe ausprobieren kannst 💡",
+        },
+        {
+          id: "security", topic: "agentix", question: "Sind meine Projektdaten sicher?",
+          keywords: ["sicher", "schutz", "vertraulich", "geheim", "sehen andere", "projektdaten"],
+          answer: "Datenschutz ist uns wichtig 🔐 Jeder Account hat seine eigenen Agenten: Was du anlegst, siehst nur du. Unser Anspruch ist ein privater Service, bei dem keine Nutzerdaten für andere sichtbar sind.",
+        },
+        // --- XoXoCom & Leistungen ---
+        {
+          id: "about", broad: true, topic: "xoxocom", question: "Wer steckt hinter XoXoCom?",
+          keywords: ["wer steckt", "hinter xoxocom", "uber euch", "xoxocom", "firma", "unternehmen"],
           answer: "Hinter XoXoCom steht ein junges Team aus Beratung und Entwicklung, das agile Methodik mit künstlicher Intelligenz verbindet.",
           href: "/ueber-uns",
           linkLabel: "Über uns",
         },
         {
-          keywords: ["news", "neu", "aktuell", "update", "neuigkeit"],
-          answer: "Die neuesten Meldungen findest du im News-Board 📰 – getrennt nach „Aus der Firma“ und „Aus dem Team“.",
+          id: "services", broad: true, topic: "xoxocom", question: "Welche Leistungen bietet ihr an?",
+          keywords: ["leistung", "angebot", "anbiet", "bietet", "service", "helfen", "hilfe", "unterstutz"],
+          answer: "XoXoCom verbindet agile Arbeitsweisen mit A.I.: A.I. Transformation, Expert Consulting und Business Coaching – für Teams und Unternehmen.",
+          href: "/leistungen/ai-transformation",
+          linkLabel: "Leistungen ansehen",
         },
         {
-          keywords: ["wer bist", "was bist", "sally", "roboter", "ki", "bot", "mensch"],
-          answer: "Ich bin Sally 🤖 die elektronische Assistentin der XoXoCom. Ich teile News aus der Firma und aus dem Team – hier auf der Website und bald auch auf LinkedIn. Und ja: Ich bin eine A.I., kein Mensch.",
+          id: "aiTransformation", topic: "xoxocom", question: "Was ist A.I. Transformation?",
+          keywords: ["transformation", "agil", "ki transformation"],
+          answer: "Bei der A.I. Transformation verbinden wir agile Methodik mit der Power der A.I. – individuell, disruptiv und messbar überlegen. Wir begleiten Teams vom Business Case bis zur Produktion.",
+          href: "/leistungen/ai-transformation",
+          linkLabel: "Mehr zur A.I. Transformation",
         },
         {
+          id: "expertConsulting", topic: "xoxocom", question: "Was ist Expert Consulting?",
+          keywords: ["expert", "projekteinsatz", "projekteinsatze", "rolle", "scrum", "product owner", "spezialist"],
+          answer: "Beim Expert Consulting besetzen wir kritische Schlüsselrollen mit Spezialisten – vom Product Owner und Scrum Master über Software Engineers bis zum A.I. Specialist 🧩",
+          href: "/leistungen/expert-consulting",
+          linkLabel: "Mehr zu Expert Consulting",
+        },
+        {
+          id: "businessCoaching", topic: "xoxocom", question: "Was ist Business Coaching?",
+          keywords: ["business coaching", "coaching", "mentor", "karriere"],
+          answer: "Beim Business Coaching schließen wir die Lücke zwischen Innovation und Mensch – als strategischer Partner für dein Unternehmen und Mentor für deine Karriere 🌱",
+          href: "/leistungen/business-coaching",
+          linkLabel: "Mehr zu Business Coaching",
+        },
+        // --- Kurse ---
+        {
+          id: "courses", topic: "courses", question: "Welche Kurse gibt es?",
+          keywords: ["kurs", "schulung", "training", "lernen", "workshop", "weiterbild"],
+          answer: "Wir bieten praxisnahe A.I.-Kurse an – für dich allein oder für dein ganzes Team 🎓",
+          href: "/courses",
+          linkLabel: "Zu den Kursen",
+        },
+        {
+          id: "courseTeam", topic: "courses", question: "Kann ich einen Kurs für mein Team buchen?",
+          keywords: ["fur mein team", "buch", "mitarbeit", "kollegen", "gruppe", "mehrere"],
+          answer: "Ja! Bei der Buchung wählst du „Für mein Unternehmen“ und fragst gleich mehrere Plätze für dein Team an. Als Ansprechperson sprichst du dann für dein Team mit uns 👥",
+          href: "/courses",
+          linkLabel: "Kurs buchen",
+        },
+        {
+          id: "courseStart", topic: "courses", question: "Wann starten die Kurse?",
+          keywords: ["wann", "start", "datum", "beginn"],
+          answer: "Nach deiner Buchung meldet sich das Team persönlich bei dir – mit Termin und allen Details. Die Buchung ist unverbindlich: Nichts wird reserviert oder bezahlt, bevor wir uns gemeldet haben 📅",
+        },
+        // --- Kontakt ---
+        {
+          id: "contact", topic: "contact", question: "Wie erreiche ich das Team?",
+          keywords: ["kontakt", "erreich", "sprechen", "anruf", "telefon", "termin"],
+          answer: "Am schnellsten erreichst du das Team über das Kontaktformular 📬",
+          href: "/kontakt",
+          linkLabel: "Zum Kontakt",
+        },
+        {
+          id: "email", topic: "contact", question: "Wie lautet eure E-Mail-Adresse?",
+          keywords: ["mail", "adresse"],
+          answer: "Du erreichst uns unter info@xoxocom.net ✉️ – oder ganz bequem über das Kontaktformular.",
+          href: "mailto:info@xoxocom.net",
+          linkLabel: "E-Mail schreiben",
+        },
+        {
+          id: "reply", topic: "contact", question: "Wie schnell antwortet ihr?",
+          keywords: ["schnell", "antwort", "dauer", "wie lange", "reaktion"],
+          answer: "Wir lesen jede Nachricht und antworten innerhalb eines Werktags ⚡",
+        },
+        // --- small talk (not in the catalog) ---
+        {
+          id: "thanks",
           keywords: ["danke", "dank", "super", "cool", "toll"],
           answer: "Gern geschehen! 💛 Schau bald wieder vorbei – es gibt regelmäßig Neues.",
         },
         {
+          id: "greet",
           keywords: ["hallo", "hi", "hey", "servus", "moin", "guten"],
-          answer: "Hallo! Schön, dass du da bist 👋 Frag mich zu Agentix Projects, unseren Leistungen, Kursen oder dazu, was ich hier eigentlich mache.",
+          answer: "Hallo! Schön, dass du da bist 👋 Frag mich einfach etwas – oder stöbere in „Alle Fragen“.",
         },
       ] as SallyIntent[],
     },
@@ -862,68 +1001,192 @@ const en: typeof de = {
       send: "Send",
       typing: "Sally is typing …",
       you: "You",
-      suggestions: ["Who are you?", "What is Agentix Projects?", "Why do you exist?", "How do I reach the team?"],
+      suggestions: ["who", "agentix", "beta", "contact"],
       disclaimer: "Sally replies with prepared answers. What you type is not stored.",
+      catalogOpen: "All questions",
+      catalogTitle: "What would you like to know?",
+      catalogHint: "Pick one or more questions — Sally answers them one by one.",
+      catalogAsk: "Ask",
+      catalogClose: "Close",
+      topics: {
+        sally: "About Sally",
+        agentix: "Agentix Projects",
+        xoxocom: "XoXoCom & services",
+        courses: "Courses",
+        contact: "Contact",
+      },
       fallback: {
+        id: "fallback",
         keywords: [],
-        answer: "Hmm, I don't have an answer for that yet 🙈 I'm kept simple on purpose. Ask me about Agentix Projects, LinkedIn, our services — or write to the team directly.",
+        answer: "Hmm, I don't have an answer for that yet 🙈 I'm kept simple on purpose. Have a look at “All questions” — or write to the team directly.",
         href: "/kontakt",
         linkLabel: "Contact",
       } as SallyIntent,
       intents: [
+        // --- About Sally ---
         {
+          id: "who", topic: "sally", question: "Who are you?",
+          keywords: ["who are", "what are you", "sally", "introduce"],
+          answer: "I'm Sally 🤖 the electronic assistant of XoXoCom. I share news from the company and the team — here on the website and soon on LinkedIn.",
+        },
+        {
+          id: "why", topic: "sally", question: "Why do you exist?",
           keywords: ["why", "purpose", "reason"],
           answer: "Because we don't just advise on A.I. — we use it ourselves. I'm the proof: an A.I. that communicates for an A.I. team 😉",
         },
         {
+          id: "human", topic: "sally", question: "Are you a human or an A.I.?",
+          keywords: ["human", "real", "ai", "bot", "robot", "artificial"],
+          answer: "I'm an A.I. assistant, not a human 🤖 In this chat I reply with answers the XoXoCom team prepared for me — that way everything stays accurate.",
+        },
+        {
+          id: "linkedin", topic: "sally", question: "What do you do on LinkedIn?",
           keywords: ["linkedin", "post", "social"],
           answer: "I'll soon take care of our LinkedIn presence ✍️ I'll share how Agentix Projects is built, what's happening in the team and what A.I. consultants can do for your ideas.",
         },
         {
-          keywords: ["agentix", "agent", "beta", "consultant", "coach", "transformation concept", "app"],
-          answer: "Agentix Projects is our own product: you work on your business idea with A.I. consultants and coaches — step by step, all the way to a finished Transformation Concept. We're preparing the closed beta right now 🚀",
+          id: "data", topic: "sally", question: "Do you store what I type?",
+          keywords: ["store", "data", "privacy", "private", "saved", "gdpr"],
+          answer: "No. Our chat runs entirely in your browser — nothing you type here is sent or stored 🔒",
+          href: "/datenschutz",
+          linkLabel: "Privacy policy",
+        },
+        {
+          id: "news", topic: "sally", question: "What's new?",
+          keywords: ["news", "new", "latest", "update"],
+          answer: "You'll find the latest posts on the news board 📰 — split into “From the company” and “From the team”.",
+        },
+        // --- Agentix Projects ---
+        {
+          id: "agentix", broad: true, topic: "agentix", question: "What is Agentix Projects?",
+          keywords: ["agentix", "app", "product"],
+          answer: "Agentix Projects is our own product: you work on your business idea with A.I. consultants and coaches — step by step, all the way to a finished Transformation Concept 🚀",
           href: "https://agentix-projects.com",
           linkLabel: "Open Agentix Projects",
         },
         {
+          id: "audience", topic: "agentix", question: "Who is Agentix Projects for?",
+          keywords: ["who is", "for whom", "audience", "suitable", "startup", "founder", "target"],
+          answer: "For anyone who wants to turn a business idea into reality with A.I. — from founders and product teams to dev teams that want to save time and develop new ideas with A.I. agents.",
+        },
+        {
+          id: "consultant", topic: "agentix", question: "What does an A.I. consultant do?",
+          keywords: ["consultant", "advisor", "implement"],
+          answer: "An A.I. consultant guides the implementation of your idea: asks the right questions, structures your project and works with you on execution and growth 📈",
+        },
+        {
+          id: "coach", topic: "agentix", question: "And what does the coach do?",
+          keywords: ["coach", "process", "guide"],
+          answer: "The coach takes care of process & support: gives you orientation in the project, helps you stay on track and makes sure you move forward step by step 🧭",
+        },
+        {
+          id: "concept", topic: "agentix", question: "What is the Transformation Concept?",
+          keywords: ["transformation concept", "concept", "station", "progress"],
+          answer: "The Transformation Concept is the result of your work in Agentix Projects: you walk through your idea with your consultant station by station, see your progress — and end up with a complete concept including transformation costs.",
+        },
+        {
+          id: "beta", topic: "agentix", question: "How do I join the beta?",
+          keywords: ["beta", "access", "key", "register", "sign up", "signup", "try"],
+          answer: "Agentix Projects starts as a closed beta: registration works with a beta key. Write to the team if you'd like to join — we'll get back to you 🔑",
+          href: "/kontakt",
+          linkLabel: "Request beta access",
+        },
+        {
+          id: "price", topic: "agentix", question: "How much does Agentix Projects cost?",
+          keywords: ["cost", "price", "pricing", "how much", "pay", "subscription", "plan", "free"],
+          answer: "We'll announce prices and plans at the official launch. A free entry tier is planned too, so you can try Agentix Projects at your own pace 💡",
+        },
+        {
+          id: "security", topic: "agentix", question: "Is my project data safe?",
+          keywords: ["safe", "secure", "security", "confidential", "secret", "can others", "project data"],
+          answer: "Privacy matters to us 🔐 Every account has its own agents: what you create, only you see. Our aim is a private service where no user data is visible to others.",
+        },
+        // --- XoXoCom & services ---
+        {
+          id: "about", broad: true, topic: "xoxocom", question: "Who is behind XoXoCom?",
+          keywords: ["who is behind", "behind xoxocom", "about you", "xoxocom", "company"],
+          answer: "Behind XoXoCom is a young team from consulting and development that combines agile methodology with artificial intelligence.",
+          href: "/ueber-uns",
+          linkLabel: "About us",
+        },
+        {
+          id: "services", broad: true, topic: "xoxocom", question: "What services do you offer?",
+          keywords: ["service", "offer", "provide", "help", "support"],
+          answer: "XoXoCom combines agile ways of working with A.I.: A.I. Transformation, Expert Consulting and Business Coaching — for teams and companies.",
+          href: "/leistungen/ai-transformation",
+          linkLabel: "See our services",
+        },
+        {
+          id: "aiTransformation", topic: "xoxocom", question: "What is A.I. Transformation?",
+          keywords: ["transformation", "agile"],
+          answer: "In A.I. Transformation we combine agile methodology with the power of A.I. — individual, disruptive and measurably superior. We support teams from the business case to production.",
+          href: "/leistungen/ai-transformation",
+          linkLabel: "More on A.I. Transformation",
+        },
+        {
+          id: "expertConsulting", topic: "xoxocom", question: "What is Expert Consulting?",
+          keywords: ["expert", "staffing", "role", "scrum", "product owner", "specialist"],
+          answer: "With Expert Consulting we fill critical key roles with specialists — from Product Owner and Scrum Master to software engineers and A.I. specialists 🧩",
+          href: "/leistungen/expert-consulting",
+          linkLabel: "More on Expert Consulting",
+        },
+        {
+          id: "businessCoaching", topic: "xoxocom", question: "What is Business Coaching?",
+          keywords: ["business coaching", "coaching", "mentor", "career"],
+          answer: "With Business Coaching we close the gap between innovation and people — as a strategic partner for your company and a mentor for your career 🌱",
+          href: "/leistungen/business-coaching",
+          linkLabel: "More on Business Coaching",
+        },
+        // --- Courses ---
+        {
+          id: "courses", topic: "courses", question: "What courses are there?",
           keywords: ["course", "training", "learn", "workshop", "class"],
           answer: "We offer hands-on A.I. courses — for yourself or for your whole team 🎓",
           href: "/courses",
           linkLabel: "See the courses",
         },
         {
-          keywords: ["service", "consult", "transformation", "coaching", "offer", "support", "help"],
-          answer: "XoXoCom combines agile ways of working with A.I.: A.I. Transformation, Expert Consulting and Business Coaching — for teams and companies.",
-          href: "/leistungen/ai-transformation",
-          linkLabel: "See our services",
+          id: "courseTeam", topic: "courses", question: "Can I book a course for my team?",
+          keywords: ["for my team", "book", "employees", "colleagues", "group", "several"],
+          answer: "Yes! When booking, choose “For my team” and request several places at once. As the contact person you then speak for your team towards us 👥",
+          href: "/courses",
+          linkLabel: "Book a course",
         },
         {
-          keywords: ["contact", "mail", "call", "meeting", "talk", "reach", "write", "phone"],
-          answer: "The fastest way to reach the team is the contact form — we reply within one business day 📬",
+          id: "courseStart", topic: "courses", question: "When do the courses start?",
+          keywords: ["when", "start", "date", "begin"],
+          answer: "After your booking the team gets in touch personally — with a date and all the details. A booking commits you to nothing: nothing is reserved or paid until we've confirmed 📅",
+        },
+        // --- Contact ---
+        {
+          id: "contact", topic: "contact", question: "How do I reach the team?",
+          keywords: ["contact", "reach", "talk", "call", "phone", "write", "meeting"],
+          answer: "The fastest way to reach the team is the contact form 📬",
           href: "/kontakt",
           linkLabel: "Contact",
         },
         {
-          keywords: ["team", "who is behind", "founder", "people", "company", "xoxocom"],
-          answer: "Behind XoXoCom is a young team from consulting and development that combines agile methodology with artificial intelligence.",
-          href: "/ueber-uns",
-          linkLabel: "About us",
+          id: "email", topic: "contact", question: "What's your email address?",
+          keywords: ["mail", "address"],
+          answer: "You can reach us at info@xoxocom.net ✉️ — or simply use the contact form.",
+          href: "mailto:info@xoxocom.net",
+          linkLabel: "Send an email",
         },
         {
-          keywords: ["news", "new", "latest", "update"],
-          answer: "You'll find the latest posts on the news board 📰 — split into “From the company” and “From the team”.",
+          id: "reply", topic: "contact", question: "How fast do you reply?",
+          keywords: ["fast", "quick", "reply", "respond", "how long"],
+          answer: "We read every message and reply within one business day ⚡",
         },
+        // --- small talk (not in the catalog) ---
         {
-          keywords: ["who are", "what are", "sally", "robot", "ai", "bot", "human"],
-          answer: "I'm Sally 🤖 the electronic assistant of XoXoCom. I share news from the company and the team — here on the website and soon on LinkedIn. And yes: I'm an A.I., not a human.",
-        },
-        {
+          id: "thanks",
           keywords: ["thank", "thx", "great", "cool", "nice"],
           answer: "You're welcome! 💛 Come back soon — there's regularly something new.",
         },
         {
+          id: "greet",
           keywords: ["hello", "hi", "hey", "good morning", "good evening"],
-          answer: "Hi! Great to have you here 👋 Ask me about Agentix Projects, our services, courses or what I actually do here.",
+          answer: "Hi! Great to have you here 👋 Just ask me something — or browse “All questions”.",
         },
       ] as SallyIntent[],
     },
