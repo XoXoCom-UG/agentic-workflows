@@ -17,6 +17,7 @@ const ROUTES: { path: string; priority: number; changeFrequency: MetadataRoute.S
   // Only the bare index. Filtered views (?tags=, ?lang=) are noindex with canonical
   // /blog, so listing them would advertise pages we ask crawlers to ignore.
   { path: "/blog", priority: 0.7, changeFrequency: "weekly" },
+  { path: "/sally", priority: 0.6, changeFrequency: "weekly" },
   // Courses are parked (lib/features.ts) — keep them out of the sitemap until relaunch.
   ...(COURSES_ENABLED
     ? [

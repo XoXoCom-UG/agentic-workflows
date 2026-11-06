@@ -34,6 +34,30 @@ export function isLegalPath(pathname: string): boolean {
 export type NavChild = { label: string; href: string; external?: boolean; desc?: string };
 export type NavItem = { label: string; href?: string; children?: NavChild[] };
 
+/** One entry on Sally's news board (/sally). `date` is ISO (YYYY-MM-DD) so it sorts as text. */
+export type SallyPost = {
+  date: string;
+  category: "company" | "team";
+  title: string;
+  body: string;
+  href?: string;
+  linkLabel?: string;
+};
+
+/**
+ * One canned answer of Sally's chat. Sally deliberately has no LLM behind her: every
+ * reply is written here, so a chat costs nothing and nothing the visitor types leaves
+ * the browser. `keywords` are matched as word prefixes against the lower-cased input
+ * (see lib/sally-brain.ts); the first intent with the most hits wins, so list order
+ * breaks ties.
+ */
+export type SallyIntent = {
+  keywords: string[];
+  answer: string;
+  href?: string;
+  linkLabel?: string;
+};
+
 const de = {
   langToggle: { aria: "Sprache wählen", de: "DE", en: "EN" },
 
@@ -57,6 +81,7 @@ const de = {
     // Hidden while the courses section is parked (lib/features.ts).
     ...(COURSES_ENABLED ? [{ label: "Kurse", href: "/courses" }] : []),
     { label: "Blog", href: "/blog" },
+    { label: "Sally", href: "/sally" },
   ] as NavItem[],
 
   cta: { label: "Kontaktiere uns", href: "/kontakt" },
@@ -336,6 +361,157 @@ const de = {
     notFoundTitle: "Beitrag nicht gefunden",
     notFoundBody: "Der Link ist vielleicht veraltet oder der Beitrag wurde entfernt. Alles Veröffentlichte findest du in der Blog-Übersicht.",
   },
+
+  /**
+   * Sally — the XoXoCom A.I. assistant page (/sally). Two jobs: a news board ("Aus der
+   * Firma" / "Aus dem Team") and a very basic chat. The same post texts are meant to
+   * feed Sally's LinkedIn posts later (feature 2), so write them as Sally, first person.
+   *
+   * Adding a post = one entry in `posts` here AND in the English tree. Newest is shown
+   * first regardless of order (sorted by `date`).
+   *
+   * ⚠ DRAFT COPY — review before relying on it. Facts are limited to what the team has
+   * shipped or announced (Agentix Projects features, closed beta, courses relaunch).
+   */
+  sally: {
+    metaTitle: "Sally — die A.I.-Assistentin von XoXoCom",
+    metaDescription: "Lerne Sally kennen: die elektronische Assistentin der XoXoCom. Sie teilt News zu Agentix Projects und aus unserem Team – und beantwortet deine ersten Fragen.",
+    eyebrow: "Sally · A.I.-Assistentin",
+    greeting: "Hey, ich bin Sally 👋 die elektronische Assistentin der XoXoCom. Ich halte dich über News zu Agentix Projects und aus unserem Team auf dem Laufenden. Frag mich einfach etwas!",
+    newsTitle: "Neuigkeiten",
+    tabs: { company: "Aus der Firma", team: "Aus dem Team" },
+    showMore: "Weiterlesen",
+    showLess: "Weniger",
+    posts: [
+      {
+        date: "2026-11-06",
+        category: "team",
+        title: "Hey, ich bin Sally 👋",
+        body: "Ab heute bin ich die elektronische Assistentin der XoXoCom. Ich informiere euch hier – und bald auch auf LinkedIn – über News zu Agentix Projects und aus unserem Team. Kurz gesagt: Ein A.I. Consultant kann dir bei der Umsetzung deiner Business-Ideen helfen, und ich erzähle dir, wie das funktioniert. 🚀",
+      },
+      {
+        date: "2026-10-30",
+        category: "team",
+        title: "Die Closed Beta rückt näher 🔑",
+        body: "Unser Team bereitet gerade die ersten Beta-Zugänge für Agentix Projects vor – inklusive Sicherheit, Rechtstexten und einem neuen Tutorial für den Einstieg. Du willst zu den Ersten gehören? Schreib uns!",
+        href: "/kontakt",
+        linkLabel: "Beta-Zugang anfragen",
+      },
+      {
+        date: "2026-10-16",
+        category: "company",
+        title: "Transformation Concept mit Fortschrittsanzeige 📈",
+        body: "In Agentix Projects gehst du mit deinem A.I. Consultant Station für Station durch deine Idee und siehst jederzeit, wie weit du bist. Am Ende steht dein fertiges Transformation Concept – inklusive Transformationskosten.",
+        href: "https://agentix-projects.com",
+        linkLabel: "Agentix Projects ansehen",
+      },
+      {
+        date: "2026-10-16",
+        category: "company",
+        title: "Deine Agenten gehören dir 🔐",
+        body: "Jeder Account hat jetzt seine eigenen Agenten – was du anlegst, siehst nur du. Und die A.I. gibt jedem neuen Projekt automatisch einen passenden Namen und eine Beschreibung.",
+      },
+      {
+        date: "2026-09-29",
+        category: "company",
+        title: "Unsere A.I.-Kurse sind zurück 🎓",
+        body: "Praxisnahe Kurse zu A.I.-Workflows – buchbar für dich allein oder gleich für dein ganzes Team.",
+        href: "/courses",
+        linkLabel: "Zu den Kursen",
+      },
+    ] as SallyPost[],
+    notes: {
+      linkedinTitle: "Sally kümmert sich um LinkedIn",
+      linkedinBody: "Bald schreibe ich unsere LinkedIn-Beiträge: wie Agentix Projects entsteht, was im Team passiert und was A.I. Consultants für deine Ideen tun können.",
+      linkedinSoon: "Bald auf LinkedIn",
+      whyTitle: "Warum haben wir Sally?",
+      whyBody: "Weil wir A.I. nicht nur beraten, sondern selbst einsetzen.",
+      whyCta: "Mehr erfahren",
+    },
+    why: {
+      eyebrow: "Warum Sally?",
+      title: "Eine A.I., die für ein A.I.-Team spricht",
+      sub: "Wir helfen Unternehmen, A.I. in ihre Arbeit zu bringen. Da liegt es nahe, dass wir das bei uns selbst zuerst tun.",
+      points: [
+        { title: "Wir nutzen, was wir empfehlen", body: "Sally ist das sichtbarste Beispiel dafür, wie A.I. bei uns im Alltag mitarbeitet – nicht als Demo, sondern als Teil des Teams." },
+        { title: "Immer etwas Neues", body: "Sally sorgt dafür, dass es regelmäßig Neuigkeiten zu Agentix Projects und aus unserem Team gibt – hier und bald auf LinkedIn." },
+        { title: "Ein Gesicht für Agentix", body: "Sie erklärt in einfachen Worten, wie A.I. Consultants und Coaches dir bei der Umsetzung deiner Business-Ideen helfen." },
+        { title: "Klar gekennzeichnet", body: "Sally ist eine A.I. und sagt das auch. Jeder Beitrag wird vom Team geprüft, bevor er erscheint." },
+      ],
+      cta: "Agentix Projects ausprobieren",
+    },
+    chat: {
+      aria: "Chat mit Sally",
+      placeholder: "Frag Sally etwas …",
+      send: "Senden",
+      typing: "Sally tippt …",
+      you: "Du",
+      suggestions: ["Wer bist du?", "Was ist Agentix Projects?", "Warum gibt es dich?", "Wie erreiche ich das Team?"],
+      disclaimer: "Sally antwortet mit vorbereiteten Antworten. Deine Eingaben werden nicht gespeichert.",
+      fallback: {
+        keywords: [],
+        answer: "Hmm, darauf habe ich noch keine Antwort 🙈 Ich bin bewusst einfach gehalten. Frag mich zu Agentix Projects, LinkedIn, unseren Leistungen – oder schreib dem Team direkt.",
+        href: "/kontakt",
+        linkLabel: "Zum Kontakt",
+      } as SallyIntent,
+      intents: [
+        {
+          keywords: ["warum", "wieso", "weshalb", "zweck", "wozu"],
+          answer: "Weil wir A.I. nicht nur beraten, sondern selbst einsetzen. Ich bin sozusagen der Beweis: eine A.I., die für ein A.I.-Team kommuniziert 😉",
+        },
+        {
+          keywords: ["linkedin", "post", "beitr", "social"],
+          answer: "Ich kümmere mich bald um unseren LinkedIn-Auftritt ✍️ Dort erzähle ich, wie Agentix Projects entsteht, was im Team passiert und was A.I. Consultants für deine Ideen tun können.",
+        },
+        {
+          keywords: ["agentix", "agent", "beta", "consultant", "coach", "transformation concept", "app"],
+          answer: "Agentix Projects ist unser eigenes Produkt: Dort arbeitest du mit A.I. Consultants und Coaches an deiner Business-Idee – Schritt für Schritt bis zum fertigen Transformation Concept. Gerade bereiten wir die Closed Beta vor 🚀",
+          href: "https://agentix-projects.com",
+          linkLabel: "Agentix Projects öffnen",
+        },
+        {
+          keywords: ["kurs", "schulung", "training", "lernen", "workshop"],
+          answer: "Wir bieten praxisnahe A.I.-Kurse an – für dich allein oder für dein ganzes Team 🎓",
+          href: "/courses",
+          linkLabel: "Zu den Kursen",
+        },
+        {
+          keywords: ["leistung", "beratung", "transformation", "coaching", "consulting", "angebot", "unterstütz", "helfen", "hilfe"],
+          answer: "XoXoCom verbindet agile Arbeitsweisen mit A.I.: A.I. Transformation, Expert Consulting und Business Coaching – für Teams und Unternehmen.",
+          href: "/leistungen/ai-transformation",
+          linkLabel: "Leistungen ansehen",
+        },
+        {
+          keywords: ["kontakt", "mail", "anruf", "termin", "sprechen", "erreich", "schreib", "telefon"],
+          answer: "Am schnellsten erreichst du das Team über das Kontaktformular – wir antworten innerhalb eines Werktags 📬",
+          href: "/kontakt",
+          linkLabel: "Zum Kontakt",
+        },
+        {
+          keywords: ["team", "wer steckt", "mitarbeiter", "gründer", "über euch", "firma", "xoxocom"],
+          answer: "Hinter XoXoCom steht ein junges Team aus Beratung und Entwicklung, das agile Methodik mit künstlicher Intelligenz verbindet.",
+          href: "/ueber-uns",
+          linkLabel: "Über uns",
+        },
+        {
+          keywords: ["news", "neu", "aktuell", "update", "neuigkeit"],
+          answer: "Die neuesten Meldungen findest du im News-Board 📰 – getrennt nach „Aus der Firma“ und „Aus dem Team“.",
+        },
+        {
+          keywords: ["wer bist", "was bist", "sally", "roboter", "ki", "bot", "mensch"],
+          answer: "Ich bin Sally 🤖 die elektronische Assistentin der XoXoCom. Ich teile News aus der Firma und aus dem Team – hier auf der Website und bald auch auf LinkedIn. Und ja: Ich bin eine A.I., kein Mensch.",
+        },
+        {
+          keywords: ["danke", "dank", "super", "cool", "toll"],
+          answer: "Gern geschehen! 💛 Schau bald wieder vorbei – es gibt regelmäßig Neues.",
+        },
+        {
+          keywords: ["hallo", "hi", "hey", "servus", "moin", "guten"],
+          answer: "Hallo! Schön, dass du da bist 👋 Frag mich zu Agentix Projects, unseren Leistungen, Kursen oder dazu, was ich hier eigentlich mache.",
+        },
+      ] as SallyIntent[],
+    },
+  },
 };
 
 const en: typeof de = {
@@ -361,6 +537,7 @@ const en: typeof de = {
     // Hidden while the courses section is parked (lib/features.ts).
     ...(COURSES_ENABLED ? [{ label: "Courses", href: "/courses" }] : []),
     { label: "Blog", href: "/blog" },
+    { label: "Sally", href: "/sally" },
   ] as NavItem[],
 
   cta: { label: "Get in touch", href: "/kontakt" },
@@ -610,6 +787,146 @@ const en: typeof de = {
     langNotice: "This article is in {language}.",
     notFoundTitle: "We can't find that article",
     notFoundBody: "The link may be out of date, or the article was removed. Everything we've published is on the blog index.",
+  },
+
+  sally: {
+    metaTitle: "Sally — the A.I. assistant of XoXoCom",
+    metaDescription: "Meet Sally, the electronic assistant of XoXoCom. She shares news about Agentix Projects and our team — and answers your first questions.",
+    eyebrow: "Sally · A.I. assistant",
+    greeting: "Hey, I'm Sally 👋 the electronic assistant of XoXoCom. I keep you posted on news about Agentix Projects and from our team. Just ask me something!",
+    newsTitle: "News",
+    tabs: { company: "From the company", team: "From the team" },
+    showMore: "Read more",
+    showLess: "Less",
+    posts: [
+      {
+        date: "2026-11-06",
+        category: "team",
+        title: "Hey, I'm Sally 👋",
+        body: "Starting today, I'm the electronic assistant of XoXoCom. I'll keep you posted here — and soon on LinkedIn — about news on Agentix Projects and from our team. In short: an A.I. consultant can help you turn your business ideas into reality, and I'll tell you how that works. 🚀",
+      },
+      {
+        date: "2026-10-30",
+        category: "team",
+        title: "The closed beta is getting close 🔑",
+        body: "Our team is preparing the first beta access for Agentix Projects — including security, legal texts and a new getting-started tutorial. Want to be among the first? Write to us!",
+        href: "/kontakt",
+        linkLabel: "Request beta access",
+      },
+      {
+        date: "2026-10-16",
+        category: "company",
+        title: "Transformation Concept with progress tracking 📈",
+        body: "In Agentix Projects you walk through your idea with your A.I. consultant, station by station, and always see how far along you are. At the end you get your finished Transformation Concept — including transformation costs.",
+        href: "https://agentix-projects.com",
+        linkLabel: "See Agentix Projects",
+      },
+      {
+        date: "2026-10-16",
+        category: "company",
+        title: "Your agents belong to you 🔐",
+        body: "Every account now has its own agents — what you create, only you see. And the A.I. automatically gives every new project a fitting name and description.",
+      },
+      {
+        date: "2026-09-29",
+        category: "company",
+        title: "Our A.I. courses are back 🎓",
+        body: "Hands-on courses on A.I. workflows — book a place for yourself or for your whole team.",
+        href: "/courses",
+        linkLabel: "See the courses",
+      },
+    ] as SallyPost[],
+    notes: {
+      linkedinTitle: "Sally takes care of LinkedIn",
+      linkedinBody: "Soon I'll write our LinkedIn posts: how Agentix Projects is built, what's happening in the team and what A.I. consultants can do for your ideas.",
+      linkedinSoon: "Coming soon to LinkedIn",
+      whyTitle: "Why do we have Sally?",
+      whyBody: "Because we don't just advise on A.I. — we use it ourselves.",
+      whyCta: "Learn more",
+    },
+    why: {
+      eyebrow: "Why Sally?",
+      title: "An A.I. that speaks for an A.I. team",
+      sub: "We help companies bring A.I. into their work. So it only makes sense that we do it ourselves first.",
+      points: [
+        { title: "We use what we recommend", body: "Sally is the most visible example of how A.I. works alongside us every day — not as a demo, but as part of the team." },
+        { title: "Always something new", body: "Sally makes sure there's regular news about Agentix Projects and from our team — here and soon on LinkedIn." },
+        { title: "A face for Agentix", body: "She explains in plain words how A.I. consultants and coaches help you turn your business ideas into reality." },
+        { title: "Clearly labelled", body: "Sally is an A.I. and says so. Every post is reviewed by the team before it goes out." },
+      ],
+      cta: "Try Agentix Projects",
+    },
+    chat: {
+      aria: "Chat with Sally",
+      placeholder: "Ask Sally something …",
+      send: "Send",
+      typing: "Sally is typing …",
+      you: "You",
+      suggestions: ["Who are you?", "What is Agentix Projects?", "Why do you exist?", "How do I reach the team?"],
+      disclaimer: "Sally replies with prepared answers. What you type is not stored.",
+      fallback: {
+        keywords: [],
+        answer: "Hmm, I don't have an answer for that yet 🙈 I'm kept simple on purpose. Ask me about Agentix Projects, LinkedIn, our services — or write to the team directly.",
+        href: "/kontakt",
+        linkLabel: "Contact",
+      } as SallyIntent,
+      intents: [
+        {
+          keywords: ["why", "purpose", "reason"],
+          answer: "Because we don't just advise on A.I. — we use it ourselves. I'm the proof: an A.I. that communicates for an A.I. team 😉",
+        },
+        {
+          keywords: ["linkedin", "post", "social"],
+          answer: "I'll soon take care of our LinkedIn presence ✍️ I'll share how Agentix Projects is built, what's happening in the team and what A.I. consultants can do for your ideas.",
+        },
+        {
+          keywords: ["agentix", "agent", "beta", "consultant", "coach", "transformation concept", "app"],
+          answer: "Agentix Projects is our own product: you work on your business idea with A.I. consultants and coaches — step by step, all the way to a finished Transformation Concept. We're preparing the closed beta right now 🚀",
+          href: "https://agentix-projects.com",
+          linkLabel: "Open Agentix Projects",
+        },
+        {
+          keywords: ["course", "training", "learn", "workshop", "class"],
+          answer: "We offer hands-on A.I. courses — for yourself or for your whole team 🎓",
+          href: "/courses",
+          linkLabel: "See the courses",
+        },
+        {
+          keywords: ["service", "consult", "transformation", "coaching", "offer", "support", "help"],
+          answer: "XoXoCom combines agile ways of working with A.I.: A.I. Transformation, Expert Consulting and Business Coaching — for teams and companies.",
+          href: "/leistungen/ai-transformation",
+          linkLabel: "See our services",
+        },
+        {
+          keywords: ["contact", "mail", "call", "meeting", "talk", "reach", "write", "phone"],
+          answer: "The fastest way to reach the team is the contact form — we reply within one business day 📬",
+          href: "/kontakt",
+          linkLabel: "Contact",
+        },
+        {
+          keywords: ["team", "who is behind", "founder", "people", "company", "xoxocom"],
+          answer: "Behind XoXoCom is a young team from consulting and development that combines agile methodology with artificial intelligence.",
+          href: "/ueber-uns",
+          linkLabel: "About us",
+        },
+        {
+          keywords: ["news", "new", "latest", "update"],
+          answer: "You'll find the latest posts on the news board 📰 — split into “From the company” and “From the team”.",
+        },
+        {
+          keywords: ["who are", "what are", "sally", "robot", "ai", "bot", "human"],
+          answer: "I'm Sally 🤖 the electronic assistant of XoXoCom. I share news from the company and the team — here on the website and soon on LinkedIn. And yes: I'm an A.I., not a human.",
+        },
+        {
+          keywords: ["thank", "thx", "great", "cool", "nice"],
+          answer: "You're welcome! 💛 Come back soon — there's regularly something new.",
+        },
+        {
+          keywords: ["hello", "hi", "hey", "good morning", "good evening"],
+          answer: "Hi! Great to have you here 👋 Ask me about Agentix Projects, our services, courses or what I actually do here.",
+        },
+      ] as SallyIntent[],
+    },
   },
 };
 

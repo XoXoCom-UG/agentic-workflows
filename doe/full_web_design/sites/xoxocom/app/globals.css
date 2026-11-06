@@ -51,6 +51,18 @@ body {
 @keyframes dashFlow { to { stroke-dashoffset: -40; } }
 .dash-flow { stroke-dasharray: 4 6; animation: dashFlow 2.8s linear infinite; }
 
+/* Sally (/sally, components/sally/*).
+   sally-float: she hovers gently. sally-talk: mouth opens and closes while a reply is
+   written out. sally-pulse: the coral lights (antenna, headset). sally-dot: the
+   "typing…" dots in her chat. */
+@keyframes sallyFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.sally-float { animation: sallyFloat 6s ease-in-out infinite; }
+@keyframes sallyTalk { 0%, 100% { transform: scaleY(0.35); } 50% { transform: scaleY(1.1); } }
+.sally-talk { transform-box: fill-box; transform-origin: center; animation: sallyTalk 0.22s ease-in-out infinite; }
+@keyframes sallyPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+.sally-pulse { animation: sallyPulse 2.4s ease-in-out infinite; }
+@keyframes sallyDot { 0%, 80%, 100% { transform: translateY(0); opacity: 0.4; } 40% { transform: translateY(-3px); opacity: 1; } }
+.sally-dot { animation: sallyDot 1s ease-in-out infinite; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
